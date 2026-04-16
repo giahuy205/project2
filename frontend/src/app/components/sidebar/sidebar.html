@@ -1,0 +1,28 @@
+
+<aside class="sidebar glass" [class.collapsed]="collapsed">
+  <div class="logo">
+    <div class="logo-icon"></div>
+    <span *ngIf="!collapsed">POS System</span>
+  </div>
+  <nav class="nav-links">
+    <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+      <i>📊</i> <span *ngIf="!collapsed">Dashboard</span>
+    </a>
+    <a routerLink="/sales" routerLinkActive="active" class="nav-item">
+      <i>🛒</i> <span *ngIf="!collapsed">Sales / Register</span>
+    </a>
+
+    <a routerLink="/inventory" routerLinkActive="active" class="nav-item">
+      <i>🏢</i> <span *ngIf="!collapsed">Inventory</span>
+    </a>
+    <a routerLink="/reports" routerLinkActive="active" class="nav-item">
+      <i>📈</i> <span *ngIf="!collapsed">Reports</span>
+    </a>
+    <a routerLink="/staff" routerLinkActive="active" class="nav-item">
+      <i>👥</i> <span *ngIf="!collapsed">Staff</span>
+    </a>
+    <a routerLink="/settings" routerLinkActive="active" class="nav-item">
+      <i>⚙️</i> <span *ngIf="!collapsed">Settings</span>
+    </a>
+  </nav>
+</aside>

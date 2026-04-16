@@ -1,0 +1,61 @@
+
+<div class="dashboard">
+  <h2>Dashboard Overview</h2>
+  <div class="stats-grid">
+    <div class="card stat-card">
+      <div class="icon" style="background: rgba(79, 70, 229, 0.1); color: var(--primary);">💰</div>
+      <div class="data">
+        <span>Today's Sales</span>
+        <h3>$3,240.50</h3>
+      </div>
+    </div>
+    <div class="card stat-card">
+      <div class="icon" style="background: rgba(16, 185, 129, 0.1); color: var(--secondary);">🧾</div>
+      <div class="data">
+        <span>Total Orders</span>
+        <h3>142</h3>
+      </div>
+    </div>
+    <div class="card stat-card">
+      <div class="icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">⭐</div>
+      <div class="data">
+        <span>Top Product</span>
+        <h3>Espresso</h3>
+      </div>
+    </div>
+    <div class="card stat-card">
+      <div class="icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">📦</div>
+      <div class="data">
+        <span>Low Stock Alerts</span>
+        <h3>14 Items</h3>
+      </div>
+    </div>
+  </div>
+  
+  <div class="charts-wrap">
+    <div class="card chart-area">
+      <h4>Revenue Trends</h4>
+      <!-- Mock Chart -->
+      <div class="mock-chart">
+        <svg viewBox="0 0 100 40" class="chart-line">
+          <polyline fill="none" stroke="var(--primary)" stroke-width="2" points="0,30 20,25 40,35 60,15 80,20 100,5" />
+        </svg>
+      </div>
+    </div>
+    <div class="card recent-tx">
+      <h4>Recent Transactions</h4>
+      <div class="table-container" style="box-shadow: none;">
+        <table>
+          <thead>
+            <tr><th>Order ID</th><th>Time</th><th>Total</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>#ORD-1002</td><td>10:45 AM</td><td>$45.00</td><td><span class="badge badge-success">Paid</span></td></tr>
+            <tr><td>#ORD-1001</td><td>10:30 AM</td><td>$12.50</td><td><span class="badge badge-success">Paid</span></td></tr>
+            <tr><td>#ORD-1000</td><td>09:15 AM</td><td>$125.00</td><td><span class="badge badge-warning">Pending</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

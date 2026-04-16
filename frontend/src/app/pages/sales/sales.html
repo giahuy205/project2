@@ -1,0 +1,52 @@
+<div class="sales-layout">
+  <div class="product-section">
+    <div class="filters">
+      <button class="btn btn-primary" [ngClass]="{'btn-primary': selectedCategoryId === null, 'btn-outline': selectedCategoryId !== null}" (click)="filterByCategory(null)">All</button>
+      <button class="btn" *ngFor="let cat of categories" [ngClass]="{'btn-primary': selectedCategoryId === cat.id, 'btn-outline': selectedCategoryId !== cat.id}" (click)="filterByCategory(cat.id)">{{cat.name}}</button>
+      <input type="text" class="form-control" placeholder="Search product or barcode..." style="margin-left: auto; width: 250px;" (input)="searchProducts($event)">
+    </div>
+    
+    <div class="product-grid">
+      <div class="product-card" *ngFor="let p of filteredProducts" (click)="addToCart(p)">
+        <div class="img-placeholder">
+          <!-- Placeholder for image, could add img url later -->
+          <span style="font-size: 2rem; color: #ddd;">{{p.name.charAt(0)}}</span>
+        </div>
+        <div class="p-info">
+          <h5>{{p.name}}</h5>
+          <span>{{p.salePrice | number:'1.0-0'}}đ</span>
+        </div>
+      </div>
+      <div *ngIf="filteredProducts.length === 0" style="grid-column: 1 / -1; text-align: center; color: gray; padding: 2rem;">
+        No products found.
+      </div>
+    </div>
+  </div>
+
+  <div class="cart-section card glass">
+    <h3 style="border-bottom: 1px solid var(--border); padding-bottom: 1rem;">Current Order</h3>
+    <div class="cart-items">
+      <div class="cart-item" *ngFor="let item of cart">
+        <div class="detail">
+          <strong>{{item.product.name}}</strong>
+          <span>{{item.quantity}} x {{item.product.salePrice | number:'1.0-0'}}đ</span>
+        </div>
+        <div class="actions">
+          <button class="btn-outline" (click)="decreaseQuantity(item)">-</button>
+          <input type="number" class="form-control" style="width: 50px; padding: 0.2rem; text-align: center; border: 1px solid #ccc; border-radius: 4px;" [(ngModel)]="item.quantity" (ngModelChange)="onQuantityChange(item)">
+          <button class="btn-outline" (click)="increaseQuantity(item)">+</button>
+        </div>
+      </div>
+      <div *ngIf="cart.length === 0" style="text-align: center; color: gray; padding: 2rem;">
+        Cart is empty
+      </div>
+    </div>
+    
+    <div class="cart-summary" *ngIf="cart.length > 0">
+      <div class="row"><span>Subtotal</span><span>{{subtotal | number:'1.0-0'}}đ</span></div>
+      <div class="row"><span>Tax</span><span>{{taxTotal | number:'1.0-0'}}đ</span></div>
+      <div class="row total"><span>Total</span><span>{{total | number:'1.0-0'}}đ</span></div>
+      <button class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;" [disabled]="cart.length === 0">Charge {{total | number:'1.0-0'}}đ</button>
+    </div>
+  </div>
+</div>
