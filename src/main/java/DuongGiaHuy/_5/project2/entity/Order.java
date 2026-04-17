@@ -12,8 +12,13 @@ import lombok.*;
 public class Order {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private java.time.LocalDate orderDate;
+    private java.time.LocalDateTime orderDate;
     private Double netAmount = 0.0;
     private Double tax = 0.0;
     private Double totalAmount = 0.0;
+    private Double paidAmount = 0.0;
+    private String paymentMethod;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private java.util.List<OrderItem> orderItems = new java.util.ArrayList<>();
 }

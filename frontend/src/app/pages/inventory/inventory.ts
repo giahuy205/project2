@@ -19,6 +19,13 @@ export class Inventory implements OnInit {
   selectedCategoryId: number | null = null;
   searchQuery = '';
   
+  // Pagination state
+  currentPage: number = 1;
+  pageSize: number = 50;
+  pagedProducts: any[] = [];
+  totalPages: number = 1;
+  pageNumbers: number[] = [];
+  
   showModal = false;
   viewMode: 'categories' | 'products' = 'products'; // Default view
   
@@ -64,7 +71,7 @@ export class Inventory implements OnInit {
     
     this.http.get<any[]>(this.API_PROD_URL).subscribe({
       next: (data) => {
-        this.products = data;
+        this.products = data.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
         this.filterProducts();
         this.cdr.detectChanges();
       },
@@ -83,6 +90,23 @@ export class Inventory implements OnInit {
     }
     
     this.filteredProducts = list;
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  updatePagination() {
+    this.totalPages = Math.ceil(this.filteredProducts.length / this.pageSize) || 1;
+    this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.pagedProducts = this.filteredProducts.slice(start, start + this.pageSize);
+    this.cdr.detectChanges();
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagination();
+    }
   }
 
   searchProducts(event: any) {

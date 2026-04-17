@@ -3,26 +3,31 @@
     <div style="display: flex; align-items: center; gap: 1rem;">
       <h2 style="margin: 0;">Inventory</h2>
       <div style="display: flex; gap: 0.5rem;">
-        <button class="btn" [ngClass]="viewMode === 'products' ? 'btn-primary' : 'btn-outline'" (click)="viewMode = 'products'">Store Stock</button>
-        <button class="btn" [ngClass]="viewMode === 'categories' ? 'btn-primary' : 'btn-outline'" (click)="viewMode = 'categories'">Categories</button>
+        <button class="btn" [ngClass]="viewMode === 'products' ? 'btn-primary' : 'btn-outline'"
+          (click)="viewMode = 'products'">Store Stock</button>
+        <button class="btn" [ngClass]="viewMode === 'categories' ? 'btn-primary' : 'btn-outline'"
+          (click)="viewMode = 'categories'">Categories</button>
       </div>
     </div>
-    
+
     <div *ngIf="viewMode === 'products'" style="display: flex; align-items: center; gap: 0.5rem; margin-left: auto;">
       <select class="form-control" style="width: 180px;" (change)="onFilterChange($event)">
         <option value="all">All Categories</option>
         <option *ngFor="let cat of categories" [value]="cat.id">{{cat.name}}</option>
       </select>
-      <input type="text" class="form-control" placeholder="Search product or barcode..." style="width: 200px;" (input)="searchProducts($event)">
+      <input type="text" class="form-control" placeholder="Search product/barcode" style="width: 200px;"
+        (input)="searchProducts($event)">
     </div>
 
-    <button *ngIf="viewMode === 'categories'" class="btn btn-primary" (click)="openModal()" style="margin-left: auto;">+ Add Category</button>
-    <button *ngIf="viewMode === 'products'" class="btn btn-primary" (click)="openProductModal()" style="margin-left: auto;">+ Add Product</button>
+    <button *ngIf="viewMode === 'categories'" class="btn btn-primary" (click)="openModal()" style="margin-left: auto;">+
+      Add Category</button>
+    <button *ngIf="viewMode === 'products'" class="btn btn-primary" (click)="openProductModal()"
+      style="margin-left: auto;">+ Add Product</button>
   </div>
-  
+
   <!-- PRODUCTS VIEW -->
   <div class="card" *ngIf="viewMode === 'products'">
-    
+
     <div class="table-container">
       <table>
         <thead>
@@ -37,7 +42,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of filteredProducts">
+          <tr *ngFor="let p of pagedProducts">
             <td><strong>{{p.name}}</strong></td>
             <td>{{p.barcode}}</td>
             <td>{{p.category?.name || 'N/A'}}</td>
@@ -49,14 +54,28 @@
             <td>{{p.importPrice | number:'1.0-0'}}đ</td>
             <td>{{p.salePrice | number:'1.0-0'}}đ</td>
             <td>
-              <button class="btn btn-edit" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;" (click)="editProduct(p)">Edit</button>
+              <button class="btn btn-edit" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;"
+                (click)="editProduct(p)">Edit</button>
             </td>
           </tr>
-          <tr *ngIf="filteredProducts.length === 0">
+          <tr *ngIf="pagedProducts.length === 0">
             <td colspan="7" style="text-align: center; color: gray;">No products found in this category.</td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-controls" *ngIf="totalPages > 1" style="display: flex; justify-content: center; align-items: center; padding: 1rem; gap: 0.5rem; border-top: 1px solid var(--border);">
+      <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">Trang trước</button>
+      
+      <div style="display: flex; gap: 0.25rem;">
+        <button *ngFor="let page of pageNumbers" class="btn" [ngClass]="currentPage === page ? 'btn-primary' : 'btn-outline'" (click)="goToPage(page)">
+          {{page}}
+        </button>
+      </div>
+      
+      <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">Trang sau</button>
     </div>
   </div>
 
@@ -80,7 +99,8 @@
             <td>{{cat.taxRate * 100}}%</td>
             <td>{{cat.note}}</td>
             <td>
-              <button class="btn btn-edit" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;" (click)="editCategory(cat)">Edit</button>
+              <button class="btn btn-edit" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;"
+                (click)="editCategory(cat)">Edit</button>
             </td>
           </tr>
           <tr *ngIf="categories.length === 0">
@@ -132,7 +152,7 @@
           <option *ngFor="let cat of categories" [ngValue]="cat.id">{{cat.name}}</option>
         </select>
       </div>
-      
+
       <div style="display: flex; gap: 1rem;">
         <div class="form-group" style="flex: 1;">
           <label class="form-label">Import Price</label>
@@ -143,11 +163,12 @@
           <input type="number" class="form-control" [(ngModel)]="newProduct.salePrice">
         </div>
       </div>
-      
+
       <div style="display: flex; gap: 1rem;">
         <div class="form-group" style="flex: 1;">
           <label class="form-label">Initial Stock</label>
-          <input type="number" class="form-control" [(ngModel)]="newProduct.stockQuantity" [disabled]="isEditingProduct">
+          <input type="number" class="form-control" [(ngModel)]="newProduct.stockQuantity"
+            [disabled]="isEditingProduct">
         </div>
       </div>
 

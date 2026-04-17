@@ -1100,6 +1100,9 @@ ALTER TABLE ONLY public.returns
     ADD CONSTRAINT returns_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id) ON DELETE SET NULL;
 
 
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS paid_amount numeric DEFAULT 0;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS payment_method character varying(50);
+
 -- Completed on 2026-04-10 09:36:56
 
 --

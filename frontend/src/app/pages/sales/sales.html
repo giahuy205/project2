@@ -1,13 +1,18 @@
 <div class="sales-layout">
   <div class="product-section">
     <div class="filters">
-      <button class="btn btn-primary" [ngClass]="{'btn-primary': selectedCategoryId === null, 'btn-outline': selectedCategoryId !== null}" (click)="filterByCategory(null)">All</button>
-      <button class="btn" *ngFor="let cat of categories" [ngClass]="{'btn-primary': selectedCategoryId === cat.id, 'btn-outline': selectedCategoryId !== cat.id}" (click)="filterByCategory(cat.id)">{{cat.name}}</button>
-      <input type="text" class="form-control" placeholder="Search product or barcode..." style="margin-left: auto; width: 250px;" (input)="searchProducts($event)">
+      <button class="btn btn-primary"
+        [ngClass]="{'btn-primary': selectedCategoryId === null, 'btn-outline': selectedCategoryId !== null}"
+        (click)="filterByCategory(null)">All</button>
+      <button class="btn" *ngFor="let cat of categories"
+        [ngClass]="{'btn-primary': selectedCategoryId === cat.id, 'btn-outline': selectedCategoryId !== cat.id}"
+        (click)="filterByCategory(cat.id)">{{cat.name}}</button>
+      <input type="text" class="form-control" placeholder="Search product or barcode..."
+        style="margin-left: auto; width: 250px;" (input)="searchProducts($event)">
     </div>
-    
+
     <div class="product-grid">
-      <div class="product-card" *ngFor="let p of filteredProducts" (click)="addToCart(p)">
+      <div class="product-card" *ngFor="let p of pagedProducts" (click)="addToCart(p)">
         <div class="img-placeholder">
           <!-- Placeholder for image, could add img url later -->
           <span style="font-size: 2rem; color: #ddd;">{{p.name.charAt(0)}}</span>
@@ -17,9 +22,21 @@
           <span>{{p.salePrice | number:'1.0-0'}}đ</span>
         </div>
       </div>
-      <div *ngIf="filteredProducts.length === 0" style="grid-column: 1 / -1; text-align: center; color: gray; padding: 2rem;">
+      <div *ngIf="pagedProducts.length === 0"
+        style="grid-column: 1 / -1; text-align: center; color: gray; padding: 2rem;">
         No products found.
       </div>
+    </div>
+    
+    <!-- Pagination Controls -->
+    <div class="pagination-controls" *ngIf="totalPages > 1" style="display: flex; justify-content: center; align-items: center; padding: 1rem; gap: 0.5rem; margin-top: auto; border-top: 1px solid var(--border);">
+      <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">Trang trước</button>
+      <div style="display: flex; gap: 0.25rem;">
+        <button *ngFor="let page of pageNumbers" class="btn" [ngClass]="currentPage === page ? 'btn-primary' : 'btn-outline'" (click)="goToPage(page)">
+          {{page}}
+        </button>
+      </div>
+      <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">Trang sau</button>
     </div>
   </div>
 
@@ -33,7 +50,9 @@
         </div>
         <div class="actions">
           <button class="btn-outline" (click)="decreaseQuantity(item)">-</button>
-          <input type="number" class="form-control" style="width: 50px; padding: 0.2rem; text-align: center; border: 1px solid #ccc; border-radius: 4px;" [(ngModel)]="item.quantity" (ngModelChange)="onQuantityChange(item)">
+          <input type="number" class="form-control"
+            style="width: 50px; padding: 0.2rem; text-align: center; border: 1px solid #ccc; border-radius: 4px;"
+            [(ngModel)]="item.quantity" (ngModelChange)="onQuantityChange(item)">
           <button class="btn-outline" (click)="increaseQuantity(item)">+</button>
         </div>
       </div>
@@ -41,12 +60,115 @@
         Cart is empty
       </div>
     </div>
-    
+
     <div class="cart-summary" *ngIf="cart.length > 0">
       <div class="row"><span>Subtotal</span><span>{{subtotal | number:'1.0-0'}}đ</span></div>
       <div class="row"><span>Tax</span><span>{{taxTotal | number:'1.0-0'}}đ</span></div>
       <div class="row total"><span>Total</span><span>{{total | number:'1.0-0'}}đ</span></div>
-      <button class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;" [disabled]="cart.length === 0">Charge {{total | number:'1.0-0'}}đ</button>
+      <button class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;"
+        [disabled]="cart.length === 0" (click)="openCheckout()">Charge {{total | number:'1.0-0'}}đ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal-overlay" *ngIf="showCheckoutModal">
+  <div class="checkout-modal">
+    <!-- Left Pane: Order Items -->
+    <div class="left-pane" style="position: relative; display: flex; flex-direction: column; overflow: hidden;">
+      <h3 class="pane-title">Danh sách hàng hóa</h3>
+      <!-- Success Message overlay within left pane -->
+      <div class="payment-success-msg" *ngIf="paymentSuccessMessage"
+        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; width: 85%; padding: 1.5rem; background-color: rgba(236, 253, 245, 0.95); border: 2px solid #34d399; border-radius: var(--radius-lg); text-align: center; box-shadow: var(--shadow-lg); backdrop-filter: blur(4px); display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <div style="font-size: 1.5rem; font-weight: bold; color: var(--success);" [innerHTML]="paymentSuccessMessage">
+        </div>
+      </div>
+      <div class="checkout-items" style="flex: 1; overflow-y: auto; margin-bottom: 1rem;">
+        <div class="checkout-item" *ngFor="let item of cart">
+          <span class="item-name">{{item.product.name}}</span>
+          <span class="item-qty">x{{item.quantity}}</span>
+          <span class="item-price">{{(item.product.salePrice * item.quantity) | number:'1.0-0'}}đ</span>
+        </div>
+      </div>
+
+      <div class="checkout-totals-left"
+        style="border-top: 1px dashed var(--border); padding-top: 1rem; margin-top: auto;">
+        <div class="summary-row"
+          style="display: flex; justify-content: space-between; color: var(--text-muted); margin-bottom: 0.5rem;">
+          <span>Tiền hàng</span>
+          <span>{{subtotal | number:'1.0-0'}} đ</span>
+        </div>
+        <div class="summary-row"
+          style="display: flex; justify-content: space-between; color: var(--text-muted); margin-bottom: 0.5rem;">
+          <span>Thuế (8%)</span>
+          <span>{{taxTotal | number:'1.0-0'}} đ</span>
+        </div>
+        <div class="summary-row highlight"
+          style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; color: var(--danger); margin-bottom: 0.5rem;">
+          <span>Tổng cộng</span>
+          <span>{{total | number:'1.0-0'}} đ</span>
+        </div>
+        <div style="font-size: 0.95rem; color: var(--text-main);">
+          <strong>Tổng số mặt hàng: {{cart.length}}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Pane: Payment -->
+    <div class="right-pane">
+      <div class="input-display" style="padding: 0.5rem 1rem;">
+        <div class="input-label">Tiền cần thanh toán</div>
+        <div class="input-value" style="color: var(--danger);">{{remainingBalance | number:'1.0-0'}} đ</div>
+      </div>
+      <div class="input-display" style="padding: 0.5rem 1rem;">
+        <div class="input-label">Tiền đã thanh toán</div>
+        <div class="input-value" style="color: var(--primary);">{{paidAmount | number:'1.0-0'}} đ</div>
+      </div>
+      <div class="input-display" style="padding: 0.5rem 1rem; background: #ecfdf5; border-color: #a7f3d0;">
+        <div class="input-label">Tiền thừa</div>
+        <div class="input-value" style="color: var(--success);">{{changeAmount | number:'1.0-0'}} đ</div>
+      </div>
+      <div class="input-display" style="padding: 0.5rem 1rem; border: 2px solid var(--secondary); background: #f0fdf4;">
+        <div class="input-label" style="font-weight: bold;">Khách đưa</div>
+        <div class="input-value">{{amountToPayNumber ? (amountToPayNumber | number:'1.0-0') + ' đ' : '0 đ'}}</div>
+      </div>
+
+      <div class="numpad-container">
+        <div class="numpad-grid">
+          <button class="btn-numpad" (click)="onNumpadClick('1')">1</button>
+          <button class="btn-numpad" (click)="onNumpadClick('2')">2</button>
+          <button class="btn-numpad" (click)="onNumpadClick('3')">3</button>
+          <button class="btn-numpad" (click)="onNumpadClick('4')">4</button>
+          <button class="btn-numpad" (click)="onNumpadClick('5')">5</button>
+          <button class="btn-numpad" (click)="onNumpadClick('6')">6</button>
+          <button class="btn-numpad" (click)="onNumpadClick('7')">7</button>
+          <button class="btn-numpad" (click)="onNumpadClick('8')">8</button>
+          <button class="btn-numpad" (click)="onNumpadClick('9')">9</button>
+          <button class="btn-numpad" (click)="onNumpadClick('000')">000</button>
+          <button class="btn-numpad" (click)="onNumpadClick('0')">0</button>
+          <button class="btn-numpad delete-btn" (click)="onNumpadClick('Del')">⌫</button>
+        </div>
+
+        <div class="action-grid">
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-payment" [class.active]="selectedPaymentMethod === 'Cash'"
+              (click)="selectMethod('Cash')">Tiền mặt</button>
+            <button class="btn btn-payment" [class.active]="selectedPaymentMethod === 'Card'"
+              (click)="selectMethod('Card')">Thẻ</button>
+            <button class="btn btn-payment" [class.active]="selectedPaymentMethod === 'QR'"
+              (click)="selectMethod('QR')">QR</button>
+          </div>
+          <button class="btn btn-action" (click)="setExactAmount()">Thanh toán đủ</button>
+          <div style="display: flex; gap: 0.5rem; flex: 1;">
+            <button class="btn btn-action"
+              style="width: 70px; flex: none; border-color: var(--danger); color: var(--danger); padding: 0.5rem; font-size: 0.9rem;"
+              (click)="onNumpadClick('C')">Xóa (C)</button>
+            <button class="btn btn-action back" style="flex: 1; margin: 0; padding: 0.5rem;"
+              (click)="closeCheckout()">Quay lại</button>
+          </div>
+          <button class="btn btn-action confirm" (click)="confirmPayment()">Xác nhận</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

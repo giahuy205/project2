@@ -1,0 +1,88 @@
+<div class="page-layout">
+  <div class="header-actions" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end;">
+    <div>
+      <h2 style="margin: 0;">Transaction History</h2>
+      <p style="color: gray; margin-top: 0.5rem; margin-bottom: 0;">View and manage your recent sales and returns.</p>
+    </div>
+    
+    <div class="filters" style="display: flex; gap: 1rem; align-items: center;">
+      <!-- Type Filter -->
+      <select class="form-control" [(ngModel)]="filterType" (change)="applyFilters()" style="min-width: 150px;">
+        <option value="ALL">Tất cả loại giao dịch</option>
+        <option value="SALE">Bán hàng (Sale)</option>
+        <option value="REFUND">Trả hàng (Refund)</option>
+      </select>
+
+      <!-- Date Range Filter -->
+      <select class="form-control" [(ngModel)]="filterDate" (change)="applyFilters()" style="min-width: 150px;">
+        <option value="ALL">Toàn thời gian</option>
+        <option value="TODAY">Trong ngày</option>
+        <option value="WEEK">Tuần này</option>
+        <option value="MONTH">Tháng này</option>
+        <option value="CUSTOM">Tùy chọn...</option>
+      </select>
+      
+      <!-- Custom Date Picker UI -->
+      <div *ngIf="filterDate === 'CUSTOM'" style="display: flex; gap: 0.5rem; align-items: center; background: white; padding: 0.25rem; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+        <input type="date" class="form-control" [(ngModel)]="customStartDate" style="border: none; padding: 0.25rem;">
+        <span style="color: gray;">-</span>
+        <input type="date" class="form-control" [(ngModel)]="customEndDate" style="border: none; padding: 0.25rem;">
+      </div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Transaction ID</th>
+            <th>Date & Time</th>
+            <th>Type</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Total Amount</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let txn of pagedTransactions" [class.row-refund]="txn.type === 'REFUND'">
+            <td><strong>{{txn.id}}</strong></td>
+            <td>{{txn.date | date:'dd/MM/yyyy HH:mm'}}</td>
+            <td>
+              <span class="badge" [ngClass]="txn.type === 'REFUND' ? 'badge-warning' : 'badge-success'">
+                {{txn.type}}
+              </span>
+            </td>
+            <td>{{txn.customer}}</td>
+            <td>{{txn.items}}</td>
+            <td>
+              <span [style.color]="txn.type === 'REFUND' ? 'var(--warning)' : 'inherit'">
+                {{txn.type === 'REFUND' ? '-' : ''}}{{txn.total | number:'1.0-0'}}đ
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">View Details</button>
+            </td>
+          </tr>
+          <tr *ngIf="pagedTransactions.length === 0">
+            <td colspan="7" style="text-align: center; color: gray;">No transactions found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-controls" *ngIf="totalPages > 1" style="display: flex; justify-content: center; align-items: center; padding: 1rem; gap: 0.5rem; border-top: 1px solid var(--border);">
+      <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">Trang trước</button>
+      
+      <div style="display: flex; gap: 0.25rem;">
+        <button *ngFor="let page of pageNumbers" class="btn" [ngClass]="currentPage === page ? 'btn-primary' : 'btn-outline'" (click)="goToPage(page)">
+          {{page}}
+        </button>
+      </div>
+      
+      <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">Trang sau</button>
+    </div>
+  </div>
+</div>

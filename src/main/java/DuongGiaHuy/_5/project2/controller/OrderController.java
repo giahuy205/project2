@@ -24,8 +24,8 @@ public class OrderController {
     }
 
     @PostMapping
-    public Order create(@RequestBody Order entity) {
-        return service.save(entity);
+    public Order create(@RequestBody DuongGiaHuy._5.project2.dto.OrderRequestDTO dto) {
+        return service.createOrderWithItems(dto);
     }
 
     @PutMapping("/{id}")
@@ -36,5 +36,11 @@ public class OrderController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.deleteById(id);
+    }
+
+    @DeleteMapping("/clean-zero")
+    public String cleanZeroOrders() {
+        service.cleanZeroOrders();
+        return "Cleaned";
     }
 }

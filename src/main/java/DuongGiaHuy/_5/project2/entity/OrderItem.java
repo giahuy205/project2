@@ -14,6 +14,7 @@ public class OrderItem {
     private Long id;
     @ManyToOne
     @JoinColumn(name = "order_id")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Order order;
     @ManyToOne
     @JoinColumn(name = "product_id")
