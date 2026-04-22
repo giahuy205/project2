@@ -1,11 +1,5 @@
 # 🛒 POS Management System
 
-> **Môn học:** Project 2 — IT3930  
-> **Sinh viên:** Dương Gia Huy — MSSV: 20236035  
-> **Trường:** Đại học Bách Khoa Hà Nội (HUST)
-
----
-
 ## 📌 Giới thiệu
 
 Hệ thống quản lý bán hàng (Point of Sale — POS) được xây dựng nhằm hỗ trợ các nghiệp vụ cơ bản của một cửa hàng bán lẻ, bao gồm: quản lý sản phẩm, danh mục, nhập kho, bán hàng, và theo dõi lịch sử giao dịch.
