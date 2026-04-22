@@ -184,6 +184,31 @@ Hệ thống sử dụng các bảng chính:
 
 ---
 
+## 🚀 Kế hoạch phát triển (Roadmap)
+
+Các tính năng dự kiến sẽ triển khai trong thời gian tới:
+
+### 📈 Báo cáo & Thống kê nâng cao
+- Biểu đồ doanh thu, lợi nhuận theo tháng/quý.
+- Thống kê thu chi chi tiết và báo cáo kết quả kinh doanh.
+
+### 👥 Quản lý nhân sự & Bảo mật
+- **Quản lý tài khoản:** Hệ thống đăng nhập, đăng xuất bảo mật.
+- **Phân quyền (RBAC):** 
+  - **Admin:** Toàn quyền quản lý hệ thống, xem báo cáo doanh thu.
+  - **Staff:** Chỉ thực hiện bán hàng và kiểm tra kho.
+- **Quản lý nhân viên:** Lưu trữ thông tin và lịch sử làm việc của nhân viên.
+
+### ⚙️ Cấu hình hệ thống (Settings)
+- Cho phép Admin tùy chỉnh thông tin cửa hàng.
+- Cấu hình linh hoạt ngưỡng cảnh báo tồn kho thấp (Low Stock Threshold) cho từng sản phẩm hoặc danh mục.
+
+### 📄 Xuất bản dữ liệu (Export)
+- Hỗ trợ in hóa đơn bán hàng trực tiếp.
+- Xuất dữ liệu danh sách sản phẩm, đơn nhập hàng, báo cáo ra file **PDF / Excel**.
+
+---
+
 ## 👨‍💻 Tác giả
 
 | Thông tin | Chi tiết |
