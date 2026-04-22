@@ -205,10 +205,7 @@ Các tính năng dự kiến sẽ triển khai trong thời gian tới:
 
 ## 👨‍💻 Tác giả
 
-| Thông tin | Chi tiết |
-|---|---|
-| **Họ và tên** | Dương Gia Huy |
-| **MSSV** | 20236035 |
-| **Môn học** | Project 2 — IT3930 |
-| **Trường** | Đại học Bách Khoa Hà Nội |
-| **GitHub** | [giahuy205/project2](https://github.com/giahuy205/project2) |
+- **Họ và tên**: Dương Gia Huy
+- **MSSV**: 20236035
+- **Môn học**: Project 2 — IT3930
+- **Trường**: Đại học Bách Khoa Hà Nội
