@@ -22,6 +22,11 @@ public class ImportItemController {
     public ImportItem getById(@PathVariable Long id) {
         return service.findById(id);
     }
+    
+    @GetMapping("/import/{importId}")
+    public List<ImportItem> getByImportId(@PathVariable Long importId) {
+        return service.findByImportId(importId);
+    }
 
     @PostMapping
     public ImportItem create(@RequestBody ImportItem entity) {

@@ -359,6 +359,7 @@ CREATE TABLE public.imports (
     id integer NOT NULL,
     supplier_name character varying(255),
     total_cost numeric(15,2) DEFAULT 0,
+    note text,
     import_date timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -468,7 +469,7 @@ ALTER SEQUENCE public.order_items_id_seq OWNED BY public.order_items.id;
 
 CREATE TABLE public.orders (
     id integer CONSTRAINT orders_order_id_not_null NOT NULL,
-    order_date date,
+    order_date timestamp with time zone,
     net_amount numeric DEFAULT 0 NOT NULL,
     tax numeric DEFAULT 0 NOT NULL,
     total_amount numeric DEFAULT 0 NOT NULL,
@@ -511,7 +512,7 @@ CREATE TABLE public.price_histories (
     new_import_price numeric(12,2),
     old_selling_price numeric(12,2),
     new_selling_price numeric(12,2),
-    updated_by integer CONSTRAINT price_historis_updated_by_not_null NOT NULL,
+    updated_by integer,
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -1102,6 +1103,8 @@ ALTER TABLE ONLY public.returns
 
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS paid_amount numeric DEFAULT 0;
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS payment_method character varying(50);
+ALTER TABLE public.imports ADD COLUMN IF NOT EXISTS note text;
+ALTER TABLE public.price_histories ALTER COLUMN updated_by DROP NOT NULL;
 
 -- Completed on 2026-04-10 09:36:56
 

@@ -1,5 +1,6 @@
 package DuongGiaHuy._5.project2.controller;
 
+import DuongGiaHuy._5.project2.dto.ImportRequestDTO;
 import DuongGiaHuy._5.project2.entity.Import;
 import DuongGiaHuy._5.project2.service.ImportService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,11 @@ public class ImportController {
     @GetMapping("/{id}")
     public Import getById(@PathVariable Long id) {
         return service.findById(id);
+    }
+
+    @PostMapping("/process")
+    public Import process(@RequestBody ImportRequestDTO request) {
+        return service.processImport(request);
     }
 
     @PostMapping

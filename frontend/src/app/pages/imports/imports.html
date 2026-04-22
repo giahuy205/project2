@@ -1,0 +1,170 @@
+<div class="page-layout">
+  <div class="header-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h2>Import Transaction</h2>
+    <button class="btn btn-primary" (click)="openImportModal()">+ Import</button>
+  </div>
+
+  <div class="card">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Import ID</th>
+            <th>Date</th>
+            <th>Supplier</th>
+            <th>Note</th>
+            <th>Total Amount</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let imp of importsList">
+            <td>#{{imp.id}}</td>
+            <td>{{imp.importDate | date:'medium'}}</td>
+            <td>{{imp.supplierName || 'N/A'}}</td>
+            <td>{{imp.note}}</td>
+            <td>{{imp.totalCost | number:'1.0-0'}}đ</td>
+            <td>
+              <button class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;"
+                (click)="viewDetails(imp)">Chi tiết</button>
+            </td>
+          </tr>
+          <tr *ngIf="importsList.length === 0">
+            <td colspan="6" style="text-align: center; color: gray;">Chưa có lịch sử nhập hàng.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Nhập hàng mới -->
+  <div class="modal-overlay" *ngIf="showImportModal">
+    <div class="modal-content card slide-in">
+      <h3 style="margin-bottom: 1rem;">Import Product</h3>
+
+      <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">Supplier</label>
+          <input type="text" class="form-control" [(ngModel)]="newImport.supplierName" placeholder="Supplier Name"
+            [disabled]="isSubmitting">
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">Note</label>
+          <input type="text" class="form-control" [(ngModel)]="newImport.note" placeholder="Note"
+            [disabled]="isSubmitting">
+        </div>
+      </div>
+
+      <h4 style="margin-bottom: 0.5rem;">List Product</h4>
+
+      <div class="item-row" *ngFor="let item of newImport.items; let i = index"
+        [class.active-row]="activeRowIndex === i" (click)="setActiveRow(i)">
+        <div class="form-group search-container" style="flex: 2;">
+          <label class="form-label">Product</label>
+          <div style="position: relative; width: 100%;">
+            <input type="text" class="form-control" [(ngModel)]="item.searchTerm" placeholder="Name or Barcode"
+              (focus)="setActiveRow(i); item.showResults = true" (blur)="hideResults(item)" [disabled]="isSubmitting">
+            <button class="dropdown-arrow" (click)="toggleAllResults(item); $event.stopPropagation()" type="button"
+              [disabled]="isSubmitting">
+              <span style="font-size: 0.6rem; transform: scale(1.5, 0.8);">▼</span>
+            </button>
+          </div>
+
+          <div class="search-results" *ngIf="item.showResults && getFilteredProducts(item).length > 0">
+            <div class="search-item" *ngFor="let p of getFilteredProducts(item)" (click)="selectProduct(item, p)">
+              <div style="display: flex; flex-direction: column;">
+                <strong>{{p.name}}</strong>
+                <span class="barcode">{{p.barcode}}</span>
+              </div>
+              <div style="text-align: right;">
+                <span style="font-size: 0.85rem; color: var(--success);">Tồn: {{p.stockQuantity}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">Quantity</label>
+          <input type="number" class="form-control" [(ngModel)]="item.quantity" min="1" (focus)="setActiveRow(i)"
+            [disabled]="isSubmitting">
+        </div>
+
+        <div class="form-group" style="flex: 1.5;">
+          <label class="form-label">Price</label>
+          <input type="number" class="form-control" [(ngModel)]="item.unitPrice" (focus)="setActiveRow(i)"
+            [disabled]="isSubmitting">
+        </div>
+
+        <div class="form-group" style="flex: 1.5;">
+          <label class="form-label">Current Price</label>
+          <input type="number" class="form-control" [value]="item._productDetails?.salePrice || 0" disabled
+            style="opacity: 0.6;">
+        </div>
+
+        <div class="form-group" style="flex: 1.5;">
+          <label class="form-label">New Price</label>
+          <input type="number" class="form-control" [(ngModel)]="item.newPrice" placeholder="Giá bán"
+            (focus)="setActiveRow(i)" [disabled]="isSubmitting">
+        </div>
+
+        <button class="btn btn-remove" (click)="removeLine(i); $event.stopPropagation()" title="Xóa dòng"
+          *ngIf="newImport.items.length > 1" [disabled]="isSubmitting">✕</button>
+      </div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <button class="btn btn-outline" (click)="addLine()" [disabled]="isSubmitting">+ Add Product</button>
+      </div>
+
+      <div style="text-align: right; font-size: 1.2rem; margin-bottom: 1rem;">
+        <strong>Total Cost: </strong> {{ getTotalImportCost() | number:'1.0-0' }}đ
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+        <button class="btn btn-outline" (click)="closeImportModal()" [disabled]="isSubmitting">Cancle</button>
+        <button class="btn btn-primary" (click)="saveImport()" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Processing...' : 'Confirm' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Chi tiết nhập hàng -->
+  <div class="modal-overlay" *ngIf="showDetailModal">
+    <div class="modal-content card slide-in" style="max-width: 600px;">
+      <h3 style="margin-bottom: 1rem;">Import Product #{{selectedImport?.id}}</h3>
+
+      <div style="margin-bottom: 1rem;">
+        <p><strong>Date:</strong> {{selectedImport?.importDate | date:'medium'}}</p>
+        <p><strong>Supplier:</strong> {{selectedImport?.supplierName || 'N/A'}}</p>
+        <p><strong>Note:</strong> {{selectedImport?.note}}</p>
+      </div>
+
+      <table style="margin-bottom: 1.5rem;">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let detail of importDetails">
+            <td>{{detail.product?.name}}</td>
+            <td>{{detail.quantity}}</td>
+            <td>{{detail.unitPrice | number:'1.0-0'}}đ</td>
+            <td>{{(detail.quantity * detail.unitPrice) | number:'1.0-0'}}đ</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="text-align: right; font-size: 1.1rem; margin-bottom: 1.5rem;">
+        <strong>Total Amount: </strong> {{selectedImport?.totalCost | number:'1.0-0'}}đ
+      </div>
+
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="btn btn-primary" (click)="closeDetailModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

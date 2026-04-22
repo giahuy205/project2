@@ -49,6 +49,7 @@ export class Transactions implements OnInit {
           total: order.totalAmount || 0,
           type: 'SALE', // Refund is not implemented gracefully yet natively
           customer: 'Khách lẻ',
+          originalOrder: order,
         })).sort((a, b) => b.rawDate.getTime() - a.rawDate.getTime() || b.id.localeCompare(a.id));
         
         this.applyFilters();
@@ -95,5 +96,18 @@ export class Transactions implements OnInit {
       this.currentPage = page;
       this.updatePagination();
     }
+  }
+
+  selectedTxn: any = null;
+  showDetailsModal: boolean = false;
+
+  viewDetails(txn: any) {
+    this.selectedTxn = txn;
+    this.showDetailsModal = true;
+  }
+
+  closeDetails() {
+    this.showDetailsModal = false;
+    this.selectedTxn = null;
   }
 }

@@ -15,4 +15,5 @@ public class Import {
     private String supplierName;
     private Double totalCost = 0.0;
     private java.time.LocalDateTime importDate;
+    private String note;
 }

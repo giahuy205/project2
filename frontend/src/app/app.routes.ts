@@ -7,6 +7,7 @@ import { Inventory } from './pages/inventory/inventory';
 import { Reports } from './pages/reports/reports';
 import { Staff } from './pages/staff/staff';
 import { Settings } from './pages/settings/settings';
+import { ImportsComponent } from './pages/imports/imports';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -15,6 +16,7 @@ export const routes: Routes = [
   { path: 'sales', component: Sales },
   { path: 'transactions', component: Transactions },
   { path: 'inventory', component: Inventory },
+  { path: 'imports', component: ImportsComponent },
   { path: 'reports', component: Reports },
   { path: 'staff', component: Staff },
   { path: 'settings', component: Settings },

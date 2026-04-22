@@ -52,7 +52,7 @@ export class Sales implements OnInit {
     this.http.get<any[]>('/api/products').subscribe(res => {
       this.products = res;
       this.filteredProducts = res;
-      this.cdr.detectChanges();
+      this.applyFilters();
     });
   }
 

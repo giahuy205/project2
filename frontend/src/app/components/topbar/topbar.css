@@ -6,7 +6,7 @@
   padding: 1rem 1.5rem;
   background: var(--surface);
   border-radius: var(--radius-lg);
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 .actions {
   display: flex;

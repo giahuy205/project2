@@ -79,6 +79,48 @@ export class Inventory implements OnInit {
     });
   }
 
+  stockFilter: string = 'all'; // 'all', 'low', 'out'
+
+  sortColumn: string = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
+  sortBy(column: string) {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.filterProducts();
+  }
+
+  categorySortColumn: string = '';
+  categorySortDirection: 'asc' | 'desc' = 'asc';
+
+  sortCategoryBy(column: string) {
+    if (this.categorySortColumn === column) {
+      this.categorySortDirection = this.categorySortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.categorySortColumn = column;
+      this.categorySortDirection = 'asc';
+    }
+    this.categories.sort((a, b) => {
+        let valA = a[column];
+        let valB = b[column];
+        if (typeof valA === 'string') valA = valA.toLowerCase();
+        if (typeof valB === 'string') valB = valB.toLowerCase();
+
+        if (valA < valB) return this.categorySortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return this.categorySortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+  }
+
+  onStockFilterChange(event: any) {
+    this.stockFilter = event.target.value;
+    this.filterProducts();
+  }
+
   filterProducts() {
     let list = this.selectedCategoryId === null 
       ? [...this.products] 
@@ -87,6 +129,31 @@ export class Inventory implements OnInit {
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase();
       list = list.filter(p => p.name.toLowerCase().includes(q) || p.barcode.toLowerCase().includes(q));
+    }
+
+    if (this.stockFilter === 'out') {
+      list = list.filter(p => p.stockQuantity <= 0);
+    } else if (this.stockFilter === 'low') {
+      list = list.filter(p => p.stockQuantity > 0 && p.stockQuantity <= 30);
+    }
+    
+    if (this.sortColumn) {
+      list.sort((a, b) => {
+        let valA = a[this.sortColumn];
+        let valB = b[this.sortColumn];
+
+        if (this.sortColumn === 'category.name') {
+            valA = a.category?.name || '';
+            valB = b.category?.name || '';
+        }
+
+        if (typeof valA === 'string') valA = valA.toLowerCase();
+        if (typeof valB === 'string') valB = valB.toLowerCase();
+
+        if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
     }
     
     this.filteredProducts = list;

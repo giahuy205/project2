@@ -26,4 +26,8 @@ public class ImportItemService {
     public void deleteById(Long id) {
         repository.deleteById(id);
     }
+    
+    public List<ImportItem> findByImportId(Long importId) {
+        return repository.findByImportObjId(importId);
+    }
 }

@@ -1,36 +1,38 @@
 <div class="page-layout">
-  <div class="header-actions" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end;">
+  <div class="header-actions"
+    style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: flex-end;">
     <div>
       <h2 style="margin: 0;">Transaction History</h2>
       <p style="color: gray; margin-top: 0.5rem; margin-bottom: 0;">View and manage your recent sales and returns.</p>
     </div>
-    
+
     <div class="filters" style="display: flex; gap: 1rem; align-items: center;">
       <!-- Type Filter -->
       <select class="form-control" [(ngModel)]="filterType" (change)="applyFilters()" style="min-width: 150px;">
-        <option value="ALL">Tất cả loại giao dịch</option>
-        <option value="SALE">Bán hàng (Sale)</option>
-        <option value="REFUND">Trả hàng (Refund)</option>
+        <option value="ALL">All Transaction</option>
+        <option value="SALE">Sale</option>
+        <option value="REFUND">Refund</option>
       </select>
 
       <!-- Date Range Filter -->
       <select class="form-control" [(ngModel)]="filterDate" (change)="applyFilters()" style="min-width: 150px;">
-        <option value="ALL">Toàn thời gian</option>
-        <option value="TODAY">Trong ngày</option>
-        <option value="WEEK">Tuần này</option>
-        <option value="MONTH">Tháng này</option>
-        <option value="CUSTOM">Tùy chọn...</option>
+        <option value="ALL">All Time</option>
+        <option value="TODAY">Today</option>
+        <option value="WEEK">This Week</option>
+        <option value="MONTH">This Month</option>
+        <option value="CUSTOM">Custom</option>
       </select>
-      
+
       <!-- Custom Date Picker UI -->
-      <div *ngIf="filterDate === 'CUSTOM'" style="display: flex; gap: 0.5rem; align-items: center; background: white; padding: 0.25rem; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+      <div *ngIf="filterDate === 'CUSTOM'"
+        style="display: flex; gap: 0.5rem; align-items: center; background: white; padding: 0.25rem; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
         <input type="date" class="form-control" [(ngModel)]="customStartDate" style="border: none; padding: 0.25rem;">
         <span style="color: gray;">-</span>
         <input type="date" class="form-control" [(ngModel)]="customEndDate" style="border: none; padding: 0.25rem;">
       </div>
     </div>
   </div>
-  
+
   <div class="card">
     <div class="table-container">
       <table>
@@ -62,7 +64,8 @@
               </span>
             </td>
             <td>
-              <button class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">View Details</button>
+              <button class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;"
+                (click)="viewDetails(txn)">View Details</button>
             </td>
           </tr>
           <tr *ngIf="pagedTransactions.length === 0">
@@ -73,16 +76,79 @@
     </div>
 
     <!-- Pagination Controls -->
-    <div class="pagination-controls" *ngIf="totalPages > 1" style="display: flex; justify-content: center; align-items: center; padding: 1rem; gap: 0.5rem; border-top: 1px solid var(--border);">
-      <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">Trang trước</button>
-      
+    <div class="pagination-controls" *ngIf="totalPages > 1"
+      style="display: flex; justify-content: center; align-items: center; padding: 1rem; gap: 0.5rem; border-top: 1px solid var(--border);">
+      <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">Trang
+        trước</button>
+
       <div style="display: flex; gap: 0.25rem;">
-        <button *ngFor="let page of pageNumbers" class="btn" [ngClass]="currentPage === page ? 'btn-primary' : 'btn-outline'" (click)="goToPage(page)">
+        <button *ngFor="let page of pageNumbers" class="btn"
+          [ngClass]="currentPage === page ? 'btn-primary' : 'btn-outline'" (click)="goToPage(page)">
           {{page}}
         </button>
       </div>
-      
-      <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">Trang sau</button>
+
+      <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">Trang
+        sau</button>
+    </div>
+  </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal-overlay" *ngIf="showDetailsModal">
+  <div class="modal-content"
+    style="width: 700px; max-width: 90vw; max-height: 90vh; overflow-y: auto; background: var(--surface); padding: 1.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-xl);">
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 1rem; margin-bottom: 1rem;">
+      <h3 style="margin: 0;">Transaction details: {{selectedTxn?.id}}</h3>
+      <button class="btn btn-outline" (click)="closeDetails()"
+        style="border: none; font-size: 1.5rem; cursor: pointer; padding: 0 0.5rem;">&times;</button>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; font-size: 0.95rem;">
+      <div><strong>Time:</strong> {{selectedTxn?.date | date:'dd/MM/yyyy HH:mm:ss'}}</div>
+      <div><strong>Customer:</strong> {{selectedTxn?.customer}}</div>
+      <div><strong>Seller:</strong> Hành chính (Admin)</div>
+      <div><strong>Status:</strong> <span class="badge badge-success">Success</span></div>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;">
+      <thead style="background: var(--background); border-bottom: 2px solid var(--border);">
+        <tr>
+          <th style="padding: 0.75rem; text-align: left;">Items</th>
+          <th style="padding: 0.75rem; text-align: right;">Quantity</th>
+          <th style="padding: 0.75rem; text-align: right;">Unit price</th>
+          <th style="padding: 0.75rem; text-align: right;">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of selectedTxn?.originalOrder?.orderItems" style="border-bottom: 1px solid var(--border);">
+          <td style="padding: 0.75rem;">{{item.product?.name || 'Undefined product'}}</td>
+          <td style="padding: 0.75rem; text-align: right;">{{item.quantity}}</td>
+          <td style="padding: 0.75rem; text-align: right;">{{(item.unitPrice || item.product?.salePrice) |
+            number:'1.0-0'}}đ</td>
+          <td style="padding: 0.75rem; text-align: right;">{{(item.subTotal || ((item.unitPrice ||
+            item.product?.salePrice) * item.quantity)) | number:'1.0-0'}}đ</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div
+      style="border-top: 1px solid var(--border); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end; font-size: 1.05rem;">
+      <div style="display: flex; justify-content: space-between; width: 250px; color: var(--text-muted);">
+        <span>Amount:</span>
+        <span>{{(selectedTxn?.originalOrder?.totalAmount - (selectedTxn?.originalOrder?.tax || 0)) |
+          number:'1.0-0'}}đ</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; width: 250px; color: var(--text-muted);">
+        <span>Tax:</span>
+        <span>{{selectedTxn?.originalOrder?.tax || 0 | number:'1.0-0'}}đ</span>
+      </div>
+      <div
+        style="display: flex; justify-content: space-between; width: 250px; font-weight: bold; font-size: 1.2rem; color: var(--danger); margin-top: 0.5rem; border-top: 1px dashed var(--border); padding-top: 0.5rem;">
+        <span>Total:</span>
+        <span>{{selectedTxn?.originalOrder?.totalAmount | number:'1.0-0'}}đ</span>
+      </div>
     </div>
   </div>
 </div>

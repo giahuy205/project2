@@ -43,4 +43,17 @@ public class OrderController {
         service.cleanZeroOrders();
         return "Cleaned";
     }
+
+    @Autowired
+    private org.springframework.jdbc.core.JdbcTemplate jdbc;
+
+    @GetMapping("/fix-date")
+    public String fixDate() {
+        try {
+            jdbc.execute("ALTER TABLE orders ALTER COLUMN order_date TYPE timestamp with time zone");
+            return "Fixed Database!";
+        } catch (Exception e) {
+            return "Failed: " + e.getMessage();
+        }
+    }
 }

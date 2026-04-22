@@ -24,7 +24,7 @@ public class Product {
     @Column(nullable = false)
     private Double salePrice;
     private Double stockQuantity = 0.0;
-    private Double lowStock = 10.0;
+    private Double lowStock = 30.0;
     private java.time.LocalDateTime createdAt;
     @ManyToOne
     @JoinColumn(name = "updated_by_id")

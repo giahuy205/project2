@@ -61,16 +61,12 @@ public class OrderService {
         order.setPaidAmount(dto.getPaidAmount());
         order.setPaymentMethod(dto.getPaymentMethod());
         
+        // We will calculate these as we process items
         double netAmount = 0.0;
-        if (dto.getItems() != null) {
-            for (DuongGiaHuy._5.project2.dto.OrderItemDTO itemDTO : dto.getItems()) {
-                netAmount += (itemDTO.getQuantity() * itemDTO.getPrice());
-            }
-        }
-        order.setNetAmount(netAmount);
-        order.setTax(netAmount * 0.08); // 8% tax
-        order.setTotalAmount(dto.getTotalAmount());
+        double totalTax = 0.0;
         
+        // Save a placeholder to get the ID for logs if needed, 
+        // or we can save at the end. Let's save first.
         Order savedOrder = repository.save(order);
 
         if (dto.getItems() != null) {
@@ -78,33 +74,51 @@ public class OrderService {
                 DuongGiaHuy._5.project2.entity.Product product = productRepository.findById(itemDTO.getProduct().getId()).orElse(null);
                 
                 if (product != null) {
-                    // Update inventory
+                    double itemQuantity = itemDTO.getQuantity();
+                    double itemPrice = itemDTO.getPrice();
+                    double itemSubtotal = itemQuantity * itemPrice;
+                    
+                    netAmount += itemSubtotal;
+                    
+                    // Lấy thuế suất từ Category của sản phẩm, mặc định 8% nếu không có
+                    double taxRate = 0.08;
+                    if (product.getCategory() != null && product.getCategory().getTaxRate() != null) {
+                        taxRate = product.getCategory().getTaxRate();
+                    }
+                    totalTax += (itemSubtotal * taxRate);
+
+                    // Update inventory (Java logic)
                     Double oldStock = product.getStockQuantity() != null ? product.getStockQuantity() : 0.0;
-                    Double newStock = oldStock - itemDTO.getQuantity();
+                    Double newStock = oldStock - itemQuantity;
                     product.setStockQuantity(newStock);
                     productRepository.save(product);
 
-                    // Create log
+                    // Create inventory log
                     DuongGiaHuy._5.project2.entity.InventoryLog log = new DuongGiaHuy._5.project2.entity.InventoryLog();
                     log.setProduct(product);
-                    log.setChangeAmount(-itemDTO.getQuantity());
+                    log.setChangeAmount(-itemQuantity);
                     log.setOldStock(oldStock);
                     log.setNewStock(newStock);
                     log.setType("Bán hàng");
                     log.setNote("Đơn hàng #" + savedOrder.getId());
                     log.setTime(java.time.LocalDateTime.now());
                     inventoryLogRepository.save(log);
-                }
 
-                DuongGiaHuy._5.project2.entity.OrderItem item = new DuongGiaHuy._5.project2.entity.OrderItem();
-                item.setOrder(savedOrder);
-                item.setProduct(product);
-                item.setQuantity(itemDTO.getQuantity());
-                item.setUnitPrice(itemDTO.getPrice());
-                itemRepository.save(item);
+                    // Create order item
+                    DuongGiaHuy._5.project2.entity.OrderItem item = new DuongGiaHuy._5.project2.entity.OrderItem();
+                    item.setOrder(savedOrder);
+                    item.setProduct(product);
+                    item.setQuantity(itemQuantity);
+                    item.setUnitPrice(itemPrice);
+                    itemRepository.save(item);
+                }
             }
         }
 
-        return repository.findById(savedOrder.getId()).orElse(savedOrder);
+        savedOrder.setNetAmount(netAmount);
+        savedOrder.setTax(totalTax);
+        savedOrder.setTotalAmount(netAmount + totalTax);
+        
+        return repository.save(savedOrder);
     }
 }
