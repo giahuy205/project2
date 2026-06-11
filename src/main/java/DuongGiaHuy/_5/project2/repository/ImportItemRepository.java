@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface ImportItemRepository extends JpaRepository<ImportItem, Long> {
     List<ImportItem> findByImportObjId(Long importId);
+    List<ImportItem> findByProductIdOrderByExpiryDateAsc(Long productId);
+    List<ImportItem> findByProductIdAndRemainingQuantityGreaterThanOrderByExpiryDateAsc(Long productId, Double remainingQuantity);
 }

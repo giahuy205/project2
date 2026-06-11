@@ -27,6 +27,9 @@ public class OrderService {
     private DuongGiaHuy._5.project2.repository.OrderItemRepository itemRepository;
 
     @Autowired
+    private DuongGiaHuy._5.project2.repository.ImportItemRepository importItemRepository;
+
+    @Autowired
     private DuongGiaHuy._5.project2.repository.ProductRepository productRepository;
 
     @Autowired
@@ -60,6 +63,14 @@ public class OrderService {
         order.setOrderDate(java.time.LocalDateTime.now());
         order.setPaidAmount(dto.getPaidAmount());
         order.setPaymentMethod(dto.getPaymentMethod());
+
+        org.springframework.web.context.request.ServletRequestAttributes attrs = (org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+        if (attrs != null && attrs.getRequest().getAttribute("currentUser") != null) {
+            DuongGiaHuy._5.project2.entity.Account account = (DuongGiaHuy._5.project2.entity.Account) attrs.getRequest().getAttribute("currentUser");
+            order.setCreatedBy(account.getUsername());
+        } else {
+            order.setCreatedBy("admin");
+        }
         
         // We will calculate these as we process items
         double netAmount = 0.0;
@@ -75,7 +86,7 @@ public class OrderService {
                 
                 if (product != null) {
                     double itemQuantity = itemDTO.getQuantity();
-                    double itemPrice = itemDTO.getPrice();
+                    double itemPrice = product.getSalePrice() != null ? product.getSalePrice() : 0.0;
                     double itemSubtotal = itemQuantity * itemPrice;
                     
                     netAmount += itemSubtotal;
@@ -92,6 +103,21 @@ public class OrderService {
                     Double newStock = oldStock - itemQuantity;
                     product.setStockQuantity(newStock);
                     productRepository.save(product);
+
+                    // FEFO Batch deduction
+                    List<DuongGiaHuy._5.project2.entity.ImportItem> batches = importItemRepository.findByProductIdAndRemainingQuantityGreaterThanOrderByExpiryDateAsc(product.getId(), 0.0);
+                    double qtyToDeduct = itemQuantity;
+                    for (DuongGiaHuy._5.project2.entity.ImportItem batch : batches) {
+                        if (qtyToDeduct <= 0) break;
+                        
+                        double available = batch.getRemainingQuantity() != null ? batch.getRemainingQuantity() : 0.0;
+                        if (available > 0) {
+                            double deducted = Math.min(available, qtyToDeduct);
+                            batch.setRemainingQuantity(available - deducted);
+                            importItemRepository.save(batch);
+                            qtyToDeduct -= deducted;
+                        }
+                    }
 
                     // Create inventory log
                     DuongGiaHuy._5.project2.entity.InventoryLog log = new DuongGiaHuy._5.project2.entity.InventoryLog();

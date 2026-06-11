@@ -21,4 +21,7 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private java.util.List<OrderItem> orderItems = new java.util.ArrayList<>();
+
+    @Column(name = "created_by")
+    private String createdBy;
 }

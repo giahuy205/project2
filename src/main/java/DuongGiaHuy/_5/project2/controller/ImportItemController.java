@@ -2,6 +2,7 @@ package DuongGiaHuy._5.project2.controller;
 
 import DuongGiaHuy._5.project2.entity.ImportItem;
 import DuongGiaHuy._5.project2.service.ImportItemService;
+import DuongGiaHuy._5.project2.config.RequiresRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/importitems")
 @CrossOrigin(origins = "*")
+@RequiresRole("admin")
 public class ImportItemController {
     @Autowired
     private ImportItemService service;
@@ -41,5 +43,17 @@ public class ImportItemController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.deleteById(id);
+    }
+
+    @GetMapping("/product/{productId}")
+    public List<ImportItem> getByProductId(@PathVariable Long productId) {
+        return service.findByProductId(productId);
+    }
+
+    @PostMapping("/{id}/discard")
+    @RequiresRole("admin")
+    public String discardBatch(@PathVariable Long id) {
+        service.discardBatch(id);
+        return "Discarded";
     }
 }

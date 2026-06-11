@@ -1,9 +1,10 @@
 
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-inventory',
@@ -13,6 +14,7 @@ import { HttpClient } from '@angular/common/http';
   styleUrl: './inventory.css',
 })
 export class Inventory implements OnInit {
+  authService = inject(AuthService);
   categories: any[] = [];
   products: any[] = [];
   filteredProducts: any[] = [];
@@ -39,6 +41,10 @@ export class Inventory implements OnInit {
 
   showProductModal = false;
   isEditingProduct = false;
+  showBatchModal = false;
+  isEditingBatchProduct = false;
+  selectedProductForBatches: any = null;
+  productBatches: any[] = [];
   errorMessage = '';
   newProduct: any = {
     id: null,
@@ -53,6 +59,16 @@ export class Inventory implements OnInit {
 
   API_CAT_URL = '/api/categorys';
   API_PROD_URL = '/api/products';
+  API_IMPORT_ITEM_URL = '/api/importitems';
+
+  toastMessage = '';
+  showToast(msg: string) {
+    this.toastMessage = msg;
+    setTimeout(() => {
+      this.toastMessage = '';
+      this.cdr.detectChanges();
+    }, 5000);
+  }
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
@@ -63,7 +79,7 @@ export class Inventory implements OnInit {
   loadData() {
     this.http.get<any[]>(this.API_CAT_URL).subscribe({
       next: (data) => {
-        this.categories = data;
+        this.categories = data.sort((a, b) => a.id - b.id);
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Backend offline or Error fetching categories', err)
@@ -223,6 +239,7 @@ export class Inventory implements OnInit {
       next: (res) => {
         this.loadData();
         this.closeProductModal();
+        this.showToast('Lưu sản phẩm thành công!');
       },
       error: (err) => {
         if (err.status === 409 || (err.error && typeof err.error === 'string' && err.error.includes('constraint'))) {
@@ -262,8 +279,72 @@ export class Inventory implements OnInit {
       next: (res) => {
         this.loadData();
         this.closeModal();
+        this.showToast('Lưu danh mục thành công!');
       },
       error: (err) => alert('Save failed! Is the backend running?')
     });
+  }
+
+  viewBatches(product: any) {
+    this.selectedProductForBatches = product;
+    this.newProduct = { ...product, category: { id: product.category ? product.category.id : null } };
+    this.errorMessage = '';
+    this.isEditingBatchProduct = false;
+    this.http.get<any[]>(`${this.API_IMPORT_ITEM_URL}/product/${product.id}`).subscribe({
+      next: (data) => {
+        this.productBatches = data;
+        this.showBatchModal = true;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error fetching batches', err)
+    });
+  }
+
+  saveProductFromBatchModal() {
+    this.errorMessage = '';
+    if (!this.newProduct.name || !this.newProduct.barcode || !this.newProduct.category.id) return;
+    
+    this.http.put(`${this.API_PROD_URL}/${this.newProduct.id}`, this.newProduct).subscribe({
+      next: (res) => {
+        this.isEditingBatchProduct = false;
+        this.loadData();
+        this.showToast('Cập nhật thông tin thành công!');
+      },
+      error: (err) => {
+        if (err.status === 409 || (err.error && typeof err.error === 'string' && err.error.includes('constraint'))) {
+           this.errorMessage = 'Mã barcode trùng với sản phẩm khác!';
+        } else {
+           this.errorMessage = 'Lỗi hệ thống!';
+        }
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  closeBatchModal() {
+    this.showBatchModal = false;
+    this.selectedProductForBatches = null;
+    this.productBatches = [];
+  }
+
+  discardBatch(batchId: number) {
+    if (confirm("Bạn có chắc muốn hủy lô hàng này không?")) {
+      this.http.post(`${this.API_IMPORT_ITEM_URL}/${batchId}/discard`, {}, { responseType: 'text' }).subscribe({
+        next: () => {
+          this.viewBatches(this.selectedProductForBatches); // reload batches
+          this.loadData(); // reload products to update total stock
+          this.showToast('Hủy lô hàng thành công!');
+        },
+        error: (err) => alert("Lỗi khi hủy lô hàng!")
+      });
+    }
+  }
+
+  isNearExpiry(dateStr: string): boolean {
+    if (!dateStr) return false;
+    const expiry = new Date(dateStr).getTime();
+    const now = new Date().getTime();
+    const daysLeft = (expiry - now) / (1000 * 60 * 60 * 24);
+    return daysLeft >= 0 && daysLeft <= 30; // 30 days threshold
   }
 }

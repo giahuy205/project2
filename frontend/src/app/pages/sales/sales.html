@@ -3,11 +3,11 @@
     <div class="filters">
       <button class="btn btn-primary"
         [ngClass]="{'btn-primary': selectedCategoryId === null, 'btn-outline': selectedCategoryId !== null}"
-        (click)="filterByCategory(null)">All</button>
+        (click)="filterByCategory(null)">Tất cả</button>
       <button class="btn" *ngFor="let cat of categories"
         [ngClass]="{'btn-primary': selectedCategoryId === cat.id, 'btn-outline': selectedCategoryId !== cat.id}"
         (click)="filterByCategory(cat.id)">{{cat.name}}</button>
-      <input type="text" class="form-control" placeholder="Search product or barcode..."
+      <input type="text" class="form-control" placeholder="Tìm kiếm sản phẩm hoặc mã vạch..."
         style="margin-left: auto; width: 250px;" (input)="searchProducts($event)">
     </div>
 
@@ -24,7 +24,7 @@
       </div>
       <div *ngIf="pagedProducts.length === 0"
         style="grid-column: 1 / -1; text-align: center; color: gray; padding: 2rem;">
-        No products found.
+        Không tìm thấy sản phẩm.
       </div>
     </div>
     
@@ -41,7 +41,7 @@
   </div>
 
   <div class="cart-section card glass">
-    <h3 style="border-bottom: 1px solid var(--border); padding-bottom: 1rem;">Current Order</h3>
+    <h3 style="border-bottom: 1px solid var(--border); padding-bottom: 1rem;">Đơn hàng hiện tại</h3>
     <div class="cart-items">
       <div class="cart-item" *ngFor="let item of cart">
         <div class="detail">
@@ -57,16 +57,16 @@
         </div>
       </div>
       <div *ngIf="cart.length === 0" style="text-align: center; color: gray; padding: 2rem;">
-        Cart is empty
+        Giỏ hàng đang trống
       </div>
     </div>
 
     <div class="cart-summary" *ngIf="cart.length > 0">
-      <div class="row"><span>Subtotal</span><span>{{subtotal | number:'1.0-0'}}đ</span></div>
-      <div class="row"><span>Tax</span><span>{{taxTotal | number:'1.0-0'}}đ</span></div>
-      <div class="row total"><span>Total</span><span>{{total | number:'1.0-0'}}đ</span></div>
+      <div class="row"><span>Tạm tính</span><span>{{subtotal | number:'1.0-0'}}đ</span></div>
+      <div class="row"><span>Thuế</span><span>{{taxTotal | number:'1.0-0'}}đ</span></div>
+      <div class="row total"><span>Tổng cộng</span><span>{{total | number:'1.0-0'}}đ</span></div>
       <button class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;"
-        [disabled]="cart.length === 0" (click)="openCheckout()">Charge {{total | number:'1.0-0'}}đ</button>
+        [disabled]="cart.length === 0" (click)="openCheckout()">Thanh toán {{total | number:'1.0-0'}}đ</button>
     </div>
   </div>
 </div>
@@ -77,12 +77,7 @@
     <!-- Left Pane: Order Items -->
     <div class="left-pane" style="position: relative; display: flex; flex-direction: column; overflow: hidden;">
       <h3 class="pane-title">Danh sách hàng hóa</h3>
-      <!-- Success Message overlay within left pane -->
-      <div class="payment-success-msg" *ngIf="paymentSuccessMessage"
-        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; width: 85%; padding: 1.5rem; background-color: rgba(236, 253, 245, 0.95); border: 2px solid #34d399; border-radius: var(--radius-lg); text-align: center; box-shadow: var(--shadow-lg); backdrop-filter: blur(4px); display: flex; flex-direction: column; justify-content: center; align-items: center;">
-        <div style="font-size: 1.5rem; font-weight: bold; color: var(--success);" [innerHTML]="paymentSuccessMessage">
-        </div>
-      </div>
+      <!-- Success Message removed to use toast instead -->
       <div class="checkout-items" style="flex: 1; overflow-y: auto; margin-bottom: 1rem;">
         <div class="checkout-item" *ngFor="let item of cart">
           <span class="item-name">{{item.product.name}}</span>
@@ -170,5 +165,35 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Deactivate Confirmation Modal -->
+<div class="modal-overlay" *ngIf="showDeactivateConfirmModal" style="z-index: 10000;">
+  <div class="deactivate-modal card glass">
+    <div class="deactivate-modal-warning-icon">⚠️</div>
+    <h3>Bạn đang thanh toán dở!</h3>
+    <p>
+      Thoát ra trang khác sẽ bị mất dữ liệu thanh toán hiện giờ, bạn có muốn thoát không?
+    </p>
+    <div class="deactivate-modal-buttons">
+      <button class="btn btn-outline" style="border-color: var(--danger); color: var(--danger);" (click)="onDeactivateConfirm(true)">
+        Thoát
+      </button>
+      <button class="btn btn-primary" (click)="onDeactivateConfirm(false)">
+        Quay về trang thanh toán
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast-popup" *ngIf="toastMessage" style="position: fixed; bottom: 20px; right: 20px; background-color: #ecfdf5; color: #059669; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999; display: flex; align-items: flex-start; gap: 0.75rem; transition: all 0.3s ease; border: 1px solid #a7f3d0; min-width: 250px;">
+  <svg viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; margin-top: 2px;">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+  </svg>
+  <div style="display: flex; flex-direction: column;">
+    <span style="font-weight: 600; font-size: 1.05rem; margin-bottom: 0.2rem;">Thành công!</span>
+    <span style="font-weight: 400; font-size: 0.95rem;">{{ toastMessage }}</span>
   </div>
 </div>

@@ -20,4 +20,6 @@ public class ImportItem {
     private Product product;
     private Integer quantity;
     private Double unitPrice;
+    private Double remainingQuantity;
+    private java.time.LocalDate expiryDate;
 }

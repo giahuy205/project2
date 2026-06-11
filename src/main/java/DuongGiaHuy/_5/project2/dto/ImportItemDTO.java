@@ -8,4 +8,5 @@ public class ImportItemDTO {
     private Integer quantity;
     private Double unitPrice;
     private Double newPrice; // optional, if null or same as before, no change.
+    private java.time.LocalDate expiryDate;
 }

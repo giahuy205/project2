@@ -2,6 +2,7 @@ package DuongGiaHuy._5.project2.controller;
 
 import DuongGiaHuy._5.project2.entity.Product;
 import DuongGiaHuy._5.project2.service.ProductService;
+import DuongGiaHuy._5.project2.config.RequiresRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -24,16 +25,19 @@ public class ProductController {
     }
 
     @PostMapping
+    @RequiresRole("admin")
     public Product create(@RequestBody Product entity) {
         return service.save(entity);
     }
 
     @PutMapping("/{id}")
+    @RequiresRole("admin")
     public Product update(@PathVariable Long id, @RequestBody Product entity) {
         return service.save(entity);
     }
 
     @DeleteMapping("/{id}")
+    @RequiresRole("admin")
     public void delete(@PathVariable Long id) {
         service.deleteById(id);
     }

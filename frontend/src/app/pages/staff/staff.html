@@ -1,1 +1,168 @@
-<p>staff works!</p>
+<div class="staff-page">
+  <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div>
+      <h2>Quản lý nhân viên</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Thêm, sửa, xóa và quản lý chức vụ nhân viên</p>
+    </div>
+    <button class="btn btn-primary" (click)="openAddModal()">+ Thêm nhân viên</button>
+  </div>
+
+  <!-- Search and Stats Bar -->
+  <div class="card search-bar glass" style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+    <div style="position: relative; flex: 1;">
+      <input 
+        type="text" 
+        class="form-control" 
+        placeholder="Tìm theo tên, email, mã NV, tên đăng nhập..." 
+        [(ngModel)]="searchTerm" 
+        (ngModelChange)="applyFilter()"
+        style="padding-left: 2.5rem;">
+      <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);">🔍</span>
+    </div>
+    <div style="font-weight: 500; font-size: 0.95rem; color: var(--text-muted);">
+      Tổng số: <strong>{{ filteredAccounts.length }}</strong> nhân viên
+    </div>
+  </div>
+
+  <!-- Table list -->
+  <div class="table-container glass">
+    <table>
+      <thead>
+        <tr>
+          <th>Mã NV</th>
+          <th>Họ tên</th>
+          <th>Tên đăng nhập</th>
+          <th>SĐT</th>
+          <th>Email</th>
+          <th>Chức vụ</th>
+          <th>Ngày sinh</th>
+          <th>Trạng thái</th>
+          <th style="text-align: center;">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let acc of filteredAccounts">
+          <td>
+            <strong>{{ acc.employeeCode || '-' }}</strong>
+          </td>
+          <td>{{ acc.fullName }}</td>
+          <td><code>{{ acc.username }}</code></td>
+          <td>{{ acc.phone || '-' }}</td>
+          <td>{{ acc.email || '-' }}</td>
+          <td>
+            <span 
+              [style.background]="acc.role === 'admin' ? 'rgba(79, 70, 229, 0.15)' : 'rgba(16, 185, 129, 0.15)'"
+              [style.color]="acc.role === 'admin' ? 'var(--primary)' : 'var(--secondary)'"
+              style="padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">
+              {{ acc.role === 'admin' ? 'Quản trị' : 'Nhân viên' }}
+            </span>
+          </td>
+          <td>{{ acc.dob ? (acc.dob | date:'dd/MM/yyyy') : '-' }}</td>
+          <td>
+            <span 
+              [style.background]="acc.isActive ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)'"
+              [style.color]="acc.isActive ? 'var(--secondary)' : 'var(--danger)'"
+              style="padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
+              {{ acc.isActive ? 'Hoạt động' : 'Đã khóa' }}
+            </span>
+          </td>
+          <td>
+            <div style="display: flex; gap: 0.5rem; justify-content: center;">
+              <button class="btn btn-edit" style="padding: 0.3rem 0.5rem; line-height: 1;" (click)="openEditModal(acc)" title="Chi tiết">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredAccounts.length === 0">
+          <td colspan="8" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+            Không tìm thấy nhân viên nào.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal Add/Edit -->
+  <div class="modal-backdrop" *ngIf="isModalOpen">
+    <div class="modal-container card glass">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+        <h3>{{ isEditMode ? 'Sửa nhân viên' : 'Thêm nhân viên mới' }}</h3>
+        <button class="close-btn" (click)="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+      </div>
+
+      <div *ngIf="errorMessage" class="alert alert-danger" style="padding: 1rem; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); border-radius: var(--radius-md); color: var(--danger); margin-bottom: 1.5rem;">
+        {{ errorMessage }}
+      </div>
+
+      <form (ngSubmit)="saveAccount()">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Tên đăng nhập (Mã NV) *</label>
+            <input type="text" class="form-control" name="username" [(ngModel)]="currentAccount.username" required disabled style="background-color: rgba(0,0,0,0.03);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số điện thoại</label>
+            <input type="text" class="form-control" name="phone" [(ngModel)]="currentAccount.phone">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Họ và tên *</label>
+            <input type="text" class="form-control" name="fullName" [(ngModel)]="currentAccount.fullName" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ngày sinh</label>
+            <input type="date" class="form-control" name="dob" [(ngModel)]="currentAccount.dob">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" [(ngModel)]="currentAccount.email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Chức vụ</label>
+            <select class="form-control" name="role" [(ngModel)]="currentAccount.role">
+              <option value="saler">Nhân viên (Saler)</option>
+              <option value="admin">Quản lý (Admin)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+          <div class="form-group" *ngIf="!isEditMode">
+            <label class="form-label">Mật khẩu (Mặc định)</label>
+            <input type="text" class="form-control" name="password" value="123456" disabled style="background-color: rgba(0,0,0,0.03); color: var(--text-muted);">
+          </div>
+          
+          <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem;">
+            <input type="checkbox" id="isActive" name="isActive" [(ngModel)]="currentAccount.isActive" style="width: 18px; height: 18px; cursor: pointer;">
+            <label for="isActive" style="font-weight: 500; cursor: pointer;">Tài khoản hoạt động</label>
+          </div>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+          <button type="button" class="btn btn-outline" (click)="closeModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary" [disabled]="saving">
+            <span *ngIf="saving">Đang lưu...</span>
+            <span *ngIf="!saving">Lưu nhân viên</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-popup" *ngIf="toastMessage" style="position: fixed; bottom: 20px; right: 20px; background-color: #ecfdf5; color: #059669; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999; display: flex; align-items: flex-start; gap: 0.75rem; transition: all 0.3s ease; border: 1px solid #a7f3d0; min-width: 250px;">
+    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; margin-top: 2px;">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+    </svg>
+    <div style="display: flex; flex-direction: column;">
+      <span style="font-weight: 600; font-size: 1.05rem; margin-bottom: 0.2rem;">Thành công!</span>
+      <span style="font-weight: 400; font-size: 0.95rem;">{{ toastMessage }}</span>
+    </div>
+  </div>
+</div>

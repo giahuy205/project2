@@ -23,4 +23,12 @@ public class Account {
     private String role = "staff";
     private Boolean isActive = true;
     private java.time.LocalDateTime createdAt;
+
+    @Column(name = "employee_code", unique = true)
+    private String employeeCode;
+
+    private java.time.LocalDate dob;
+
+    @Transient
+    private String password;
 }

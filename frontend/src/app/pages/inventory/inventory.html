@@ -1,31 +1,31 @@
 <div class="page-layout">
   <div class="header-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
     <div style="display: flex; align-items: center; gap: 1rem;">
-      <h2 style="margin: 0;">Inventory</h2>
+      <h2 style="margin: 0;">Kho hàng</h2>
       <div style="display: flex; gap: 0.5rem;">
         <button class="btn" [ngClass]="viewMode === 'products' ? 'btn-primary' : 'btn-outline'"
-          (click)="viewMode = 'products'">Store Stock</button>
+          (click)="viewMode = 'products'">Hàng hóa</button>
         <button class="btn" [ngClass]="viewMode === 'categories' ? 'btn-primary' : 'btn-outline'"
-          (click)="viewMode = 'categories'">Categories</button>
+          (click)="viewMode = 'categories'">Danh mục</button>
       </div>
     </div>
 
     <div *ngIf="viewMode === 'products'" style="display: flex; align-items: center; gap: 0.5rem;">
-      <input type="text" class="form-control" placeholder="Search product/barcode" style="width: 200px;" (input)="searchProducts($event)">
+      <input type="text" class="form-control" placeholder="Tìm sản phẩm/mã vạch" style="width: 200px;" (input)="searchProducts($event)">
       <select class="form-control" style="width: 150px;" (change)="onStockFilterChange($event)">
-        <option value="all">All Stock</option>
-        <option value="low">Low Stock (1-30)</option>
-        <option value="out">Out of stock (0)</option>
+        <option value="all">Tất cả</option>
+        <option value="low">Sắp hết (1-30)</option>
+        <option value="out">Hết hàng (0)</option>
       </select>
       <select class="form-control" style="width: 180px;" (change)="onFilterChange($event)">
-        <option value="all">All Categories</option>
+        <option value="all">Tất cả danh mục</option>
         <option *ngFor="let cat of categories" [value]="cat.id">{{cat.name}}</option>
       </select>
-      <button class="btn btn-primary" (click)="openProductModal()">+ Add Product</button>
+      <button *ngIf="authService.isAdmin()" class="btn btn-primary" (click)="openProductModal()">+ Thêm sản phẩm</button>
     </div>
 
     <div *ngIf="viewMode === 'categories'" style="display: flex; align-items: center; gap: 0.5rem;">
-      <button class="btn btn-primary" (click)="openModal()">+ Add Category</button>
+      <button *ngIf="authService.isAdmin()" class="btn btn-primary" (click)="openModal()">+ Thêm danh mục</button>
     </div>
   </div>
 
@@ -36,19 +36,17 @@
       <table>
         <thead>
           <tr>
-            <th (click)="sortBy('name')" style="cursor: pointer; user-select: none;">Name <span
+            <th (click)="sortBy('name')" style="cursor: pointer; user-select: none;">Tên <span
                 *ngIf="sortColumn === 'name'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th (click)="sortBy('barcode')" style="cursor: pointer; user-select: none;">Barcode <span
+            <th (click)="sortBy('barcode')" style="cursor: pointer; user-select: none;">Mã vạch <span
                 *ngIf="sortColumn === 'barcode'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th (click)="sortBy('category.name')" style="cursor: pointer; user-select: none;">Category <span
+            <th (click)="sortBy('category.name')" style="cursor: pointer; user-select: none;">Danh mục <span
                 *ngIf="sortColumn === 'category.name'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th (click)="sortBy('stockQuantity')" style="cursor: pointer; user-select: none;">Stock Left <span
+            <th (click)="sortBy('stockQuantity')" style="cursor: pointer; user-select: none;">Tồn kho <span
                 *ngIf="sortColumn === 'stockQuantity'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th (click)="sortBy('importPrice')" style="cursor: pointer; user-select: none;">Import Price <span
-                *ngIf="sortColumn === 'importPrice'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th (click)="sortBy('salePrice')" style="cursor: pointer; user-select: none;">Sale Price <span
+            <th (click)="sortBy('salePrice')" style="cursor: pointer; user-select: none;">Giá bán <span
                 *ngIf="sortColumn === 'salePrice'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th>Actions</th>
+            <th *ngIf="authService.isAdmin()">Thao tác</th>
           </tr>
         </thead>
         <tbody>
@@ -62,15 +60,15 @@
                 {{p.stockQuantity}}
               </span>
             </td>
-            <td>{{p.importPrice | number:'1.0-0'}}đ</td>
             <td>{{p.salePrice | number:'1.0-0'}}đ</td>
             <td>
-              <button class="btn btn-edit" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;"
-                (click)="editProduct(p)">Edit</button>
+              <button class="btn btn-outline" style="padding: 0.3rem 0.5rem; line-height: 1;" (click)="viewBatches(p)" title="Chi tiết">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
             </td>
           </tr>
           <tr *ngIf="pagedProducts.length === 0">
-            <td colspan="7" style="text-align: center; color: gray;">No products found in this category.</td>
+            <td colspan="7" style="text-align: center; color: gray;">Không tìm thấy sản phẩm nào.</td>
           </tr>
         </tbody>
       </table>
@@ -102,12 +100,12 @@
           <tr>
             <th (click)="sortCategoryBy('id')" style="cursor: pointer; user-select: none;">ID <span
                 *ngIf="categorySortColumn === 'id'">{{categorySortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th (click)="sortCategoryBy('name')" style="cursor: pointer; user-select: none;">Name <span
+            <th (click)="sortCategoryBy('name')" style="cursor: pointer; user-select: none;">Tên danh mục <span
                 *ngIf="categorySortColumn === 'name'">{{categorySortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th (click)="sortCategoryBy('taxRate')" style="cursor: pointer; user-select: none;">Tax Rate (%) <span
+            <th (click)="sortCategoryBy('taxRate')" style="cursor: pointer; user-select: none;">Thuế (%) <span
                 *ngIf="categorySortColumn === 'taxRate'">{{categorySortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th>Note</th>
-            <th>Actions</th>
+            <th>Ghi chú</th>
+            <th *ngIf="authService.isAdmin()">Thao tác</th>
           </tr>
         </thead>
         <tbody>
@@ -116,13 +114,14 @@
             <td><strong>{{cat.name}}</strong></td>
             <td>{{cat.taxRate * 100}}%</td>
             <td>{{cat.note}}</td>
-            <td>
-              <button class="btn btn-edit" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;"
-                (click)="editCategory(cat)">Edit</button>
+            <td *ngIf="authService.isAdmin()">
+              <button class="btn btn-edit" style="padding: 0.3rem 0.5rem; line-height: 1;" (click)="editCategory(cat)" title="Sửa">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              </button>
             </td>
           </tr>
           <tr *ngIf="categories.length === 0">
-            <td colspan="5" style="text-align: center; color: gray;">No categories found.</td>
+            <td colspan="5" style="text-align: center; color: gray;">Không tìm thấy danh mục.</td>
           </tr>
         </tbody>
       </table>
@@ -132,73 +131,168 @@
   <!-- Modal Add/Edit Category -->
   <div class="modal-overlay" *ngIf="showModal">
     <div class="modal-content card slide-in">
-      <h3 style="margin-bottom: 1rem;">{{ isEditingCategory ? 'Edit Category' : 'Add New Category' }}</h3>
+      <h3 style="margin-bottom: 1rem;">{{ isEditingCategory ? 'Sửa danh mục' : 'Thêm danh mục mới' }}</h3>
       <div class="form-group">
-        <label class="form-label">Category Name *</label>
-        <input type="text" class="form-control" [(ngModel)]="newCategory.name" placeholder="e.g. Drinks">
+        <label class="form-label">Tên danh mục *</label>
+        <input type="text" class="form-control" [(ngModel)]="newCategory.name" placeholder="VD: Nước giải khát">
       </div>
       <div class="form-group">
-        <label class="form-label">Tax Rate (Decimal e.g. 0.08)</label>
+        <label class="form-label">Thuế suất (VD: 0.08)</label>
         <input type="number" class="form-control" [(ngModel)]="newCategory.taxRate">
       </div>
       <div class="form-group">
-        <label class="form-label">Note</label>
-        <input type="text" class="form-control" [(ngModel)]="newCategory.note" placeholder="Description...">
+        <label class="form-label">Ghi chú</label>
+        <input type="text" class="form-control" [(ngModel)]="newCategory.note" placeholder="Mô tả...">
       </div>
       <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
-        <button class="btn btn-outline" (click)="closeModal()">Cancel</button>
-        <button class="btn btn-primary" (click)="saveCategory()" [disabled]="!newCategory.name">Save</button>
+        <button class="btn btn-outline" (click)="closeModal()">Hủy</button>
+        <button class="btn btn-primary" (click)="saveCategory()" [disabled]="!newCategory.name">Lưu</button>
       </div>
     </div>
   </div>
   <!-- Modal Add Product -->
   <div class="modal-overlay" *ngIf="showProductModal">
     <div class="modal-content card slide-in" style="width: 500px; max-height: 90vh; overflow-y: auto;">
-      <h3 style="margin-bottom: 1rem;">{{ isEditingProduct ? 'Edit Product' : 'Add New Product' }}</h3>
+      <h3 style="margin-bottom: 1rem;">{{ isEditingProduct ? 'Sửa sản phẩm' : 'Thêm sản phẩm mới' }}</h3>
       <div class="form-group">
-        <label class="form-label">Product Name</label>
-        <input type="text" class="form-control" [(ngModel)]="newProduct.name" placeholder="e.g. Espresso">
+        <label class="form-label">Tên sản phẩm</label>
+        <input type="text" class="form-control" [(ngModel)]="newProduct.name" placeholder="VD: Cà phê">
       </div>
       <div class="form-group">
-        <label class="form-label">Barcode / SKU</label>
-        <input type="text" class="form-control" [(ngModel)]="newProduct.barcode" placeholder="e.g. ESP-101">
+        <label class="form-label">Mã vạch / SKU</label>
+        <input type="text" class="form-control" [(ngModel)]="newProduct.barcode" placeholder="VD: ESP-101">
       </div>
       <div class="form-group">
-        <label class="form-label">Category</label>
+        <label class="form-label">Danh mục</label>
         <select class="form-control" [(ngModel)]="newProduct.category.id">
-          <option [ngValue]="null" disabled>Select Category</option>
+          <option [ngValue]="null" disabled>Chọn danh mục</option>
           <option *ngFor="let cat of categories" [ngValue]="cat.id">{{cat.name}}</option>
         </select>
       </div>
 
       <div style="display: flex; gap: 1rem;">
         <div class="form-group" style="flex: 1;">
-          <label class="form-label">Import Price</label>
+          <label class="form-label">Giá nhập</label>
           <input type="number" class="form-control" [(ngModel)]="newProduct.importPrice">
         </div>
         <div class="form-group" style="flex: 1;">
-          <label class="form-label">Sale Price</label>
+          <label class="form-label">Giá bán</label>
           <input type="number" class="form-control" [(ngModel)]="newProduct.salePrice">
         </div>
       </div>
 
-      <div style="display: flex; gap: 1rem;">
-        <div class="form-group" style="flex: 1;">
-          <label class="form-label">Initial Stock</label>
-          <input type="number" class="form-control" [(ngModel)]="newProduct.stockQuantity"
-            [disabled]="isEditingProduct">
-        </div>
-      </div>
 
       <div *ngIf="errorMessage" style="color: rgb(255, 55, 0); margin-top: 1rem; text-align: left; font-size: 0.8rem;">
         {{ errorMessage }}
       </div>
 
       <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
-        <button class="btn btn-outline" (click)="closeProductModal()">Cancel</button>
+        <button class="btn btn-outline" (click)="closeProductModal()">Hủy</button>
         <button class="btn btn-primary" (click)="saveProduct()"
-          [disabled]="!newProduct.name || !newProduct.barcode || !newProduct.category.id">Save</button>
+          [disabled]="!newProduct.name || !newProduct.barcode || !newProduct.category.id">Lưu</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal Chi tiết lô hàng -->
+  <div class="modal-overlay" *ngIf="showBatchModal">
+    <div class="modal-content card slide-in" style="width: 750px; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+         <h3 style="margin: 0;">Chi tiết sản phẩm & lô hàng</h3>
+         <button style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; line-height: 1; padding: 0;" (click)="closeBatchModal()">✕</button>
+      </div>
+
+      <div style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <h4 style="margin: 0;">Thông tin chung</h4>
+          <div>
+            <button *ngIf="authService.isAdmin() && !isEditingBatchProduct" class="btn btn-edit" style="padding: 0.2rem 0.5rem; font-size: 0.85rem;" (click)="isEditingBatchProduct = true">Chỉnh sửa</button>
+            <button *ngIf="isEditingBatchProduct" class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.85rem; margin-right: 0.5rem;" (click)="isEditingBatchProduct = false">Hủy</button>
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <div class="form-group" style="flex: 1; min-width: 200px;">
+            <label class="form-label">Tên sản phẩm</label>
+            <input type="text" class="form-control" [(ngModel)]="newProduct.name" [disabled]="!isEditingBatchProduct">
+          </div>
+          <div class="form-group" style="flex: 1; min-width: 150px;">
+            <label class="form-label">Mã vạch</label>
+            <input type="text" class="form-control" [(ngModel)]="newProduct.barcode" [disabled]="!isEditingBatchProduct">
+          </div>
+          <div class="form-group" style="flex: 1; min-width: 150px;">
+            <label class="form-label">Danh mục</label>
+            <select class="form-control" [(ngModel)]="newProduct.category.id" [disabled]="!isEditingBatchProduct">
+              <option *ngFor="let cat of categories" [ngValue]="cat.id">{{cat.name}}</option>
+            </select>
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">Giá bán</label>
+            <input type="number" class="form-control" [(ngModel)]="newProduct.salePrice" [disabled]="!isEditingBatchProduct">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">Tổng tồn kho</label>
+            <input type="number" class="form-control" [value]="newProduct.stockQuantity" disabled>
+          </div>
+        </div>
+        <div style="text-align: right;" *ngIf="isEditingBatchProduct">
+          <span style="color: red; font-size: 0.8rem; margin-right: 1rem;" *ngIf="errorMessage">{{ errorMessage }}</span>
+          <button class="btn btn-primary" (click)="saveProductFromBatchModal()" [disabled]="!newProduct.name || !newProduct.barcode || !newProduct.category.id">Lưu thay đổi</button>
+        </div>
+      </div>
+      
+      <h4 style="margin-bottom: 0.5rem;">Lịch sử lô hàng</h4>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align: left; padding-left: 0.5rem;">ID Lô</th>
+              <th style="text-align: left;">Ngày nhập</th>
+              <th style="text-align: right;">Giá nhập</th>
+              <th style="text-align: center;">Hạn sử dụng</th>
+              <th style="text-align: right;">SL Nhập</th>
+              <th style="text-align: right;">SL Còn</th>
+              <th style="text-align: center;" *ngIf="authService.isAdmin()">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let batch of productBatches" [style.opacity]="batch.remainingQuantity <= 0 ? 0.5 : 1">
+              <td style="text-align: left; padding-left: 0.5rem;">#{{batch.id}}</td>
+              <td style="text-align: left;">{{batch.importObj?.importDate | date:'dd/MM/yyyy'}}</td>
+              <td style="text-align: right;">{{batch.unitPrice | number:'1.0-0'}}đ</td>
+              <td style="text-align: center;" [style.color]="isNearExpiry(batch.expiryDate) ? 'var(--danger)' : ''">
+                {{batch.expiryDate ? (batch.expiryDate | date:'dd/MM/yyyy') : 'N/A'}}
+              </td>
+              <td style="text-align: right;">{{batch.quantity}}</td>
+              <td style="text-align: right;"><strong>{{batch.remainingQuantity}}</strong></td>
+              <td style="text-align: center;" *ngIf="authService.isAdmin()">
+                <button *ngIf="batch.remainingQuantity > 0" class="btn btn-outline" style="padding: 0.3rem 0.5rem; line-height: 1; color: var(--danger); border-color: var(--danger);" (click)="discardBatch(batch.id)" title="Hủy lô">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="productBatches.length === 0">
+              <td colspan="6" style="text-align: center; color: gray;">Chưa có lô hàng nào.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-popup" *ngIf="toastMessage" style="position: fixed; bottom: 20px; right: 20px; background-color: #ecfdf5; color: #059669; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999; display: flex; align-items: flex-start; gap: 0.75rem; transition: all 0.3s ease; border: 1px solid #a7f3d0; min-width: 250px;">
+    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; margin-top: 2px;">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+    </svg>
+    <div style="display: flex; flex-direction: column;">
+      <span style="font-weight: 600; font-size: 1.05rem; margin-bottom: 0.2rem;">Thành công!</span>
+      <span style="font-weight: 400; font-size: 0.95rem;">{{ toastMessage }}</span>
     </div>
   </div>
 </div>

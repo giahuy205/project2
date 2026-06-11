@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
@@ -13,6 +13,8 @@ import { FormsModule } from '@angular/forms';
 })
 export class Sales implements OnInit {
   products: any[] = [];
+  showDeactivateConfirmModal: boolean = false;
+  deactivateResolver: ((value: boolean) => void) | null = null;
   filteredProducts: any[] = [];
   categories: any[] = [];
   
@@ -40,6 +42,15 @@ export class Sales implements OnInit {
 
   get amountToPayNumber(): number {
     return Number(this.amountToPay) || 0;
+  }
+
+  toastMessage = '';
+  showToast(msg: string) {
+    this.toastMessage = msg;
+    setTimeout(() => {
+      this.toastMessage = '';
+      this.cdr.detectChanges();
+    }, 5000);
   }
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
@@ -252,7 +263,8 @@ export class Sales implements OnInit {
       msg = `${mockPrefix}Thanh toán thành công bằng ${methodText}!`;
     }
 
-    this.paymentSuccessMessage = msg;
+    this.showToast(msg);
+    this.resetAfterPayment();
   }
 
   resetAfterPayment() {
@@ -265,6 +277,31 @@ export class Sales implements OnInit {
     this.paidAmount = 0;
     this.changeAmount = 0;
     this.selectedPaymentMethod = 'Cash';
+  }
+
+  confirmDeactivate(): Promise<boolean> {
+    if (this.cart.length === 0) {
+      return Promise.resolve(true);
+    }
+    this.showDeactivateConfirmModal = true;
+    return new Promise<boolean>((resolve) => {
+      this.deactivateResolver = resolve;
+    });
+  }
+
+  onDeactivateConfirm(value: boolean) {
+    this.showDeactivateConfirmModal = false;
+    if (this.deactivateResolver) {
+      this.deactivateResolver(value);
+      this.deactivateResolver = null;
+    }
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  unloadNotification($event: any) {
+    if (this.cart.length > 0) {
+      $event.returnValue = true;
+    }
   }
 }
 

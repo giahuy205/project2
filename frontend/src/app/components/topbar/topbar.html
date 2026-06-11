@@ -1,15 +1,50 @@
-
-<header class="topbar glass">
-  <div style="color: gray; font-size: 1rem; font-weight: 500;">
-    {{ currentTime | date:'HH:mm dd/MM/yy' }}
+<header class="topbar">
+  <div class="clock-container" style="font-size: 1rem; font-weight: 500; color: #94a3b8;">
+    {{ currentTime | date:'HH:mm - dd/MM/yyyy' }}
   </div>
-  <div class="actions" style="margin-left: auto;">
-    <button class="btn btn-outline" style="border: none; font-size: 1.2rem;">🔔</button>
-    <div class="profile">
-      <div class="avatar">A</div>
-      <div class="info">
-        <strong>Admin User</strong>
-        <span>Manager</span>
+
+  <div class="actions">
+    <div class="notification-wrapper" style="position: relative;">
+      <button class="notification-btn" (click)="toggleNotifications($event)">
+        <svg class="bell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+        <span class="notification-badge" *ngIf="notifications.length > 0">{{ notifications.length }}</span>
+      </button>
+
+      <!-- Notification Dropdown -->
+      <div class="notification-dropdown" *ngIf="showNotifications" (click)="$event.stopPropagation()">
+        <div class="dropdown-header">
+          <h4>Thông báo</h4>
+          <span class="badge">{{ notifications.length }} mới</span>
+        </div>
+        <div class="dropdown-body">
+          <div class="notification-item" *ngFor="let notif of notifications">
+            <div class="notif-icon" [ngClass]="notif.type">
+              <span *ngIf="notif.type === 'out_of_stock'">⚠️</span>
+              <span *ngIf="notif.type === 'low_stock'">📉</span>
+              <span *ngIf="notif.type === 'expired'">❌</span>
+              <span *ngIf="notif.type === 'near_expiry'">⏳</span>
+            </div>
+            <div class="notif-content">
+              <p>{{ notif.message }}</p>
+              <small>{{ notif.time | date:'HH:mm dd/MM' }}</small>
+            </div>
+          </div>
+          <div class="notification-item empty" *ngIf="notifications.length === 0">
+            <p>Không có thông báo mới.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="topbar-profile">
+      <div class="topbar-avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
       </div>
     </div>
   </div>

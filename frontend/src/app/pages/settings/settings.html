@@ -1,31 +1,115 @@
-
 <div class="settings-page">
-  <h2>Settings</h2>
+  <div class="page-header" style="margin-bottom: 2rem;">
+    <h2>Cài đặt</h2>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Quản lý tài khoản và cấu hình hệ thống</p>
+  </div>
+  
   <div class="settings-layout">
-    <div class="card sidebar-settings">
-      <ul style="list-style: none; padding: 0;">
-        <li style="padding: 1rem; border-bottom: 1px solid var(--border); font-weight: bold; color: var(--primary);">General</li>
-        <li style="padding: 1rem; border-bottom: 1px solid var(--border); color: var(--text-muted);">Tax & Currency</li>
-        <li style="padding: 1rem; border-bottom: 1px solid var(--border); color: var(--text-muted);">Hardware (Printers)</li>
-        <li style="padding: 1rem; color: var(--text-muted);">Theme</li>
+    <div class="card sidebar-settings glass">
+      <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.5rem;">
+        <li 
+          [class.active]="activeTab === 'profile'" 
+          (click)="activeTab = 'profile'"
+          style="padding: 1rem; border-radius: var(--radius-md); font-weight: 500; display: flex; align-items: center; gap: 0.75rem;">
+          <i>👤</i> Hồ sơ cá nhân
+        </li>
+        <li 
+          *ngIf="authService.isAdmin()"
+          [class.active]="activeTab === 'general'" 
+          (click)="activeTab = 'general'"
+          style="padding: 1rem; border-radius: var(--radius-md); font-weight: 500; display: flex; align-items: center; gap: 0.75rem;">
+          <i>⚙️</i> Cài đặt cửa hàng
+        </li>
       </ul>
     </div>
-    <div class="card content-settings">
-      <h3>General Configuration</h3>
-      <br>
-      <div class="form-group">
-        <label class="form-label">Store Name</label>
-        <input type="text" class="form-control" value="Awesome Coffee Shop">
+    
+    <div class="card content-settings glass">
+      <!-- Profile Tab -->
+      <div *ngIf="activeTab === 'profile'">
+        <h3 style="margin-bottom: 1.5rem; color: var(--primary);">Hồ sơ cá nhân</h3>
+        
+        <div *ngIf="successMessage" class="alert alert-success" style="padding: 1rem; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--secondary); border-radius: var(--radius-md); color: var(--secondary); margin-bottom: 1.5rem;">
+          {{ successMessage }}
+        </div>
+        <div *ngIf="errorMessage" class="alert alert-danger" style="padding: 1rem; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); border-radius: var(--radius-md); color: var(--danger); margin-bottom: 1.5rem;">
+          {{ errorMessage }}
+        </div>
+
+        <form (ngSubmit)="saveProfile()">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+              <label class="form-label">Mã nhân viên (Không thể thay đổi)</label>
+              <input type="text" class="form-control" [value]="profileData.employeeCode || 'Chưa đặt'" disabled style="background-color: rgba(0,0,0,0.03); cursor: not-allowed;">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tên đăng nhập (Không thể thay đổi)</label>
+              <input type="text" class="form-control" [value]="profileData.username" disabled style="background-color: rgba(0,0,0,0.03); cursor: not-allowed;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+              <label class="form-label">Chức vụ</label>
+              <input type="text" class="form-control" [value]="profileData.role === 'admin' ? 'Quản lý (Admin)' : 'Nhân viên (Saler)'" disabled style="background-color: rgba(0,0,0,0.03); cursor: not-allowed; text-transform: capitalize;">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Ngày sinh</label>
+              <input type="date" class="form-control" name="dob" [(ngModel)]="profileData.dob">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+              <label class="form-label">Họ và tên</label>
+              <input type="text" class="form-control" name="fullName" [(ngModel)]="profileData.fullName" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" name="email" [(ngModel)]="profileData.email">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 1rem;">
+            <label class="form-label">Mật khẩu mới (Để trống nếu không muốn đổi)</label>
+            <input type="password" class="form-control" name="password" [(ngModel)]="profileData.password" placeholder="Nhập mật khẩu mới">
+          </div>
+
+          <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn btn-primary" [disabled]="savingProfile">
+              <span *ngIf="savingProfile">Đang lưu...</span>
+              <span *ngIf="!savingProfile">Lưu hồ sơ</span>
+            </button>
+          </div>
+        </form>
       </div>
-      <div class="form-group">
-        <label class="form-label">Store Address</label>
-        <input type="text" class="form-control" value="123 Main St, NY">
+
+      <!-- General Store Settings Tab -->
+      <div *ngIf="activeTab === 'general' && authService.isAdmin()">
+        <h3 style="margin-bottom: 1.5rem; color: var(--primary);">Cài đặt cửa hàng</h3>
+        
+        <div *ngIf="storeSuccessMessage" class="alert alert-success" style="padding: 1rem; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--secondary); border-radius: var(--radius-md); color: var(--secondary); margin-bottom: 1.5rem;">
+          {{ storeSuccessMessage }}
+        </div>
+
+        <form (ngSubmit)="saveStoreSettings()">
+          <div class="form-group">
+            <label class="form-label">Tên cửa hàng</label>
+            <input type="text" class="form-control" name="storeName" [(ngModel)]="storeName" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Địa chỉ</label>
+            <input type="text" class="form-control" name="storeAddress" [(ngModel)]="storeAddress" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số điện thoại</label>
+            <input type="text" class="form-control" name="storePhone" [(ngModel)]="storePhone" required>
+          </div>
+          
+          <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn btn-primary">Lưu cài đặt</button>
+          </div>
+        </form>
       </div>
-      <div class="form-group">
-        <label class="form-label">Phone Number</label>
-        <input type="text" class="form-control" value="123-456-7890">
-      </div>
-      <button class="btn btn-primary" style="margin-top: 1rem;">Save Changes</button>
     </div>
   </div>
 </div>

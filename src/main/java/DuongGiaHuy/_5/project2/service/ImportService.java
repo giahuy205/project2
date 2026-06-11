@@ -98,6 +98,8 @@ public class ImportService {
             importItem.setImportObj(savedImport);
             importItem.setProduct(product);
             importItem.setQuantity(itemDTO.getQuantity());
+            importItem.setRemainingQuantity((double) itemDTO.getQuantity());
+            importItem.setExpiryDate(itemDTO.getExpiryDate());
             importItem.setUnitPrice(itemDTO.getUnitPrice());
             importItemRepository.save(importItem);
         }

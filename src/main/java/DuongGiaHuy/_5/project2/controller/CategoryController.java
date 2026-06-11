@@ -2,6 +2,7 @@ package DuongGiaHuy._5.project2.controller;
 
 import DuongGiaHuy._5.project2.entity.Category;
 import DuongGiaHuy._5.project2.service.CategoryService;
+import DuongGiaHuy._5.project2.config.RequiresRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -24,16 +25,19 @@ public class CategoryController {
     }
 
     @PostMapping
+    @RequiresRole("admin")
     public Category create(@RequestBody Category entity) {
         return service.save(entity);
     }
 
     @PutMapping("/{id}")
+    @RequiresRole("admin")
     public Category update(@PathVariable Long id, @RequestBody Category entity) {
         return service.save(entity);
     }
 
     @DeleteMapping("/{id}")
+    @RequiresRole("admin")
     public void delete(@PathVariable Long id) {
         service.deleteById(id);
     }

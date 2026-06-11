@@ -21,6 +21,7 @@ export class ImportsComponent implements OnInit {
   importDetails: any[] = [];
   activeRowIndex: number | null = null;
   isSubmitting = false;
+  showConfirmModal = false;
   
   // Form fields
   newImport: any = {
@@ -32,6 +33,15 @@ export class ImportsComponent implements OnInit {
   API_IMPORT_URL = '/api/imports';
   API_IMPORT_ITEM_URL = '/api/importitems';
   API_PROD_URL = '/api/products';
+
+  toastMessage = '';
+  showToast(msg: string) {
+    this.toastMessage = msg;
+    setTimeout(() => {
+      this.toastMessage = '';
+      this.cdr.detectChanges();
+    }, 5000);
+  }
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
@@ -82,9 +92,10 @@ export class ImportsComponent implements OnInit {
       searchTerm: '',
       showResults: false,
       showAll: false,
-      quantity: 1,
+      quantity: null,
       unitPrice: 0,
       newPrice: null, // Will default to current salePrice
+      expiryDate: null,
       _productDetails: null // to store temporary product info like old price, stock
     });
   }
@@ -119,6 +130,16 @@ export class ImportsComponent implements OnInit {
     this.onProductSelect(item);
   }
 
+  onSearchTermChange(item: any) {
+    if (item._productDetails && item.searchTerm !== item._productDetails.name) {
+      item.productId = null;
+      item._productDetails = null;
+      item.unitPrice = 0;
+      item.newPrice = null;
+    }
+    item.showResults = true;
+  }
+
   // Helper to use in template for blur delay
   hideResults(item: any) {
     setTimeout(() => {
@@ -150,19 +171,38 @@ export class ImportsComponent implements OnInit {
     }, 0);
   }
 
+  getValidationErrors(): string[] {
+    const errors: string[] = [];
+    const hasInvalidQuantity = this.newImport.items.some((i: any) => i.productId && (!i.quantity || i.quantity <= 0));
+    const hasInvalidPrice = this.newImport.items.some((i: any) => i.productId && i.newPrice != null && i.unitPrice > 0 && i.newPrice < i.unitPrice);
+    if (hasInvalidQuantity) errors.push('Invalid import quantity');
+    if (hasInvalidPrice) errors.push('Check sale price');
+    return errors;
+  }
+
   saveImport() {
     // Validate
     if (this.newImport.items.length === 0) {
-      alert("Vui lòng thêm ít nhất 1 sản phẩm!");
+      alert("Please add at least 1 product!");
       return;
     }
     
     // Check if any product is not selected
     if (this.newImport.items.some((i: any) => !i.productId)) {
-       alert("Vui lòng chọn sản phẩm cho tất cả các dòng!");
+       alert("Please select a product for all lines!");
        return;
     }
 
+    // Check validation errors
+    if (this.getValidationErrors().length > 0) {
+      return;
+    }
+
+    this.showConfirmModal = true;
+  }
+
+  executeSave() {
+    this.showConfirmModal = false;
     this.isSubmitting = true;
     const requestData = {
       supplierName: this.newImport.supplierName,
@@ -171,7 +211,8 @@ export class ImportsComponent implements OnInit {
         productId: i.productId,
         quantity: i.quantity,
         unitPrice: i.unitPrice,
-        newPrice: i.newPrice
+        newPrice: i.newPrice,
+        expiryDate: i.expiryDate
       }))
     };
 
@@ -179,12 +220,13 @@ export class ImportsComponent implements OnInit {
       next: () => {
         this.isSubmitting = false;
         this.closeImportModal();
+        this.showToast('Thêm phiếu nhập kho thành công!');
         this.loadImports();
         this.loadProducts(); // Reload products to update stock/prices locally
       },
       error: (err) => {
         this.isSubmitting = false;
-        alert('Lỗi khi nhập hàng!');
+        alert('Error importing products!');
         console.error(err);
       }
     });

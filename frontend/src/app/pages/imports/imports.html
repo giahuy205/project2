@@ -1,7 +1,8 @@
 <div class="page-layout">
-  <div class="header-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-    <h2>Import Transaction</h2>
-    <button class="btn btn-primary" (click)="openImportModal()">+ Import</button>
+  <div class="header-actions"
+    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h2>Giao dịch nhập hàng</h2>
+    <button class="btn btn-primary" (click)="openImportModal()">+ Nhập hàng</button>
   </div>
 
   <div class="card">
@@ -9,12 +10,12 @@
       <table>
         <thead>
           <tr>
-            <th>Import ID</th>
-            <th>Date</th>
-            <th>Supplier</th>
-            <th>Note</th>
-            <th>Total Amount</th>
-            <th>Action</th>
+            <th>Mã lô nhập</th>
+            <th>Ngày nhập</th>
+            <th>Nhà cung cấp</th>
+            <th>Ghi chú</th>
+            <th>Tổng tiền</th>
+            <th>Thao tác</th>
           </tr>
         </thead>
         <tbody>
@@ -25,8 +26,9 @@
             <td>{{imp.note}}</td>
             <td>{{imp.totalCost | number:'1.0-0'}}đ</td>
             <td>
-              <button class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;"
-                (click)="viewDetails(imp)">Chi tiết</button>
+              <button class="btn btn-outline" style="padding: 0.3rem 0.5rem; line-height: 1;" (click)="viewDetails(imp)" title="Chi tiết">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
             </td>
           </tr>
           <tr *ngIf="importsList.length === 0">
@@ -40,30 +42,31 @@
   <!-- Modal Nhập hàng mới -->
   <div class="modal-overlay" *ngIf="showImportModal">
     <div class="modal-content card slide-in">
-      <h3 style="margin-bottom: 1rem;">Import Product</h3>
+      <h3 style="margin-bottom: 1rem;">Nhập hàng</h3>
 
       <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
         <div class="form-group" style="flex: 1;">
-          <label class="form-label">Supplier</label>
-          <input type="text" class="form-control" [(ngModel)]="newImport.supplierName" placeholder="Supplier Name"
+          <label class="form-label">Nhà cung cấp</label>
+          <input type="text" class="form-control" [(ngModel)]="newImport.supplierName" placeholder="Tên nhà cung cấp"
             [disabled]="isSubmitting">
         </div>
         <div class="form-group" style="flex: 1;">
-          <label class="form-label">Note</label>
-          <input type="text" class="form-control" [(ngModel)]="newImport.note" placeholder="Note"
+          <label class="form-label">Ghi chú</label>
+          <input type="text" class="form-control" [(ngModel)]="newImport.note" placeholder="Ghi chú"
             [disabled]="isSubmitting">
         </div>
       </div>
 
-      <h4 style="margin-bottom: 0.5rem;">List Product</h4>
+      <h4 style="margin-bottom: 0.5rem;">Danh sách sản phẩm</h4>
 
       <div class="item-row" *ngFor="let item of newImport.items; let i = index"
         [class.active-row]="activeRowIndex === i" (click)="setActiveRow(i)">
         <div class="form-group search-container" style="flex: 2;">
-          <label class="form-label">Product</label>
+          <label class="form-label">Sản phẩm</label>
           <div style="position: relative; width: 100%;">
-            <input type="text" class="form-control" [(ngModel)]="item.searchTerm" placeholder="Name or Barcode"
-              (focus)="setActiveRow(i); item.showResults = true" (blur)="hideResults(item)" [disabled]="isSubmitting">
+            <input type="text" class="form-control" [(ngModel)]="item.searchTerm" placeholder="Tên hoặc mã vạch"
+              (focus)="setActiveRow(i); item.showResults = true" (blur)="hideResults(item)"
+              (input)="onSearchTermChange(item)" [disabled]="isSubmitting">
             <button class="dropdown-arrow" (click)="toggleAllResults(item); $event.stopPropagation()" type="button"
               [disabled]="isSubmitting">
               <span style="font-size: 0.6rem; transform: scale(1.5, 0.8);">▼</span>
@@ -71,7 +74,8 @@
           </div>
 
           <div class="search-results" *ngIf="item.showResults && getFilteredProducts(item).length > 0">
-            <div class="search-item" *ngFor="let p of getFilteredProducts(item)" (click)="selectProduct(item, p)">
+            <div class="search-item" *ngFor="let p of getFilteredProducts(item)"
+              (mousedown)="$event.preventDefault(); selectProduct(item, p)">
               <div style="display: flex; flex-direction: column;">
                 <strong>{{p.name}}</strong>
                 <span class="barcode">{{p.barcode}}</span>
@@ -84,45 +88,61 @@
         </div>
 
         <div class="form-group" style="flex: 1;">
-          <label class="form-label">Quantity</label>
+          <label class="form-label">Số lượng</label>
           <input type="number" class="form-control" [(ngModel)]="item.quantity" min="1" (focus)="setActiveRow(i)"
             [disabled]="isSubmitting">
         </div>
 
+        <div class="form-group" style="flex: 1.2;">
+          <label class="form-label">Hạn sử dụng</label>
+          <input type="date" class="form-control" [(ngModel)]="item.expiryDate" (focus)="setActiveRow(i)"
+            [disabled]="isSubmitting">
+        </div>
+
         <div class="form-group" style="flex: 1.5;">
-          <label class="form-label">Price</label>
+          <label class="form-label">Giá nhập</label>
           <input type="number" class="form-control" [(ngModel)]="item.unitPrice" (focus)="setActiveRow(i)"
             [disabled]="isSubmitting">
         </div>
 
         <div class="form-group" style="flex: 1.5;">
-          <label class="form-label">Current Price</label>
+          <label class="form-label">Giá bán hiện tại</label>
           <input type="number" class="form-control" [value]="item._productDetails?.salePrice || 0" disabled
             style="opacity: 0.6;">
         </div>
 
         <div class="form-group" style="flex: 1.5;">
-          <label class="form-label">New Price</label>
+          <label class="form-label">Giá bán mới</label>
           <input type="number" class="form-control" [(ngModel)]="item.newPrice" placeholder="Giá bán"
             (focus)="setActiveRow(i)" [disabled]="isSubmitting">
         </div>
 
-        <button class="btn btn-remove" (click)="removeLine(i); $event.stopPropagation()" title="Xóa dòng"
-          *ngIf="newImport.items.length > 1" [disabled]="isSubmitting">✕</button>
+        <button class="btn btn-remove" style="padding: 0.4rem; display: flex; align-items: center; justify-content: center;" (click)="removeLine(i); $event.stopPropagation()" title="Xóa"
+          *ngIf="newImport.items.length > 1" [disabled]="isSubmitting">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
       </div>
 
       <div style="margin-bottom: 1.5rem;">
-        <button class="btn btn-outline" (click)="addLine()" [disabled]="isSubmitting">+ Add Product</button>
+        <button class="btn btn-outline" (click)="addLine()" [disabled]="isSubmitting">+ Thêm sản phẩm</button>
       </div>
 
       <div style="text-align: right; font-size: 1.2rem; margin-bottom: 1rem;">
-        <strong>Total Cost: </strong> {{ getTotalImportCost() | number:'1.0-0' }}đ
+        <strong>Tổng chi phí: </strong> {{ getTotalImportCost() | number:'1.0-0' }}đ
+      </div>
+
+      <div *ngIf="getValidationErrors().length > 0" style="text-align: right; margin-bottom: 0.75rem;">
+        <p *ngFor="let err of getValidationErrors()"
+          style="color: red; margin: 0.25rem 0; font-size: 0.9rem; font-weight: 500;">
+          ⚠ {{ err }}
+        </p>
       </div>
 
       <div style="display: flex; justify-content: flex-end; gap: 1rem;">
-        <button class="btn btn-outline" (click)="closeImportModal()" [disabled]="isSubmitting">Cancle</button>
-        <button class="btn btn-primary" (click)="saveImport()" [disabled]="isSubmitting">
-          {{ isSubmitting ? 'Processing...' : 'Confirm' }}
+        <button class="btn btn-outline" (click)="closeImportModal()" [disabled]="isSubmitting">Hủy</button>
+        <button class="btn btn-primary" (click)="saveImport()"
+          [disabled]="isSubmitting || getValidationErrors().length > 0">
+          {{ isSubmitting ? 'Đang xử lý...' : 'Xác nhận' }}
         </button>
       </div>
     </div>
@@ -131,21 +151,21 @@
   <!-- Modal Chi tiết nhập hàng -->
   <div class="modal-overlay" *ngIf="showDetailModal">
     <div class="modal-content card slide-in" style="max-width: 600px;">
-      <h3 style="margin-bottom: 1rem;">Import Product #{{selectedImport?.id}}</h3>
+      <h3 style="margin-bottom: 1rem;">Chi tiết lô nhập #{{selectedImport?.id}}</h3>
 
       <div style="margin-bottom: 1rem;">
-        <p><strong>Date:</strong> {{selectedImport?.importDate | date:'medium'}}</p>
-        <p><strong>Supplier:</strong> {{selectedImport?.supplierName || 'N/A'}}</p>
-        <p><strong>Note:</strong> {{selectedImport?.note}}</p>
+        <p><strong>Ngày nhập:</strong> {{selectedImport?.importDate | date:'medium'}}</p>
+        <p><strong>Nhà cung cấp:</strong> {{selectedImport?.supplierName || 'Không rõ'}}</p>
+        <p><strong>Ghi chú:</strong> {{selectedImport?.note}}</p>
       </div>
 
       <table style="margin-bottom: 1.5rem;">
         <thead>
           <tr>
-            <th>Product</th>
-            <th>Quantity</th>
-            <th>Price</th>
-            <th>Total Amount</th>
+            <th>Sản phẩm</th>
+            <th>Số lượng</th>
+            <th>Giá nhập</th>
+            <th>Tổng tiền</th>
           </tr>
         </thead>
         <tbody>
@@ -159,12 +179,67 @@
       </table>
 
       <div style="text-align: right; font-size: 1.1rem; margin-bottom: 1.5rem;">
-        <strong>Total Amount: </strong> {{selectedImport?.totalCost | number:'1.0-0'}}đ
+        <strong>Tổng tiền: </strong> {{selectedImport?.totalCost | number:'1.0-0'}}đ
       </div>
 
       <div style="display: flex; justify-content: flex-end;">
-        <button class="btn btn-primary" (click)="closeDetailModal()">Close</button>
+        <button class="btn btn-primary" (click)="closeDetailModal()">Đóng</button>
       </div>
+    </div>
+  </div>
+  <!-- Confirmation Modal (Overlays Import Modal) -->
+  <div class="modal-overlay" *ngIf="showConfirmModal" style="z-index: 1100;">
+    <div class="modal-content card slide-in" style="max-width: 500px; border: 2px solid var(--primary);">
+      <h3 style="margin-bottom: 1rem; color: var(--primary);">Xác nhận nhập hàng</h3>
+      
+      <div style="background: var(--background); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <p style="margin: 0.25rem 0;"><strong>Nhà cung cấp:</strong> {{ newImport.supplierName || 'Không rõ' }}</p>
+        <p style="margin: 0.25rem 0;"><strong>Ghi chú:</strong> {{ newImport.note || 'Không có' }}</p>
+      </div>
+
+      <div style="max-height: 300px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 4px;">
+        <table style="width: 100%; font-size: 0.9rem;">
+          <thead style="background: #f8f9fa; position: sticky; top: 0;">
+            <tr>
+              <th style="padding: 0.5rem; text-align: left;">Sản phẩm</th>
+              <th style="padding: 0.5rem; text-align: center;">HSD</th>
+              <th style="padding: 0.5rem; text-align: right;">SL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of newImport.items" style="border-bottom: 1px solid #eee;">
+              <td style="padding: 0.5rem;">{{ item.searchTerm }}</td>
+              <td style="padding: 0.5rem; text-align: center; color: var(--danger);">{{ item.expiryDate | date:'dd/MM/yyyy' }}</td>
+              <td style="padding: 0.5rem; text-align: right; font-weight: bold;">{{ item.quantity }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="text-align: right; font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--danger);">
+        <strong>Tổng tiền: {{ getTotalImportCost() | number:'1.0-0' }}đ</strong>
+      </div>
+
+      <p style="font-size: 0.85rem; color: gray; margin-bottom: 1rem;">
+        <i>* Hệ thống sẽ ngay lập tức cập nhật tồn kho và giá bán.</i>
+      </p>
+
+      <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+        <button class="btn btn-outline" (click)="showConfirmModal = false">Quay lại</button>
+        <button class="btn btn-primary" (click)="executeSave()">Xác nhận lưu</button>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-popup" *ngIf="toastMessage" style="position: fixed; bottom: 20px; right: 20px; background-color: #ecfdf5; color: #059669; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999; display: flex; align-items: flex-start; gap: 0.75rem; transition: all 0.3s ease; border: 1px solid #a7f3d0; min-width: 250px;">
+    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; margin-top: 2px;">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+    </svg>
+    <div style="display: flex; flex-direction: column;">
+      <span style="font-weight: 600; font-size: 1.05rem; margin-bottom: 0.2rem;">Thành công!</span>
+      <span style="font-weight: 400; font-size: 0.95rem;">{{ toastMessage }}</span>
     </div>
   </div>
 </div>

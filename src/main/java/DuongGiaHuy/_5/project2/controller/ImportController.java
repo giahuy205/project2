@@ -3,6 +3,7 @@ package DuongGiaHuy._5.project2.controller;
 import DuongGiaHuy._5.project2.dto.ImportRequestDTO;
 import DuongGiaHuy._5.project2.entity.Import;
 import DuongGiaHuy._5.project2.service.ImportService;
+import DuongGiaHuy._5.project2.config.RequiresRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/imports")
 @CrossOrigin(origins = "*")
+@RequiresRole("admin")
 public class ImportController {
     @Autowired
     private ImportService service;

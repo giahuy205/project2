@@ -19,7 +19,7 @@ import { filter } from 'rxjs/operators';
         <app-sidebar></app-sidebar>
         <div class="main-content">
           <app-topbar></app-topbar>
-          <div class="page-content" style="padding-top: 20px;">
+          <div class="page-content">
             <router-outlet></router-outlet>
           </div>
         </div>

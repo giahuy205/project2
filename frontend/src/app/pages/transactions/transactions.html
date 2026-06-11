@@ -2,25 +2,25 @@
   <div class="header-actions"
     style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: flex-end;">
     <div>
-      <h2 style="margin: 0;">Transaction History</h2>
-      <p style="color: gray; margin-top: 0.5rem; margin-bottom: 0;">View and manage your recent sales and returns.</p>
+      <h2 style="margin: 0;">Lịch sử giao dịch</h2>
+      <p style="color: gray; margin-top: 0.5rem; margin-bottom: 0;">Xem và quản lý các giao dịch bán hàng và hoàn trả gần đây.</p>
     </div>
 
     <div class="filters" style="display: flex; gap: 1rem; align-items: center;">
       <!-- Type Filter -->
       <select class="form-control" [(ngModel)]="filterType" (change)="applyFilters()" style="min-width: 150px;">
-        <option value="ALL">All Transaction</option>
-        <option value="SALE">Sale</option>
-        <option value="REFUND">Refund</option>
+        <option value="ALL">Tất cả giao dịch</option>
+        <option value="SALE">Bán hàng</option>
+        <option value="REFUND">Hoàn trả</option>
       </select>
 
       <!-- Date Range Filter -->
       <select class="form-control" [(ngModel)]="filterDate" (change)="applyFilters()" style="min-width: 150px;">
-        <option value="ALL">All Time</option>
-        <option value="TODAY">Today</option>
-        <option value="WEEK">This Week</option>
-        <option value="MONTH">This Month</option>
-        <option value="CUSTOM">Custom</option>
+        <option value="ALL">Tất cả thời gian</option>
+        <option value="TODAY">Hôm nay</option>
+        <option value="WEEK">Tuần này</option>
+        <option value="MONTH">Tháng này</option>
+        <option value="CUSTOM">Tùy chỉnh</option>
       </select>
 
       <!-- Custom Date Picker UI -->
@@ -38,13 +38,13 @@
       <table>
         <thead>
           <tr>
-            <th>Transaction ID</th>
-            <th>Date & Time</th>
-            <th>Type</th>
-            <th>Customer</th>
-            <th>Items</th>
-            <th>Total Amount</th>
-            <th>Actions</th>
+            <th>Mã giao dịch</th>
+            <th>Ngày & Giờ</th>
+            <th>Loại</th>
+            <th>Khách hàng</th>
+            <th>Số lượng</th>
+            <th>Tổng tiền</th>
+            <th>Thao tác</th>
           </tr>
         </thead>
         <tbody>
@@ -65,11 +65,11 @@
             </td>
             <td>
               <button class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;"
-                (click)="viewDetails(txn)">View Details</button>
+                (click)="viewDetails(txn)">Chi tiết</button>
             </td>
           </tr>
           <tr *ngIf="pagedTransactions.length === 0">
-            <td colspan="7" style="text-align: center; color: gray;">No transactions found.</td>
+            <td colspan="7" style="text-align: center; color: gray;">Không tìm thấy giao dịch.</td>
           </tr>
         </tbody>
       </table>
@@ -100,30 +100,30 @@
     style="width: 700px; max-width: 90vw; max-height: 90vh; overflow-y: auto; background: var(--surface); padding: 1.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-xl);">
     <div
       style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 1rem; margin-bottom: 1rem;">
-      <h3 style="margin: 0;">Transaction details: {{selectedTxn?.id}}</h3>
+      <h3 style="margin: 0;">Chi tiết giao dịch: {{selectedTxn?.id}}</h3>
       <button class="btn btn-outline" (click)="closeDetails()"
         style="border: none; font-size: 1.5rem; cursor: pointer; padding: 0 0.5rem;">&times;</button>
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; font-size: 0.95rem;">
-      <div><strong>Time:</strong> {{selectedTxn?.date | date:'dd/MM/yyyy HH:mm:ss'}}</div>
-      <div><strong>Customer:</strong> {{selectedTxn?.customer}}</div>
-      <div><strong>Seller:</strong> Hành chính (Admin)</div>
-      <div><strong>Status:</strong> <span class="badge badge-success">Success</span></div>
+      <div><strong>Thời gian:</strong> {{selectedTxn?.date | date:'dd/MM/yyyy HH:mm:ss'}}</div>
+      <div><strong>Khách hàng:</strong> {{selectedTxn?.customer}}</div>
+      <div><strong>Người bán:</strong> {{selectedTxn?.originalOrder?.createdBy || 'Hành chính (Admin)'}}</div>
+      <div><strong>Trạng thái:</strong> <span class="badge badge-success">Thành công</span></div>
     </div>
 
     <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;">
       <thead style="background: var(--background); border-bottom: 2px solid var(--border);">
         <tr>
-          <th style="padding: 0.75rem; text-align: left;">Items</th>
-          <th style="padding: 0.75rem; text-align: right;">Quantity</th>
-          <th style="padding: 0.75rem; text-align: right;">Unit price</th>
-          <th style="padding: 0.75rem; text-align: right;">Subtotal</th>
+          <th style="padding: 0.75rem; text-align: left;">Sản phẩm</th>
+          <th style="padding: 0.75rem; text-align: right;">Số lượng</th>
+          <th style="padding: 0.75rem; text-align: right;">Đơn giá</th>
+          <th style="padding: 0.75rem; text-align: right;">Thành tiền</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let item of selectedTxn?.originalOrder?.orderItems" style="border-bottom: 1px solid var(--border);">
-          <td style="padding: 0.75rem;">{{item.product?.name || 'Undefined product'}}</td>
+          <td style="padding: 0.75rem;">{{item.product?.name || 'Sản phẩm không xác định'}}</td>
           <td style="padding: 0.75rem; text-align: right;">{{item.quantity}}</td>
           <td style="padding: 0.75rem; text-align: right;">{{(item.unitPrice || item.product?.salePrice) |
             number:'1.0-0'}}đ</td>
@@ -136,17 +136,17 @@
     <div
       style="border-top: 1px solid var(--border); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end; font-size: 1.05rem;">
       <div style="display: flex; justify-content: space-between; width: 250px; color: var(--text-muted);">
-        <span>Amount:</span>
+        <span>Tiền hàng:</span>
         <span>{{(selectedTxn?.originalOrder?.totalAmount - (selectedTxn?.originalOrder?.tax || 0)) |
           number:'1.0-0'}}đ</span>
       </div>
       <div style="display: flex; justify-content: space-between; width: 250px; color: var(--text-muted);">
-        <span>Tax:</span>
+        <span>Thuế:</span>
         <span>{{selectedTxn?.originalOrder?.tax || 0 | number:'1.0-0'}}đ</span>
       </div>
       <div
         style="display: flex; justify-content: space-between; width: 250px; font-weight: bold; font-size: 1.2rem; color: var(--danger); margin-top: 0.5rem; border-top: 1px dashed var(--border); padding-top: 0.5rem;">
-        <span>Total:</span>
+        <span>Tổng cộng:</span>
         <span>{{selectedTxn?.originalOrder?.totalAmount | number:'1.0-0'}}đ</span>
       </div>
     </div>

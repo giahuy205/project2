@@ -298,7 +298,9 @@ CREATE TABLE public.accounts (
     email character varying(100),
     role character varying(20) DEFAULT 'staff'::character varying,
     is_active boolean DEFAULT true,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    employee_code character varying(50) UNIQUE,
+    dob date
 );
 
 
@@ -339,7 +341,9 @@ CREATE TABLE public.import_items (
     import_id integer,
     product_id integer,
     quantity integer NOT NULL,
-    unit_price numeric(15,2) NOT NULL
+    unit_price numeric(15,2) NOT NULL,
+    remaining_quantity numeric(15,2),
+    expiry_date date
 );
 
 
@@ -1105,6 +1109,9 @@ ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS paid_amount numeric DEFAULT 0
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS payment_method character varying(50);
 ALTER TABLE public.imports ADD COLUMN IF NOT EXISTS note text;
 ALTER TABLE public.price_histories ALTER COLUMN updated_by DROP NOT NULL;
+ALTER TABLE public.accounts ADD COLUMN IF NOT EXISTS employee_code character varying(50);
+ALTER TABLE public.accounts ADD COLUMN IF NOT EXISTS dob date;
+ALTER TABLE public.accounts ADD CONSTRAINT accounts_employee_code_key UNIQUE (employee_code);
 
 -- Completed on 2026-04-10 09:36:56
 
