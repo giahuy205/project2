@@ -2,14 +2,14 @@ package DuongGiaHuy._5.project2.service;
 
 import DuongGiaHuy._5.project2.entity.ReturnOrder;
 import DuongGiaHuy._5.project2.repository.ReturnOrderRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ReturnOrderService {
-    @Autowired
-    private ReturnOrderRepository repository;
+    private final ReturnOrderRepository repository;
 
     public List<ReturnOrder> findAll() {
         return repository.findAll();

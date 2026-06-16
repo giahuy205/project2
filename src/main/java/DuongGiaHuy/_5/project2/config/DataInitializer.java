@@ -3,17 +3,17 @@ package DuongGiaHuy._5.project2.config;
 import DuongGiaHuy._5.project2.entity.Account;
 import DuongGiaHuy._5.project2.repository.AccountRepository;
 import DuongGiaHuy._5.project2.util.PasswordUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Component
+@RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
-    @Autowired
-    private AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
 
     @Override
     public void run(String... args) throws Exception {

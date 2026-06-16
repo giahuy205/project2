@@ -2,14 +2,14 @@ package DuongGiaHuy._5.project2.service;
 
 import DuongGiaHuy._5.project2.entity.Order;
 import DuongGiaHuy._5.project2.repository.OrderRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class OrderService {
-    @Autowired
-    private OrderRepository repository;
+    private final OrderRepository repository;
 
     public List<Order> findAll() {
         return repository.findAll();
@@ -23,17 +23,13 @@ public class OrderService {
         return repository.save(entity);
     }
 
-    @Autowired
-    private DuongGiaHuy._5.project2.repository.OrderItemRepository itemRepository;
+    private final DuongGiaHuy._5.project2.repository.OrderItemRepository itemRepository;
 
-    @Autowired
-    private DuongGiaHuy._5.project2.repository.ImportItemRepository importItemRepository;
+    private final DuongGiaHuy._5.project2.repository.ImportItemRepository importItemRepository;
 
-    @Autowired
-    private DuongGiaHuy._5.project2.repository.ProductRepository productRepository;
+    private final DuongGiaHuy._5.project2.repository.ProductRepository productRepository;
 
-    @Autowired
-    private DuongGiaHuy._5.project2.repository.InventoryLogRepository inventoryLogRepository;
+    private final DuongGiaHuy._5.project2.repository.InventoryLogRepository inventoryLogRepository;
 
     public void deleteById(Long id) {
         repository.deleteById(id);

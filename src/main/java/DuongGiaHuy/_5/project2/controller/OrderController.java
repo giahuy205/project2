@@ -3,16 +3,16 @@ package DuongGiaHuy._5.project2.controller;
 import DuongGiaHuy._5.project2.entity.Order;
 import DuongGiaHuy._5.project2.service.OrderService;
 import DuongGiaHuy._5.project2.config.RequiresRole;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class OrderController {
-    @Autowired
-    private OrderService service;
+    private final OrderService service;
 
     @GetMapping
     public List<Order> getAll() {
@@ -48,8 +48,7 @@ public class OrderController {
         return "Cleaned";
     }
 
-    @Autowired
-    private org.springframework.jdbc.core.JdbcTemplate jdbc;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     @GetMapping("/fix-date")
     public String fixDate() {

@@ -4,7 +4,7 @@ import DuongGiaHuy._5.project2.entity.Account;
 import DuongGiaHuy._5.project2.service.AccountService;
 import DuongGiaHuy._5.project2.config.RequiresRole;
 import DuongGiaHuy._5.project2.util.PasswordUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,9 +15,9 @@ import java.util.List;
 @RequestMapping("/api/accounts")
 @CrossOrigin(origins = "*")
 @RequiresRole("admin")
+@RequiredArgsConstructor
 public class AccountController {
-    @Autowired
-    private AccountService service;
+    private final AccountService service;
 
     @GetMapping
     public List<Account> getAll() {
@@ -31,6 +31,14 @@ public class AccountController {
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Account entity) {
+        // Validate required fields
+        if (entity.getUsername() == null || entity.getUsername().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Username is required");
+        }
+        if (entity.getFullName() == null || entity.getFullName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Full name is required");
+        }
+
         // Validate uniqueness of username
         boolean usernameExists = service.findAll().stream()
                 .anyMatch(a -> a.getUsername().equalsIgnoreCase(entity.getUsername()));
@@ -44,6 +52,20 @@ public class AccountController {
                     .anyMatch(a -> entity.getEmployeeCode().equalsIgnoreCase(a.getEmployeeCode()));
             if (codeExists) {
                 return ResponseEntity.badRequest().body("Employee code already exists");
+            }
+        }
+
+        // Normalize blank email to null to prevent unique constraint violation on empty emails
+        if (entity.getEmail() != null && entity.getEmail().trim().isEmpty()) {
+            entity.setEmail(null);
+        }
+
+        // Validate uniqueness of email if provided
+        if (entity.getEmail() != null) {
+            boolean emailExists = service.findAll().stream()
+                    .anyMatch(a -> entity.getEmail().equalsIgnoreCase(a.getEmail()));
+            if (emailExists) {
+                return ResponseEntity.badRequest().body("Email already exists");
             }
         }
 
@@ -66,6 +88,14 @@ public class AccountController {
             return ResponseEntity.notFound().build();
         }
 
+        // Validate required fields
+        if (entity.getUsername() == null || entity.getUsername().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Username is required");
+        }
+        if (entity.getFullName() == null || entity.getFullName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Full name is required");
+        }
+
         // Validate username uniqueness if changed
         if (!existing.getUsername().equalsIgnoreCase(entity.getUsername())) {
             boolean usernameExists = service.findAll().stream()
@@ -82,6 +112,22 @@ public class AccountController {
                         .anyMatch(a -> entity.getEmployeeCode().equalsIgnoreCase(a.getEmployeeCode()));
                 if (codeExists) {
                     return ResponseEntity.badRequest().body("Employee code already exists");
+                }
+            }
+        }
+
+        // Normalize blank email to null to prevent unique constraint violation on empty emails
+        if (entity.getEmail() != null && entity.getEmail().trim().isEmpty()) {
+            entity.setEmail(null);
+        }
+
+        // Validate email uniqueness if changed and provided
+        if (entity.getEmail() != null) {
+            if (existing.getEmail() == null || !existing.getEmail().equalsIgnoreCase(entity.getEmail())) {
+                boolean emailExists = service.findAll().stream()
+                        .anyMatch(a -> entity.getEmail().equalsIgnoreCase(a.getEmail()));
+                if (emailExists) {
+                    return ResponseEntity.badRequest().body("Email already exists");
                 }
             }
         }

@@ -2,14 +2,14 @@ package DuongGiaHuy._5.project2.service;
 
 import DuongGiaHuy._5.project2.entity.Category;
 import DuongGiaHuy._5.project2.repository.CategoryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryService {
-    @Autowired
-    private CategoryRepository repository;
+    private final CategoryRepository repository;
 
     public List<Category> findAll() {
         return repository.findAll();

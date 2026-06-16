@@ -1,4 +1,4 @@
-# 🛒 POS Management System
+# 🛒SmartStore - POS Management System
 
 ## 📌 Giới thiệu
 

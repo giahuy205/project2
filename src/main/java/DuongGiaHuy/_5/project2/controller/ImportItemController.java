@@ -3,7 +3,7 @@ package DuongGiaHuy._5.project2.controller;
 import DuongGiaHuy._5.project2.entity.ImportItem;
 import DuongGiaHuy._5.project2.service.ImportItemService;
 import DuongGiaHuy._5.project2.config.RequiresRole;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -11,9 +11,9 @@ import java.util.List;
 @RequestMapping("/api/importitems")
 @CrossOrigin(origins = "*")
 @RequiresRole("admin")
+@RequiredArgsConstructor
 public class ImportItemController {
-    @Autowired
-    private ImportItemService service;
+    private final ImportItemService service;
 
     @GetMapping
     public List<ImportItem> getAll() {

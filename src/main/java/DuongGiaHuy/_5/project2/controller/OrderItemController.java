@@ -2,16 +2,16 @@ package DuongGiaHuy._5.project2.controller;
 
 import DuongGiaHuy._5.project2.entity.OrderItem;
 import DuongGiaHuy._5.project2.service.OrderItemService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/orderitems")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class OrderItemController {
-    @Autowired
-    private OrderItemService service;
+    private final OrderItemService service;
 
     @GetMapping
     public List<OrderItem> getAll() {

@@ -3,16 +3,16 @@ package DuongGiaHuy._5.project2.controller;
 import DuongGiaHuy._5.project2.entity.Category;
 import DuongGiaHuy._5.project2.service.CategoryService;
 import DuongGiaHuy._5.project2.config.RequiresRole;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/categorys")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class CategoryController {
-    @Autowired
-    private CategoryService service;
+    private final CategoryService service;
 
     @GetMapping
     public List<Category> getAll() {

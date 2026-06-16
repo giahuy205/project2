@@ -4,7 +4,7 @@ import DuongGiaHuy._5.project2.dto.ImportRequestDTO;
 import DuongGiaHuy._5.project2.entity.Import;
 import DuongGiaHuy._5.project2.service.ImportService;
 import DuongGiaHuy._5.project2.config.RequiresRole;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -12,9 +12,9 @@ import java.util.List;
 @RequestMapping("/api/imports")
 @CrossOrigin(origins = "*")
 @RequiresRole("admin")
+@RequiredArgsConstructor
 public class ImportController {
-    @Autowired
-    private ImportService service;
+    private final ImportService service;
 
     @GetMapping
     public List<Import> getAll() {

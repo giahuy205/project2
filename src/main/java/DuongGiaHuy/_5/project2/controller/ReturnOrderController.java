@@ -3,7 +3,7 @@ package DuongGiaHuy._5.project2.controller;
 import DuongGiaHuy._5.project2.entity.ReturnOrder;
 import DuongGiaHuy._5.project2.service.ReturnOrderService;
 import DuongGiaHuy._5.project2.config.RequiresRole;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -11,9 +11,9 @@ import java.util.List;
 @RequestMapping("/api/returnorders")
 @CrossOrigin(origins = "*")
 @RequiresRole("admin")
+@RequiredArgsConstructor
 public class ReturnOrderController {
-    @Autowired
-    private ReturnOrderService service;
+    private final ReturnOrderService service;
 
     @GetMapping
     public List<ReturnOrder> getAll() {

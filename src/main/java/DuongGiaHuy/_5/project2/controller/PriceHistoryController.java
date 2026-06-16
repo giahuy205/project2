@@ -3,7 +3,7 @@ package DuongGiaHuy._5.project2.controller;
 import DuongGiaHuy._5.project2.entity.PriceHistory;
 import DuongGiaHuy._5.project2.service.PriceHistoryService;
 import DuongGiaHuy._5.project2.config.RequiresRole;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -11,9 +11,9 @@ import java.util.List;
 @RequestMapping("/api/pricehistorys")
 @CrossOrigin(origins = "*")
 @RequiresRole("admin")
+@RequiredArgsConstructor
 public class PriceHistoryController {
-    @Autowired
-    private PriceHistoryService service;
+    private final PriceHistoryService service;
 
     @GetMapping
     public List<PriceHistory> getAll() {

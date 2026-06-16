@@ -10,7 +10,7 @@ import DuongGiaHuy._5.project2.repository.ImportItemRepository;
 import DuongGiaHuy._5.project2.repository.ImportRepository;
 import DuongGiaHuy._5.project2.repository.ProductRepository;
 import DuongGiaHuy._5.project2.repository.PriceHistoryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,18 +20,15 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 @Service
+@RequiredArgsConstructor
 public class ImportService {
-    @Autowired
-    private ImportRepository importRepository;
+    private final ImportRepository importRepository;
     
-    @Autowired
-    private ImportItemRepository importItemRepository;
+    private final ImportItemRepository importItemRepository;
     
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
     
-    @Autowired
-    private PriceHistoryRepository priceHistoryRepository;
+    private final PriceHistoryRepository priceHistoryRepository;
 
     @PersistenceContext
     private EntityManager entityManager;

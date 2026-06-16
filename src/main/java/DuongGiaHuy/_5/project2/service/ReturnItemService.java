@@ -2,14 +2,14 @@ package DuongGiaHuy._5.project2.service;
 
 import DuongGiaHuy._5.project2.entity.ReturnItem;
 import DuongGiaHuy._5.project2.repository.ReturnItemRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ReturnItemService {
-    @Autowired
-    private ReturnItemRepository repository;
+    private final ReturnItemRepository repository;
 
     public List<ReturnItem> findAll() {
         return repository.findAll();

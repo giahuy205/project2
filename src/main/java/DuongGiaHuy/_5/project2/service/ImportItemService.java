@@ -2,14 +2,14 @@ package DuongGiaHuy._5.project2.service;
 
 import DuongGiaHuy._5.project2.entity.ImportItem;
 import DuongGiaHuy._5.project2.repository.ImportItemRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ImportItemService {
-    @Autowired
-    private ImportItemRepository repository;
+    private final ImportItemRepository repository;
 
     public List<ImportItem> findAll() {
         return repository.findAll();
@@ -31,11 +31,9 @@ public class ImportItemService {
         return repository.findByImportObjId(importId);
     }
 
-    @Autowired
-    private DuongGiaHuy._5.project2.repository.ProductRepository productRepository;
+    private final DuongGiaHuy._5.project2.repository.ProductRepository productRepository;
 
-    @Autowired
-    private DuongGiaHuy._5.project2.repository.InventoryLogRepository inventoryLogRepository;
+    private final DuongGiaHuy._5.project2.repository.InventoryLogRepository inventoryLogRepository;
 
     public List<ImportItem> findByProductId(Long productId) {
         return repository.findByProductIdOrderByExpiryDateAsc(productId);
