@@ -18,6 +18,7 @@ export class AuthService {
           localStorage.setItem('role', res.role);
           localStorage.setItem('fullName', res.fullName);
           localStorage.setItem('username', res.username);
+          localStorage.setItem('avatar', res.avatar || '');
         }
       })
     );
@@ -28,6 +29,7 @@ export class AuthService {
     localStorage.removeItem('role');
     localStorage.removeItem('fullName');
     localStorage.removeItem('username');
+    localStorage.removeItem('avatar');
     this.router.navigate(['/login']);
   }
 
@@ -57,5 +59,9 @@ export class AuthService {
 
   getUsername(): string {
     return localStorage.getItem('username') || '';
+  }
+
+  getAvatar(): string | null {
+    return localStorage.getItem('avatar');
   }
 }

@@ -254,3 +254,28 @@
   background-color: rgba(239, 68, 68, 0.15);
   color: #fca5a5;
 }
+
+/* Settings Active Profile Card Styles */
+.profile-card.active {
+  background-color: #e6f0ff !important;
+  border-color: #e6f0ff !important;
+}
+
+.profile-card.active .profile-name {
+  color: #2b5292 !important;
+  font-weight: 700;
+}
+
+.profile-card.active .profile-role {
+  color: rgba(43, 82, 146, 0.8) !important;
+}
+
+.profile-card.active .profile-avatar {
+  background-color: #2b5292 !important;
+  color: #ffffff !important;
+}
+
+.profile-avatar-collapsed.active {
+  background-color: #e6f0ff !important;
+  color: #2b5292 !important;
+}

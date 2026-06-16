@@ -100,9 +100,10 @@ public class OrderService {
                     product.setStockQuantity(newStock);
                     productRepository.save(product);
 
-                    // FEFO Batch deduction
+                    // FEFO Batch deduction & cost calculation
                     List<DuongGiaHuy._5.project2.entity.ImportItem> batches = importItemRepository.findByProductIdAndRemainingQuantityGreaterThanOrderByExpiryDateAsc(product.getId(), 0.0);
                     double qtyToDeduct = itemQuantity;
+                    double totalCostForThisItem = 0.0;
                     for (DuongGiaHuy._5.project2.entity.ImportItem batch : batches) {
                         if (qtyToDeduct <= 0) break;
                         
@@ -112,8 +113,16 @@ public class OrderService {
                             batch.setRemainingQuantity(available - deducted);
                             importItemRepository.save(batch);
                             qtyToDeduct -= deducted;
+                            
+                            double batchCost = batch.getUnitPrice() != null ? batch.getUnitPrice() : (product.getImportPrice() != null ? product.getImportPrice() : 0.0);
+                            totalCostForThisItem += deducted * batchCost;
                         }
                     }
+                    if (qtyToDeduct > 0) {
+                        double fallbackCost = product.getImportPrice() != null ? product.getImportPrice() : 0.0;
+                        totalCostForThisItem += qtyToDeduct * fallbackCost;
+                    }
+                    double averageCostPrice = itemQuantity > 0 ? (totalCostForThisItem / itemQuantity) : (product.getImportPrice() != null ? product.getImportPrice() : 0.0);
 
                     // Create inventory log
                     DuongGiaHuy._5.project2.entity.InventoryLog log = new DuongGiaHuy._5.project2.entity.InventoryLog();
@@ -132,6 +141,7 @@ public class OrderService {
                     item.setProduct(product);
                     item.setQuantity(itemQuantity);
                     item.setUnitPrice(itemPrice);
+                    item.setCostPrice(averageCostPrice);
                     itemRepository.save(item);
                 }
             }

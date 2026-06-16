@@ -192,6 +192,11 @@ export class Inventory implements OnInit {
     }
   }
 
+  onPageSizeChange() {
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
   searchProducts(event: any) {
     this.searchQuery = event.target.value;
     this.filterProducts();

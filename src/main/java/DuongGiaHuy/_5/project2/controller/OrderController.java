@@ -106,4 +106,15 @@ public class OrderController {
             return "Failed: " + e.getMessage();
         }
     }
+
+    @GetMapping("/fix-cost-price")
+    public String fixCostPrice() {
+        try {
+            jdbc.execute("ALTER TABLE order_items ADD COLUMN IF NOT EXISTS cost_price numeric(15,2)");
+            jdbc.execute("UPDATE order_items oi SET cost_price = p.import_price FROM products p WHERE oi.product_id = p.id AND oi.cost_price IS NULL");
+            return "Successfully added and backfilled cost_price in order_items!";
+        } catch (Exception e) {
+            return "Failed to fix cost_price: " + e.getMessage();
+        }
+    }
 }

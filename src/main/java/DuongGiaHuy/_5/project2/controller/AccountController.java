@@ -38,6 +38,9 @@ public class AccountController {
         if (entity.getFullName() == null || entity.getFullName().trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Full name is required");
         }
+        if (entity.getPhone() == null || entity.getPhone().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Số điện thoại là bắt buộc");
+        }
 
         // Validate uniqueness of username
         boolean usernameExists = service.findAll().stream()
@@ -139,6 +142,10 @@ public class AccountController {
         existing.setIsActive(entity.getIsActive());
         existing.setEmployeeCode(entity.getEmployeeCode());
         existing.setDob(entity.getDob());
+        existing.setPhone(entity.getPhone());
+        existing.setAddress(entity.getAddress());
+        existing.setGender(entity.getGender());
+        existing.setAvatar(entity.getAvatar());
 
         Account saved = service.save(existing);
         return ResponseEntity.ok(saved);
@@ -175,10 +182,26 @@ public class AccountController {
             return ResponseEntity.notFound().build();
         }
 
+        // Validate employeeCode uniqueness if changed
+        if (updatedProfile.getEmployeeCode() != null && !updatedProfile.getEmployeeCode().trim().isEmpty()) {
+            if (existing.getEmployeeCode() == null || !existing.getEmployeeCode().equalsIgnoreCase(updatedProfile.getEmployeeCode())) {
+                boolean codeExists = service.findAll().stream()
+                        .anyMatch(a -> updatedProfile.getEmployeeCode().equalsIgnoreCase(a.getEmployeeCode()));
+                if (codeExists) {
+                    return ResponseEntity.badRequest().body("Mã nhân viên đã tồn tại");
+                }
+            }
+        }
+
         // Update allowed fields only
         existing.setFullName(updatedProfile.getFullName());
+        existing.setEmployeeCode(updatedProfile.getEmployeeCode());
         existing.setEmail(updatedProfile.getEmail());
         existing.setDob(updatedProfile.getDob());
+        existing.setPhone(updatedProfile.getPhone());
+        existing.setAddress(updatedProfile.getAddress());
+        existing.setGender(updatedProfile.getGender());
+        existing.setAvatar(updatedProfile.getAvatar());
 
         // Update password if provided
         if (updatedProfile.getPassword() != null && !updatedProfile.getPassword().trim().isEmpty()) {
@@ -187,5 +210,34 @@ public class AccountController {
 
         Account saved = service.save(existing);
         return ResponseEntity.ok(saved);
+    }
+
+    @PutMapping("/change-password")
+    @RequiresRole("any")
+    public ResponseEntity<?> changePassword(HttpServletRequest request, @RequestBody java.util.Map<String, String> body) {
+        Account currentUser = (Account) request.getAttribute("currentUser");
+        if (currentUser == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        Account existing = service.findById(currentUser.getId());
+        if (existing == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String currentPassword = body.get("currentPassword");
+        String newPassword = body.get("newPassword");
+
+        if (currentPassword == null || currentPassword.trim().isEmpty() ||
+            newPassword == null || newPassword.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Mật khẩu hiện tại và mật khẩu mới không được để trống");
+        }
+
+        if (!PasswordUtils.verifyPassword(currentPassword, existing.getPasswordHash())) {
+            return ResponseEntity.badRequest().body("Mật khẩu hiện tại không chính xác");
+        }
+
+        existing.setPasswordHash(PasswordUtils.hashPassword(newPassword));
+        service.save(existing);
+        return ResponseEntity.ok(java.util.Map.of("message", "Đổi mật khẩu thành công"));
     }
 }

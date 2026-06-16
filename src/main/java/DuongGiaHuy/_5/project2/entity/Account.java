@@ -29,6 +29,14 @@ public class Account {
 
     private java.time.LocalDate dob;
 
+    private String phone;
+
+    private String address;
+
+    private String gender;
+
+    private String avatar;
+
     @Transient
     private String password;
 }

@@ -1,4 +1,339 @@
 <div class="page-layout">
-  <h2>Báo cáo</h2>
-  <p>Tính năng báo cáo đang được phát triển!</p>
+  <!-- Header Action Bar -->
+  <div class="header-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h2 style="margin: 0;">Báo cáo doanh thu & lợi nhuận</h2>
+    </div>
+
+    <!-- Date Filters -->
+    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+      <div class="btn-group" style="display: flex; background: rgba(0,0,0,0.03); padding: 0.25rem; border-radius: var(--radius-md); border: 1px solid var(--border);">
+        <button class="btn" [ngClass]="activeRange === 'today' ? 'btn-primary' : 'btn-outline'" 
+          (click)="setRange('today')" style="padding: 0.4rem 0.8rem; border: none; font-size: 0.85rem; border-radius: 8px; box-shadow: none;">Hôm nay</button>
+        <button class="btn" [ngClass]="activeRange === 'week' ? 'btn-primary' : 'btn-outline'" 
+          (click)="setRange('week')" style="padding: 0.4rem 0.8rem; border: none; font-size: 0.85rem; border-radius: 8px; box-shadow: none;">Tuần này</button>
+        <button class="btn" [ngClass]="activeRange === 'month' ? 'btn-primary' : 'btn-outline'" 
+          (click)="setRange('month')" style="padding: 0.4rem 0.8rem; border: none; font-size: 0.85rem; border-radius: 8px; box-shadow: none;">Tháng này</button>
+        <button class="btn" [ngClass]="activeRange === 'quarter' ? 'btn-primary' : 'btn-outline'" 
+          (click)="setRange('quarter')" style="padding: 0.4rem 0.8rem; border: none; font-size: 0.85rem; border-radius: 8px; box-shadow: none;">Quý này</button>
+        <button class="btn" [ngClass]="activeRange === 'year' ? 'btn-primary' : 'btn-outline'" 
+          (click)="setRange('year')" style="padding: 0.4rem 0.8rem; border: none; font-size: 0.85rem; border-radius: 8px; box-shadow: none;">Năm nay</button>
+      </div>
+
+      <!-- Custom Date Pickers -->
+      <div style="display: flex; align-items: center; gap: 0.5rem; background: var(--surface); padding: 0.25rem 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+        <input type="date" class="form-control" [(ngModel)]="startDate" (change)="onCustomDateChange()" 
+          style="border: none; padding: 0.25rem; font-size: 0.85rem; background: transparent; width: 125px; outline: none; box-shadow: none;">
+        <span style="color: var(--text-muted); font-size: 0.9rem;">-</span>
+        <input type="date" class="form-control" [(ngModel)]="endDate" (change)="onCustomDateChange()" 
+          style="border: none; padding: 0.25rem; font-size: 0.85rem; background: transparent; width: 125px; outline: none; box-shadow: none;">
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI & Payment Method Layout Row -->
+  <div style="display: flex; gap: 1.5rem; margin-bottom: 2rem; align-items: stretch; flex-wrap: wrap;">
+    <!-- Left: 3x2 KPI Grid -->
+    <div style="flex: 2.2; min-width: 600px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;">
+      <!-- CARD 1: GROSS REVENUE (Doanh thu) -->
+      <div class="card stat-card" style="display: flex; align-items: center; gap: 1rem; border-left: 5px solid #3B82F6; margin-bottom: 0;">
+        <div style="background: rgba(59, 130, 246, 0.1); color: #3B82F6; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+          💰
+        </div>
+        <div>
+          <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Doanh thu</span>
+          <h3 style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: var(--text-main);">{{ totalAmount | number:'1.0-0' }}đ</h3>
+        </div>
+      </div>
+
+      <!-- CARD 2: TAX (Thuế) -->
+      <div class="card stat-card" style="display: flex; align-items: center; gap: 1rem; border-left: 5px solid #8B5CF6; margin-bottom: 0;">
+        <div style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+          🧾
+        </div>
+        <div>
+          <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Thuế</span>
+          <h3 style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #8B5CF6;">{{ tax | number:'1.0-0' }}đ</h3>
+        </div>
+      </div>
+
+      <!-- CARD 3: NET REVENUE (Doanh thu không tính thuế) -->
+      <div class="card stat-card" style="display: flex; align-items: center; gap: 1rem; border-left: 5px solid var(--primary); margin-bottom: 0;">
+        <div style="background: rgba(79, 70, 229, 0.1); color: var(--primary); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+          💵
+        </div>
+        <div>
+          <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Doanh thu ko tính thuế</span>
+          <h3 style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: var(--text-main);">{{ netRevenue | number:'1.0-0' }}đ</h3>
+        </div>
+      </div>
+
+      <!-- CARD 4: COGS (Giá vốn) -->
+      <div class="card stat-card" style="display: flex; align-items: center; gap: 1rem; border-left: 5px solid var(--warning); margin-bottom: 0;">
+        <div style="background: rgba(245, 158, 11, 0.1); color: var(--warning); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+          📦
+        </div>
+        <div>
+          <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Giá vốn</span>
+          <h3 style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: var(--text-main);">{{ cogs | number:'1.0-0' }}đ</h3>
+        </div>
+      </div>
+
+      <!-- CARD 5: PROFIT (Lợi nhuận) -->
+      <div class="card stat-card" style="display: flex; align-items: center; gap: 1rem; border-left: 5px solid var(--secondary); margin-bottom: 0;">
+        <div style="background: rgba(16, 185, 129, 0.1); color: var(--secondary); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+          📈
+        </div>
+        <div>
+          <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Lợi nhuận</span>
+          <h3 style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: var(--secondary);">{{ profit | number:'1.0-0' }}đ</h3>
+        </div>
+      </div>
+
+      <!-- CARD 6: MARGIN (Biên lợi nhuận) -->
+      <div class="card stat-card" style="display: flex; align-items: center; gap: 1rem; border-left: 5px solid #EC4899; margin-bottom: 0;">
+        <div style="background: rgba(236, 72, 153, 0.1); color: #EC4899; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+          📊
+        </div>
+        <div>
+          <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Biên lợi nhuận</span>
+          <h3 style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #EC4899;">{{ margin | number:'1.1-1' }}%</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Donut Chart -->
+    <div class="card" style="flex: 1; min-width: 320px; display: flex; flex-direction: column; justify-content: center; margin-bottom: 0;">
+      <h4 style="margin: 0 0 1rem 0; font-size: 1.05rem; font-weight: 600;">Phương thức thanh toán</h4>
+      
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+        <!-- Left side: Donut Chart -->
+        <div style="display: flex; justify-content: center; align-items: center; flex: 1;">
+          <div style="position: relative; width: 110px; height: 110px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm);"
+               [style.background]="paymentPieStyle">
+            <!-- Hollow center for Donut look -->
+            <div style="width: 70px; height: 70px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: var(--text-main); flex-direction: column; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+              <span>{{ totalOrders }}</span>
+              <span style="font-size: 0.6rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Đơn hàng</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right side: Legend and data -->
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1.2;">
+          <div *ngFor="let p of paymentReport" style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <span [style.background]="p.color" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%;"></span>
+              <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">{{ p.method }}</span>
+            </div>
+            <div style="text-align: right;">
+              <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-main); display: block;">{{ p.count }} đơn</span>
+              <span style="font-size: 0.7rem; color: var(--text-muted);" *ngIf="totalOrders > 0">
+                {{ (p.count / totalOrders * 100) | number:'1.1-1' }}%
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State Indicator -->
+  <div *ngIf="loading" style="display: flex; justify-content: center; align-items: center; padding: 4rem;">
+    <div class="spinner" style="width: 40px; height: 40px; border: 4px solid rgba(0,0,0,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s infinite linear;"></div>
+  </div>
+
+  <!-- Dashboard Content Layout Grid -->
+  <div *ngIf="!loading" style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem; align-items: start; flex-wrap: wrap;">
+    
+    <!-- LEFT PANEL: SALES CHART & PRODUCTS TABLE -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      
+      <!-- Chart Card -->
+      <div class="card" style="position: relative; overflow: hidden; min-height: 320px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h4 style="margin: 0; font-size: 1.1rem; font-weight: 600;">Xu hướng doanh thu & lợi nhuận</h4>
+          <!-- Chart Legends -->
+          <div style="display: flex; gap: 1rem; font-size: 0.85rem; font-weight: 500;">
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <span style="display: inline-block; width: 12px; height: 12px; background: var(--primary); border-radius: 3px;"></span>
+              <span style="color: var(--text-muted);">Doanh thu</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <span style="display: inline-block; width: 12px; height: 12px; background: var(--secondary); border-radius: 3px;"></span>
+              <span style="color: var(--text-muted);">Lợi nhuận gộp</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SVG Dynamic Render Chart -->
+        <div style="width: 100%; height: 250px; position: relative;" *ngIf="trendData.length > 0">
+          <svg viewBox="0 0 600 250" style="width: 100%; height: 100%; overflow: visible;">
+            <!-- Gradients Definition -->
+            <defs>
+              <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="var(--primary)" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="prfGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--secondary)" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="var(--secondary)" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Y Axis Gridlines -->
+            <g>
+              <line *ngFor="let y of chartYGrid" x1="50" [attr.y1]="y" x2="550" [attr.y2]="y" 
+                stroke="var(--border)" stroke-width="1" stroke-dasharray="4" />
+            </g>
+
+            <!-- Area Shading Gradients -->
+            <polygon [attr.points]="revenueAreaPoints" fill="url(#revGrad)" />
+            <polygon [attr.points]="profitAreaPoints" fill="url(#prfGrad)" />
+
+            <!-- Revenue Trend Line -->
+            <polyline [attr.points]="revenuePoints" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+
+            <!-- Profit Trend Line -->
+            <polyline [attr.points]="profitPoints" fill="none" stroke="var(--secondary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+
+            <!-- X Axis Ticks & Date Labels -->
+            <g>
+              <text *ngFor="let tick of chartTicks" [attr.x]="tick.x" y="240" 
+                text-anchor="middle" fill="var(--text-muted)" font-size="10" font-weight="500">
+                {{ tick.label }}
+              </text>
+            </g>
+
+            <!-- Y Axis Values -->
+            <g font-size="9" font-weight="500" fill="var(--text-muted)">
+              <text x="40" y="34" text-anchor="end">{{ maxVal | number:'1.0-0' }}</text>
+              <text x="40" y="100" text-anchor="end">{{ (maxVal * 0.66) | number:'1.0-0' }}</text>
+              <text x="40" y="166" text-anchor="end">{{ (maxVal * 0.33) | number:'1.0-0' }}</text>
+              <text x="40" y="224" text-anchor="end">0</text>
+            </g>
+          </svg>
+        </div>
+
+        <div *ngIf="trendData.length === 0" style="display: flex; justify-content: center; align-items: center; height: 220px; color: var(--text-muted); font-size: 0.95rem;">
+          Không có dữ liệu biểu đồ cho kỳ này.
+        </div>
+      </div>
+
+      <!-- Product Profitability Table Card -->
+      <div class="card">
+        <h4 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 600;">Hiệu quả kinh doanh sản phẩm</h4>
+        <div class="table-container" style="box-shadow: none; border: 1px solid var(--border);">
+          <table>
+            <thead>
+              <tr>
+                <th>Sản phẩm</th>
+                <th>Danh mục</th>
+                <th style="text-align: right;">Đã bán</th>
+                <th style="text-align: right;">Doanh thu</th>
+                <th style="text-align: right;">Giá vốn</th>
+                <th style="text-align: right;">Lợi nhuận</th>
+                <th style="text-align: right;">Mép lãi (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of productReport">
+                <td><strong>{{ p.productName }}</strong></td>
+                <td><span style="font-size: 0.85rem; padding: 0.25rem 0.5rem; background: rgba(0,0,0,0.04); border-radius: 4px; color: var(--text-muted);">{{ p.categoryName }}</span></td>
+                <td style="text-align: right;">{{ p.quantitySold }}</td>
+                <td style="text-align: right;">{{ p.revenue | number:'1.0-0' }}đ</td>
+                <td style="text-align: right; color: var(--text-muted);">{{ p.cogs | number:'1.0-0' }}đ</td>
+                <td style="text-align: right; font-weight: 600; color: var(--secondary);">{{ p.profit | number:'1.0-0' }}đ</td>
+                <td style="text-align: right; font-weight: 500; color: #EC4899;">{{ p.margin | number:'1.1-1' }}%</td>
+              </tr>
+              <tr *ngIf="productReport.length === 0">
+                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem;">Không tìm thấy sản phẩm nào có doanh thu trong kỳ này.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: STAFF PERFORMANCE -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <div class="card" style="min-height: 400px;">
+        <h4 style="margin: 0 0 1.25rem 0; font-size: 1.1rem; font-weight: 600;">Doanh số theo nhân viên</h4>
+        
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <div *ngFor="let s of staffReport; let i = index" 
+            style="display: flex; flex-direction: column; gap: 0.5rem; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: rgba(0,0,0,0.01); transition: transform 0.2s;"
+            [style.border-left]="'5px solid ' + (i === 0 ? 'var(--secondary)' : (i === 1 ? 'var(--primary)' : 'var(--text-muted)'))">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <span style="font-weight: 600; font-size: 1rem; color: var(--text-main);">{{ s.username }}</span>
+                <span style="display: block; font-size: 0.8rem; color: var(--text-muted);">Số đơn: {{ s.totalOrders }}</span>
+              </div>
+              <div style="text-align: right;">
+                <span style="font-weight: 700; color: var(--text-main); font-size: 1.05rem;">{{ s.revenue | number:'1.0-0' }}đ</span>
+                <span style="display: block; font-size: 0.8rem; color: var(--text-muted);" *ngIf="revenue > 0">
+                  Tỉ lệ: {{ (s.revenue / revenue * 100) | number:'1.1-1' }}%
+                </span>
+              </div>
+            </div>
+
+            <!-- Custom progress bar indicator -->
+            <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.05); border-radius: 3px; overflow: hidden; margin-top: 0.25rem;">
+              <div [style.width.%]="revenue > 0 ? (s.revenue / revenue * 100) : 0" 
+                [style.background]="i === 0 ? 'var(--secondary)' : (i === 1 ? 'var(--primary)' : 'var(--text-muted)')"
+                style="height: 100%; border-radius: 3px;">
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="staffReport.length === 0" style="display: flex; justify-content: center; align-items: center; height: 200px; color: var(--text-muted); font-size: 0.95rem;">
+            Không có dữ liệu nhân viên.
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Sales Breakdown -->
+      <div class="card" style="min-height: 300px;">
+        <h4 style="margin: 0 0 1.25rem 0; font-size: 1.1rem; font-weight: 600;">Cơ cấu doanh thu theo Danh mục</h4>
+        
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <div *ngFor="let c of categoryReport" 
+            style="display: flex; flex-direction: column; gap: 0.5rem; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: rgba(0,0,0,0.01);"
+            [style.border-left]="'5px solid ' + c.color">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <span style="font-weight: 600; font-size: 1rem; color: var(--text-main);">{{ c.categoryName }}</span>
+              </div>
+              <div style="text-align: right;">
+                <span style="font-weight: 700; color: var(--text-main); font-size: 1.05rem;">{{ c.revenue | number:'1.0-0' }}đ</span>
+                <span style="display: block; font-size: 0.8rem; color: var(--text-muted);" *ngIf="totalAmount > 0">
+                  Tỉ lệ: {{ (c.revenue / totalAmount * 100) | number:'1.1-1' }}%
+                </span>
+              </div>
+            </div>
+
+            <!-- Custom progress bar indicator -->
+            <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.05); border-radius: 3px; overflow: hidden; margin-top: 0.25rem;">
+              <div [style.width.%]="totalAmount > 0 ? (c.revenue / totalAmount * 100) : 0" 
+                [style.background]="c.color"
+                style="height: 100%; border-radius: 3px;">
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="categoryReport.length === 0" style="display: flex; justify-content: center; align-items: center; height: 150px; color: var(--text-muted); font-size: 0.95rem;">
+            Không có dữ liệu danh mục.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<style>
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>

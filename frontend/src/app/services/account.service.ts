@@ -13,6 +13,9 @@ export interface Account {
   employeeCode?: string;
   dob?: string; // YYYY-MM-DD
   phone?: string;
+  address?: string;
+  gender?: string;
+  avatar?: string;
   password?: string;
 }
 
@@ -49,5 +52,9 @@ export class AccountService {
 
   updateProfile(profile: Account): Observable<Account> {
     return this.http.put<Account>(`${this.baseUrl}/profile`, profile);
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/change-password`, { currentPassword, newPassword });
   }
 }

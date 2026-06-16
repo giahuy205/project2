@@ -1,5 +1,18 @@
-.settings-layout { display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; margin-top: 1rem; }
-.sidebar-settings li { cursor: pointer; transition: all 0.2s ease; color: var(--text-muted); }
-.sidebar-settings li:hover { background: rgba(79, 70, 229, 0.1); color: var(--primary); }
-.sidebar-settings li.active { background-color: var(--primary); color: white !important; }
-.sidebar-settings li.active:hover { background-color: var(--primary-hover); }
+.settings-layout { margin-top: 1rem; }
+
+.btn-gray {
+  background-color: #E5E7EB !important;
+  color: #9CA3AF !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+[data-theme='dark'] .btn-gray {
+  background-color: #374151 !important;
+  color: #4B5563 !important;
+}
+
+.modified-label {
+  font-weight: 700 !important;
+  color: var(--primary) !important;
+}

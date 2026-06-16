@@ -23,4 +23,6 @@ public class OrderItem {
     private Double unitPrice;
     private Double subTotal;
     private Double appliedTaxRate;
+    @Column(name = "cost_price")
+    private Double costPrice;
 }

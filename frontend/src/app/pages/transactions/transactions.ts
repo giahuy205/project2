@@ -98,6 +98,11 @@ export class Transactions implements OnInit {
     }
   }
 
+  onPageSizeChange() {
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
   selectedTxn: any = null;
   showDetailsModal: boolean = false;
 

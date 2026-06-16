@@ -1,91 +1,264 @@
 <div class="settings-page">
-  <div class="page-header" style="margin-bottom: 2rem;">
-    <h2>Cài đặt</h2>
-    <p style="color: var(--text-muted); font-size: 0.95rem;">Quản lý tài khoản và cấu hình hệ thống</p>
-  </div>
-  
-  <div class="settings-layout">
-    <div class="card sidebar-settings glass">
-      <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.5rem;">
-        <li 
-          [class.active]="activeTab === 'profile'" 
-          (click)="activeTab = 'profile'"
-          style="padding: 1rem; border-radius: var(--radius-md); font-weight: 500; display: flex; align-items: center; gap: 0.75rem;">
-          <i>👤</i> Hồ sơ cá nhân
-        </li>
-        <li 
-          *ngIf="authService.isAdmin()"
-          [class.active]="activeTab === 'general'" 
-          (click)="activeTab = 'general'"
-          style="padding: 1rem; border-radius: var(--radius-md); font-weight: 500; display: flex; align-items: center; gap: 0.75rem;">
-          <i>⚙️</i> Cài đặt cửa hàng
-        </li>
-      </ul>
-    </div>
+  <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; align-items: start; margin-top: 1rem;">
     
-    <div class="card content-settings glass">
-      <!-- Profile Tab -->
-      <div *ngIf="activeTab === 'profile'">
-        <h3 style="margin-bottom: 1.5rem; color: var(--primary);">Hồ sơ cá nhân</h3>
-        
-        <div *ngIf="successMessage" class="alert alert-success" style="padding: 1rem; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--secondary); border-radius: var(--radius-md); color: var(--secondary); margin-bottom: 1.5rem;">
-          {{ successMessage }}
+    <!-- Left Column: Personal Information (60%) -->
+    <div class="card glass">
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+        <div style="background: rgba(79, 70, 229, 0.1); padding: 0.5rem; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.25rem; height: 1.25rem; color: var(--primary);"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         </div>
-        <div *ngIf="errorMessage" class="alert alert-danger" style="padding: 1rem; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); border-radius: var(--radius-md); color: var(--danger); margin-bottom: 1.5rem;">
-          {{ errorMessage }}
+        <div>
+          <h3 style="margin: 0; color: var(--primary); font-size: 1.2rem; font-weight: 700;">Thông tin cá nhân</h3>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--text-muted);">Cập nhật các thông tin cơ bản của bạn</p>
+        </div>
+      </div>
+
+      <!-- Avatar Section -->
+      <div style="display: flex; justify-content: center; margin-bottom: 2rem;">
+        <div style="position: relative; width: 140px; height: 140px;">
+          <div style="width: 100%; height: 100%; border-radius: 50%; overflow: hidden; border: 4px solid var(--border); background: var(--background); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md);">
+            <img *ngIf="profileData.avatar" [src]="profileData.avatar" style="width: 100%; height: 100%; object-fit: cover;">
+            <svg *ngIf="!profileData.avatar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 60px; height: 60px; color: var(--text-muted);">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <button type="button" (click)="triggerAvatarUpload()" style="position: absolute; bottom: 5px; right: 5px; background: #3b82f6; border: 3px solid var(--surface); border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; box-shadow: var(--shadow-md); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.1rem; height: 1.1rem; color: white;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          </button>
+          <input type="file" #avatarInput style="display: none;" (change)="onAvatarFileSelected($event)" accept="image/*">
+        </div>
+      </div>
+
+      <div *ngIf="successMessage" class="alert alert-success" style="padding: 1rem; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--secondary); border-radius: var(--radius-md); color: var(--secondary); margin-bottom: 1.5rem;">
+        {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="alert alert-danger" style="padding: 1rem; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); border-radius: var(--radius-md); color: var(--danger); margin-bottom: 1.5rem;">
+        {{ errorMessage }}
+      </div>
+
+      <form (ngSubmit)="saveProfile()">
+          <!-- Row 1: Họ và tên & Mã nhân viên -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" [class.modified-label]="isFieldModified('fullName')">HỌ VÀ TÊN</label>
+              <div style="position: relative;">
+                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); display: flex; align-items: center;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1rem; height: 1rem;">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </span>
+                <input type="text" class="form-control" name="fullName" [(ngModel)]="profileData.fullName" required style="padding-left: 2.5rem; height: 40px; border-radius: 10px;">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">MÃ NHÂN VIÊN</label>
+              <div style="position: relative;">
+                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); display: flex; align-items: center;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1rem; height: 1rem;">
+                    <rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect>
+                    <line x1="7" y1="8" x2="17" y2="8"></line>
+                    <line x1="7" y1="12" x2="17" y2="12"></line>
+                    <line x1="7" y1="16" x2="12" y2="16"></line>
+                  </svg>
+                </span>
+                <input type="text" class="form-control" [value]="profileData.employeeCode" disabled style="padding-left: 2.5rem; height: 40px; border-radius: 10px; background-color: rgba(0,0,0,0.02); opacity: 0.8; cursor: not-allowed;">
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2: Chức vụ & Số điện thoại -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">CHỨC VỤ</label>
+              <div style="position: relative;">
+                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); display: flex; align-items: center;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1rem; height: 1rem;">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                </span>
+                <input type="text" class="form-control" [value]="profileData.role === 'admin' ? 'Quản lý (Admin)' : 'Nhân viên (Saler)'" disabled style="padding-left: 2.5rem; height: 40px; border-radius: 10px; background-color: rgba(0,0,0,0.02); opacity: 0.8; cursor: not-allowed;">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" [class.modified-label]="isFieldModified('phone')">SỐ ĐIỆN THOẠI</label>
+              <div style="position: relative;">
+                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); display: flex; align-items: center;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1rem; height: 1rem;">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                  </svg>
+                </span>
+                <input type="text" class="form-control" name="phone" [(ngModel)]="profileData.phone" required style="padding-left: 2.5rem; height: 40px; border-radius: 10px;">
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 3: Ngày sinh & Giới tính -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" [class.modified-label]="isFieldModified('dob')">NGÀY SINH</label>
+              <div style="position: relative;">
+                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); display: flex; align-items: center;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1rem; height: 1rem;">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                </span>
+                <input type="date" class="form-control" name="dob" [(ngModel)]="profileData.dob" style="padding-left: 2.5rem; height: 40px; border-radius: 10px;">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" [class.modified-label]="isFieldModified('gender')">GIỚI TÍNH</label>
+              <div style="position: relative;">
+                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); display: flex; align-items: center;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1rem; height: 1rem;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    <path d="M2 12h20"></path>
+                  </svg>
+                </span>
+                <select class="form-control" name="gender" [(ngModel)]="profileData.gender" style="padding-left: 2.5rem; height: 40px; border-radius: 10px;">
+                  <option value="">Chọn giới tính</option>
+                  <option value="male">Nam</option>
+                  <option value="female">Nữ</option>
+                  <option value="other">Khác</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 4: Email & Địa chỉ -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" [class.modified-label]="isFieldModified('email')">EMAIL</label>
+              <div style="position: relative;">
+                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); display: flex; align-items: center;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1rem; height: 1rem;">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                </span>
+                <input type="email" class="form-control" name="email" [(ngModel)]="profileData.email" style="padding-left: 2.5rem; height: 40px; border-radius: 10px;">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" [class.modified-label]="isFieldModified('address')">ĐỊA CHỈ</label>
+              <div style="position: relative;">
+                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); display: flex; align-items: center;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1rem; height: 1rem;">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                </span>
+                <input type="text" class="form-control" name="address" [(ngModel)]="profileData.address" style="padding-left: 2.5rem; height: 40px; border-radius: 10px;" placeholder="Nhập địa chỉ">
+              </div>
+            </div>
+          </div>
+
+        <div style="margin-top: 2rem; display: flex;">
+          <button type="submit" class="btn" style="width: 100%; border-radius: 10px; height: 40px; font-weight: 600; display: flex; align-items: center; justify-content: center; transition: all 0.3s;"
+            [class.btn-primary]="isProfileModified()"
+            [class.btn-gray]="!isProfileModified()"
+            [disabled]="!isProfileModified() || savingProfile">
+            <span *ngIf="savingProfile">Đang lưu...</span>
+            <span *ngIf="!savingProfile">Lưu thông tin cá nhân</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Right Column: Change Password & Store Settings (40%) -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      
+      <!-- Card 1: Change Password -->
+      <div class="card glass">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+          <div style="background: rgba(79, 70, 229, 0.1); padding: 0.5rem; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.25rem; height: 1.25rem; color: var(--primary);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          </div>
+          <div>
+            <h4 style="margin: 0; color: var(--primary); font-size: 1.1rem; font-weight: 700;">Đổi mật khẩu</h4>
+            <p style="margin: 0; font-size: 0.8rem; color: var(--text-muted);">Giữ tài khoản của bạn được bảo mật tuyệt đối</p>
+          </div>
         </div>
 
-        <form (ngSubmit)="saveProfile()">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-            <div class="form-group">
-              <label class="form-label">Mã nhân viên (Không thể thay đổi)</label>
-              <input type="text" class="form-control" [value]="profileData.employeeCode || 'Chưa đặt'" disabled style="background-color: rgba(0,0,0,0.03); cursor: not-allowed;">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Tên đăng nhập (Không thể thay đổi)</label>
-              <input type="text" class="form-control" [value]="profileData.username" disabled style="background-color: rgba(0,0,0,0.03); cursor: not-allowed;">
+        <div *ngIf="passwordSuccessMessage" class="alert alert-success" style="padding: 1rem; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--secondary); border-radius: var(--radius-md); color: var(--secondary); margin-bottom: 1.5rem;">
+          {{ passwordSuccessMessage }}
+        </div>
+        <div *ngIf="passwordErrorMessage" class="alert alert-danger" style="padding: 1rem; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); border-radius: var(--radius-md); color: var(--danger); margin-bottom: 1.5rem;">
+          {{ passwordErrorMessage }}
+        </div>
+
+        <form (ngSubmit)="changePassword()">
+          <div class="form-group">
+            <label class="form-label">MẬT KHẨU HIỆN TẠI</label>
+            <div style="position: relative;">
+              <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); display: flex; align-items: center;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1rem; height: 1rem;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </span>
+              <input [type]="showCurrentPassword ? 'text' : 'password'" class="form-control" name="currentPassword" [(ngModel)]="currentPassword" required placeholder="••••••••" style="padding-left: 2.5rem; padding-right: 2.5rem; height: 40px; border-radius: 10px;">
+              <button type="button" (click)="showCurrentPassword = !showCurrentPassword" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; user-select: none;">
+                <svg *ngIf="showCurrentPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.1rem; height: 1.1rem; color: var(--text-muted);"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg *ngIf="!showCurrentPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.1rem; height: 1.1rem; color: var(--text-muted);"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              </button>
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-            <div class="form-group">
-              <label class="form-label">Chức vụ</label>
-              <input type="text" class="form-control" [value]="profileData.role === 'admin' ? 'Quản lý (Admin)' : 'Nhân viên (Saler)'" disabled style="background-color: rgba(0,0,0,0.03); cursor: not-allowed; text-transform: capitalize;">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Ngày sinh</label>
-              <input type="date" class="form-control" name="dob" [(ngModel)]="profileData.dob">
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-            <div class="form-group">
-              <label class="form-label">Họ và tên</label>
-              <input type="text" class="form-control" name="fullName" [(ngModel)]="profileData.fullName" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Email</label>
-              <input type="email" class="form-control" name="email" [(ngModel)]="profileData.email">
+          <div class="form-group">
+            <label class="form-label">MẬT KHẨU MỚI</label>
+            <div style="position: relative;">
+              <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); display: flex; align-items: center;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1rem; height: 1rem;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </span>
+              <input [type]="showNewPassword ? 'text' : 'password'" class="form-control" name="newPassword" [(ngModel)]="newPassword" required placeholder="••••••••" style="padding-left: 2.5rem; padding-right: 2.5rem; height: 40px; border-radius: 10px;">
+              <button type="button" (click)="showNewPassword = !showNewPassword" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; user-select: none;">
+                <svg *ngIf="showNewPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.1rem; height: 1.1rem; color: var(--text-muted);"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg *ngIf="!showNewPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.1rem; height: 1.1rem; color: var(--text-muted);"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              </button>
             </div>
           </div>
 
-          <div class="form-group" style="margin-top: 1rem;">
-            <label class="form-label">Mật khẩu mới (Để trống nếu không muốn đổi)</label>
-            <input type="password" class="form-control" name="password" [(ngModel)]="profileData.password" placeholder="Nhập mật khẩu mới">
+          <div class="form-group">
+            <label class="form-label">XÁC NHẬN MẬT KHẨU</label>
+            <div style="position: relative;">
+              <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); display: flex; align-items: center;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1rem; height: 1rem;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </span>
+              <input [type]="showConfirmPassword ? 'text' : 'password'" class="form-control" name="confirmPassword" [(ngModel)]="confirmPassword" required placeholder="••••••••" style="padding-left: 2.5rem; padding-right: 2.5rem; height: 40px; border-radius: 10px;">
+              <button type="button" (click)="showConfirmPassword = !showConfirmPassword" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; user-select: none;">
+                <svg *ngIf="showConfirmPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.1rem; height: 1.1rem; color: var(--text-muted);"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg *ngIf="!showConfirmPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.1rem; height: 1.1rem; color: var(--text-muted);"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              </button>
+            </div>
           </div>
 
-          <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
-            <button type="submit" class="btn btn-primary" [disabled]="savingProfile">
-              <span *ngIf="savingProfile">Đang lưu...</span>
-              <span *ngIf="!savingProfile">Lưu hồ sơ</span>
+          <div style="margin-top: 1.5rem;">
+            <button type="submit" class="btn" style="width: 100%; border-radius: 10px; height: 40px; font-weight: 600; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+              [class.btn-primary]="isPasswordModified()"
+              [class.btn-gray]="!isPasswordModified()"
+              [disabled]="!isPasswordModified() || changingPassword">
+              <span *ngIf="changingPassword">Đang xử lý...</span>
+              <span *ngIf="!changingPassword">Cập nhật mật khẩu</span>
             </button>
           </div>
         </form>
       </div>
 
-      <!-- General Store Settings Tab -->
-      <div *ngIf="activeTab === 'general' && authService.isAdmin()">
-        <h3 style="margin-bottom: 1.5rem; color: var(--primary);">Cài đặt cửa hàng</h3>
+      <!-- Card 2: General Store Settings (shown only to admin) -->
+      <div *ngIf="authService.isAdmin()" class="card glass">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+          <div style="background: rgba(79, 70, 229, 0.1); padding: 0.5rem; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.25rem; height: 1.25rem; color: var(--primary);"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          </div>
+          <div>
+            <h4 style="margin: 0; color: var(--primary); font-size: 1.1rem; font-weight: 700;">Cài đặt cửa hàng</h4>
+            <p style="margin: 0; font-size: 0.8rem; color: var(--text-muted);">Quản lý thông tin cấu hình cửa hàng</p>
+          </div>
+        </div>
         
         <div *ngIf="storeSuccessMessage" class="alert alert-success" style="padding: 1rem; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--secondary); border-radius: var(--radius-md); color: var(--secondary); margin-bottom: 1.5rem;">
           {{ storeSuccessMessage }}
@@ -93,23 +266,29 @@
 
         <form (ngSubmit)="saveStoreSettings()">
           <div class="form-group">
-            <label class="form-label">Tên cửa hàng</label>
-            <input type="text" class="form-control" name="storeName" [(ngModel)]="storeName" required>
+            <label class="form-label">TÊN CỬA HÀNG</label>
+            <input type="text" class="form-control" name="storeName" [(ngModel)]="storeName" required style="height: 40px; border-radius: 10px;">
           </div>
           <div class="form-group">
-            <label class="form-label">Địa chỉ</label>
-            <input type="text" class="form-control" name="storeAddress" [(ngModel)]="storeAddress" required>
+            <label class="form-label">ĐỊA CHỈ</label>
+            <input type="text" class="form-control" name="storeAddress" [(ngModel)]="storeAddress" required style="height: 40px; border-radius: 10px;">
           </div>
           <div class="form-group">
-            <label class="form-label">Số điện thoại</label>
-            <input type="text" class="form-control" name="storePhone" [(ngModel)]="storePhone" required>
+            <label class="form-label">SỐ ĐIỆN THOẠI</label>
+            <input type="text" class="form-control" name="storePhone" [(ngModel)]="storePhone" required style="height: 40px; border-radius: 10px;">
           </div>
           
-          <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
-            <button type="submit" class="btn btn-primary">Lưu cài đặt</button>
+          <div style="margin-top: 1.5rem;">
+            <button type="submit" class="btn" style="width: 100%; height: 40px; border-radius: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; transition: all 0.3s;"
+              [class.btn-primary]="isStoreModified()"
+              [class.btn-gray]="!isStoreModified()"
+              [disabled]="!isStoreModified()">
+              Lưu cài đặt
+            </button>
           </div>
         </form>
       </div>
+
     </div>
   </div>
 </div>

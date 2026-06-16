@@ -18,6 +18,15 @@ export class Staff implements OnInit {
   accounts: Account[] = [];
   filteredAccounts: Account[] = [];
   searchTerm = '';
+  statusFilter = 'all';
+  roleFilter = 'all';
+
+  // Pagination state
+  currentPage = 1;
+  pageSize = 10;
+  pagedAccounts: Account[] = [];
+  totalPages = 1;
+  pageNumbers: number[] = [];
 
   // Modal State
   isModalOpen = false;
@@ -36,6 +45,8 @@ export class Staff implements OnInit {
     employeeCode: '',
     dob: '',
     phone: '',
+    address: '',
+    gender: '',
     isActive: true,
     password: ''
   };
@@ -60,18 +71,61 @@ export class Staff implements OnInit {
   }
 
   applyFilter() {
-    if (!this.searchTerm.trim()) {
-      this.filteredAccounts = this.accounts;
-      return;
+    let result = this.accounts;
+    
+    // Search filter
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase().trim();
+      result = result.filter(acc => 
+        acc.fullName.toLowerCase().includes(term) ||
+        acc.username.toLowerCase().includes(term) ||
+        (acc.email && acc.email.toLowerCase().includes(term)) ||
+        (acc.employeeCode && acc.employeeCode.toLowerCase().includes(term))
+      );
     }
 
-    const term = this.searchTerm.toLowerCase().trim();
-    this.filteredAccounts = this.accounts.filter(acc => 
-      acc.fullName.toLowerCase().includes(term) ||
-      acc.username.toLowerCase().includes(term) ||
-      (acc.email && acc.email.toLowerCase().includes(term)) ||
-      (acc.employeeCode && acc.employeeCode.toLowerCase().includes(term))
-    );
+    // Status filter
+    if (this.statusFilter === 'active') {
+      result = result.filter(acc => acc.isActive === true);
+    } else if (this.statusFilter === 'inactive') {
+      result = result.filter(acc => acc.isActive === false);
+    }
+
+    // Role filter
+    if (this.roleFilter === 'admin') {
+      result = result.filter(acc => acc.role === 'admin');
+    } else if (this.roleFilter === 'saler') {
+      result = result.filter(acc => acc.role === 'saler');
+    }
+
+    // Sort: active accounts at the top, inactive accounts at the bottom
+    this.filteredAccounts = [...result].sort((a, b) => {
+      if (a.isActive === b.isActive) return 0;
+      return a.isActive ? -1 : 1;
+    });
+
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  updatePagination() {
+    this.totalPages = Math.ceil(this.filteredAccounts.length / this.pageSize) || 1;
+    this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.pagedAccounts = this.filteredAccounts.slice(start, start + this.pageSize);
+    this.cdr.detectChanges();
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagination();
+    }
+  }
+
+  onPageSizeChange() {
+    this.currentPage = 1;
+    this.updatePagination();
   }
 
   generateNextEmployeeCode(): string {
@@ -105,6 +159,8 @@ export class Staff implements OnInit {
       employeeCode: nextCode,
       dob: '',
       phone: '',
+      address: '',
+      gender: '',
       isActive: true,
       password: ''
     };
@@ -124,6 +180,11 @@ export class Staff implements OnInit {
   }
 
   saveAccount() {
+    if (!this.currentAccount.phone || !this.currentAccount.phone.trim()) {
+      this.errorMessage = 'Số điện thoại là bắt buộc';
+      return;
+    }
+
     this.saving = true;
     this.errorMessage = '';
     this.successMessage = '';

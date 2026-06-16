@@ -300,7 +300,11 @@ CREATE TABLE public.accounts (
     is_active boolean DEFAULT true,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     employee_code character varying(50) UNIQUE,
-    dob date
+    dob date,
+    phone character varying(20),
+    address character varying(255),
+    gender character varying(20),
+    avatar text
 );
 
 
@@ -1112,6 +1116,15 @@ ALTER TABLE public.price_histories ALTER COLUMN updated_by DROP NOT NULL;
 ALTER TABLE public.accounts ADD COLUMN IF NOT EXISTS employee_code character varying(50);
 ALTER TABLE public.accounts ADD COLUMN IF NOT EXISTS dob date;
 ALTER TABLE public.accounts ADD CONSTRAINT accounts_employee_code_key UNIQUE (employee_code);
+ALTER TABLE public.accounts ADD COLUMN IF NOT EXISTS phone character varying(20);
+ALTER TABLE public.accounts ADD COLUMN IF NOT EXISTS address character varying(255);
+ALTER TABLE public.accounts ADD COLUMN IF NOT EXISTS gender character varying(20);
+ALTER TABLE public.accounts ADD COLUMN IF NOT EXISTS avatar text;
+ALTER TABLE public.order_items ADD COLUMN IF NOT EXISTS cost_price numeric(15,2);
+UPDATE public.order_items oi
+SET cost_price = p.import_price
+FROM public.products p
+WHERE oi.product_id = p.id AND oi.cost_price IS NULL;
 
 -- Completed on 2026-04-10 09:36:56
 

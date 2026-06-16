@@ -19,9 +19,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let imp of importsList">
+          <tr *ngFor="let imp of pagedImports">
             <td>#{{imp.id}}</td>
-            <td>{{imp.importDate | date:'medium'}}</td>
+            <td>{{imp.importDate | date:'dd/MM/yyyy HH:mm'}}</td>
             <td>{{imp.supplierName || 'N/A'}}</td>
             <td>{{imp.note}}</td>
             <td>{{imp.totalCost | number:'1.0-0'}}đ</td>
@@ -36,6 +36,32 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
+        <span>Hiển thị mỗi trang:</span>
+        <select class="form-control" style="width: 80px; padding: 0.35rem 0.5rem; height: auto;" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="20">20</option>
+          <option [ngValue]="50">50</option>
+        </select>
+        <span>dòng</span>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; align-items: center;" *ngIf="totalPages > 1">
+        <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Trang trước</button>
+
+        <div style="display: flex; gap: 0.25rem;">
+          <button *ngFor="let page of pageNumbers" class="btn"
+            [ngClass]="currentPage === page ? 'btn-primary' : 'btn-outline'" (click)="goToPage(page)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">
+            {{page}}
+          </button>
+        </div>
+
+        <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Trang sau</button>
+      </div>
     </div>
   </div>
 
@@ -154,7 +180,7 @@
       <h3 style="margin-bottom: 1rem;">Chi tiết lô nhập #{{selectedImport?.id}}</h3>
 
       <div style="margin-bottom: 1rem;">
-        <p><strong>Ngày nhập:</strong> {{selectedImport?.importDate | date:'medium'}}</p>
+        <p><strong>Ngày nhập:</strong> {{selectedImport?.importDate | date:'dd/MM/yyyy HH:mm'}}</p>
         <p><strong>Nhà cung cấp:</strong> {{selectedImport?.supplierName || 'Không rõ'}}</p>
         <p><strong>Ghi chú:</strong> {{selectedImport?.note}}</p>
       </div>

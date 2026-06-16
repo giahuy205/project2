@@ -15,6 +15,13 @@ export class ImportsComponent implements OnInit {
   importsList: any[] = [];
   products: any[] = [];
   
+  // Pagination state
+  currentPage: number = 1;
+  pageSize: number = 10;
+  pagedImports: any[] = [];
+  totalPages: number = 1;
+  pageNumbers: number[] = [];
+
   showImportModal = false;
   showDetailModal = false;
   selectedImport: any = null;
@@ -56,10 +63,32 @@ export class ImportsComponent implements OnInit {
         this.importsList = data.sort((a, b) => {
            return new Date(b.importDate).getTime() - new Date(a.importDate).getTime();
         });
+        this.currentPage = 1;
+        this.updatePagination();
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error fetching imports', err)
     });
+  }
+
+  updatePagination() {
+    this.totalPages = Math.ceil(this.importsList.length / this.pageSize) || 1;
+    this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.pagedImports = this.importsList.slice(start, start + this.pageSize);
+    this.cdr.detectChanges();
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagination();
+    }
+  }
+
+  onPageSizeChange() {
+    this.currentPage = 1;
+    this.updatePagination();
   }
 
   loadProducts() {
