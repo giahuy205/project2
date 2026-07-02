@@ -22,4 +22,7 @@ public class ImportItem {
     private Double unitPrice;
     private Double remainingQuantity;
     private java.time.LocalDate expiryDate;
+    private Integer receivedQuantity = 0;
+    private Double newPrice;
 }
+

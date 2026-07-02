@@ -28,24 +28,40 @@
         <option value="saler">Nhân viên (Saler)</option>
       </select>
 
-      <button class="btn btn-primary" (click)="openAddModal()">+ Thêm nhân viên</button>
+      <button class="btn btn-primary" (click)="openAddModal()" title="Thêm nhân viên mới" style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; padding: 0;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      </button>
     </div>
   </div>
 
   <!-- Table list -->
   <div class="card">
     <div class="table-container">
-      <table>
+      <table style="table-layout: fixed; width: 100%;">
         <thead>
           <tr>
-            <th>Mã NV</th>
-            <th>Họ tên</th>
-            <th>SĐT</th>
-            <th>Email</th>
-            <th>Chức vụ</th>
-            <th>Ngày sinh</th>
-            <th>Trạng thái</th>
-            <th style="text-align: center;">Thao tác</th>
+            <th (click)="sortBy('employeeCode')" style="width: 10%; cursor: pointer; user-select: none;">
+              Mã NV <span *ngIf="sortColumn === 'employeeCode'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span>
+            </th>
+            <th (click)="sortBy('fullName')" style="width: 20%; cursor: pointer; user-select: none;">
+              Họ tên <span *ngIf="sortColumn === 'fullName'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span>
+            </th>
+            <th (click)="sortBy('phone')" style="width: 12%; cursor: pointer; user-select: none;">
+              SĐT <span *ngIf="sortColumn === 'phone'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span>
+            </th>
+            <th (click)="sortBy('email')" style="width: 20%; cursor: pointer; user-select: none;">
+              Email <span *ngIf="sortColumn === 'email'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span>
+            </th>
+            <th (click)="sortBy('role')" style="width: 12%; cursor: pointer; user-select: none;">
+              Chức vụ <span *ngIf="sortColumn === 'role'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span>
+            </th>
+            <th (click)="sortBy('dob')" style="width: 12%; cursor: pointer; user-select: none;">
+              Ngày sinh <span *ngIf="sortColumn === 'dob'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span>
+            </th>
+            <th (click)="sortBy('isActive')" style="width: 14%; cursor: pointer; user-select: none;">
+              Trạng thái <span *ngIf="sortColumn === 'isActive'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span>
+            </th>
+            <th style="width: 10%; text-align: center;">Thao tác</th>
           </tr>
         </thead>
         <tbody>
@@ -91,28 +107,33 @@
     </div>
 
     <!-- Pagination Controls -->
-    <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 1rem;">
-      <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
-        <span>Hiển thị mỗi trang:</span>
-        <select class="form-control" style="width: 80px; padding: 0.35rem 0.5rem; height: auto;" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
-          <option [ngValue]="10">10</option>
-          <option [ngValue]="20">20</option>
-          <option [ngValue]="50">50</option>
-        </select>
-        <span>dòng</span>
-      </div>
-
-      <div style="display: flex; gap: 0.5rem; align-items: center;" *ngIf="totalPages > 1">
-        <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Trang trước</button>
-
-        <div style="display: flex; gap: 0.25rem;">
-          <button *ngFor="let page of pageNumbers" class="btn"
-            [ngClass]="currentPage === page ? 'btn-primary' : 'btn-outline'" (click)="goToPage(page)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">
-            {{page}}
-          </button>
+    <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-top: 1px solid var(--border); flex-wrap: nowrap; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <div style="color: var(--text-muted); font-size: 0.9rem; white-space: nowrap;">
+          Hiển thị {{ startItemIndex }}–{{ endItemIndex }} trong số {{ filteredAccounts.length }} nhân viên
         </div>
 
-        <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Trang sau</button>
+        <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.9rem; white-space: nowrap;">
+          <span>Số hàng mỗi trang:</span>
+          <select class="form-control" style="width: auto; min-width: 70px; padding: 0.35rem 1.75rem 0.35rem 0.5rem; height: 34px; line-height: 1; font-size: 0.9rem; display: inline-block; cursor: pointer;" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.35rem; align-items: center; white-space: nowrap;">
+        <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" style="padding: 0.4rem 0.7rem; font-size: 0.9rem; line-height: 1;" title="Trang trước">&lt;</button>
+
+        <ng-container *ngFor="let page of getVisiblePages()">
+          <span *ngIf="page === '...'" style="color: var(--text-muted); padding: 0 0.25rem; user-select: none;">...</span>
+          <button *ngIf="page !== '...'" class="btn" [ngClass]="currentPage === page ? 'btn-primary' : 'btn-outline'" (click)="goToPage(page)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem; min-width: 36px; height: 34px; display: flex; align-items: center; justify-content: center; line-height: 1;">
+            {{page}}
+          </button>
+        </ng-container>
+
+        <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" style="padding: 0.4rem 0.7rem; font-size: 0.9rem; line-height: 1;" title="Trang sau">&gt;</button>
       </div>
     </div>
   </div>

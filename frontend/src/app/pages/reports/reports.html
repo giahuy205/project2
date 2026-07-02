@@ -1,32 +1,32 @@
 <div class="page-layout">
   <!-- Header Action Bar -->
-  <div class="header-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+  <div class="header-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: nowrap; gap: 0.75rem;">
     <div>
-      <h2 style="margin: 0;">Báo cáo doanh thu & lợi nhuận</h2>
+      <h2 style="margin: 0; white-space: nowrap; font-size: 1.5rem;">Báo cáo doanh thu & lợi nhuận</h2>
     </div>
 
     <!-- Date Filters -->
-    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-      <div class="btn-group" style="display: flex; background: rgba(0,0,0,0.03); padding: 0.25rem; border-radius: var(--radius-md); border: 1px solid var(--border);">
+    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: nowrap;">
+      <div class="btn-group" style="display: flex; background: rgba(0,0,0,0.03); padding: 0.25rem; border-radius: var(--radius-md); border: 1px solid var(--border); height: 38px; align-items: center;">
         <button class="btn" [ngClass]="activeRange === 'today' ? 'btn-primary' : 'btn-outline'" 
-          (click)="setRange('today')" style="padding: 0.4rem 0.8rem; border: none; font-size: 0.85rem; border-radius: 8px; box-shadow: none;">Hôm nay</button>
+          (click)="setRange('today')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1;">Hôm nay</button>
         <button class="btn" [ngClass]="activeRange === 'week' ? 'btn-primary' : 'btn-outline'" 
-          (click)="setRange('week')" style="padding: 0.4rem 0.8rem; border: none; font-size: 0.85rem; border-radius: 8px; box-shadow: none;">Tuần này</button>
+          (click)="setRange('week')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1;">Tuần này</button>
         <button class="btn" [ngClass]="activeRange === 'month' ? 'btn-primary' : 'btn-outline'" 
-          (click)="setRange('month')" style="padding: 0.4rem 0.8rem; border: none; font-size: 0.85rem; border-radius: 8px; box-shadow: none;">Tháng này</button>
+          (click)="setRange('month')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1;">Tháng này</button>
         <button class="btn" [ngClass]="activeRange === 'quarter' ? 'btn-primary' : 'btn-outline'" 
-          (click)="setRange('quarter')" style="padding: 0.4rem 0.8rem; border: none; font-size: 0.85rem; border-radius: 8px; box-shadow: none;">Quý này</button>
+          (click)="setRange('quarter')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1;">Quý này</button>
         <button class="btn" [ngClass]="activeRange === 'year' ? 'btn-primary' : 'btn-outline'" 
-          (click)="setRange('year')" style="padding: 0.4rem 0.8rem; border: none; font-size: 0.85rem; border-radius: 8px; box-shadow: none;">Năm nay</button>
+          (click)="setRange('year')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1;">Năm nay</button>
       </div>
 
       <!-- Custom Date Pickers -->
-      <div style="display: flex; align-items: center; gap: 0.5rem; background: var(--surface); padding: 0.25rem 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+      <div style="display: flex; align-items: center; gap: 0.25rem; background: var(--surface); padding: 0.25rem 0.4rem; border-radius: var(--radius-md); border: 1px solid var(--border); box-shadow: var(--shadow-sm); height: 38px;">
         <input type="date" class="form-control" [(ngModel)]="startDate" (change)="onCustomDateChange()" 
-          style="border: none; padding: 0.25rem; font-size: 0.85rem; background: transparent; width: 125px; outline: none; box-shadow: none;">
-        <span style="color: var(--text-muted); font-size: 0.9rem;">-</span>
+          style="border: none; padding: 0.15rem 0.25rem; font-size: 0.8rem; background: transparent; width: 100px; outline: none; box-shadow: none; height: auto;">
+        <span style="color: var(--text-muted); font-size: 0.85rem;">-</span>
         <input type="date" class="form-control" [(ngModel)]="endDate" (change)="onCustomDateChange()" 
-          style="border: none; padding: 0.25rem; font-size: 0.85rem; background: transparent; width: 125px; outline: none; box-shadow: none;">
+          style="border: none; padding: 0.15rem 0.25rem; font-size: 0.8rem; background: transparent; width: 100px; outline: none; box-shadow: none; height: auto;">
       </div>
     </div>
   </div>
@@ -224,16 +224,16 @@
       <div class="card">
         <h4 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 600;">Hiệu quả kinh doanh sản phẩm</h4>
         <div class="table-container" style="box-shadow: none; border: 1px solid var(--border);">
-          <table>
+          <table style="table-layout: fixed; width: 100%;">
             <thead>
               <tr>
-                <th>Sản phẩm</th>
-                <th>Danh mục</th>
-                <th style="text-align: right;">Đã bán</th>
-                <th style="text-align: right;">Doanh thu</th>
-                <th style="text-align: right;">Giá vốn</th>
-                <th style="text-align: right;">Lợi nhuận</th>
-                <th style="text-align: right;">Mép lãi (%)</th>
+                <th style="width: 22%;">Sản phẩm</th>
+                <th style="width: 15%;">Danh mục</th>
+                <th style="width: 10%; text-align: right;">Đã bán</th>
+                <th style="width: 15%; text-align: right;">Doanh thu</th>
+                <th style="width: 13%; text-align: right;">Giá vốn</th>
+                <th style="width: 13%; text-align: right;">Lợi nhuận</th>
+                <th style="width: 12%; text-align: right;">Mép lãi (%)</th>
               </tr>
             </thead>
             <tbody>

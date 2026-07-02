@@ -16,4 +16,7 @@ public class Import {
     private Double totalCost = 0.0;
     private java.time.LocalDateTime importDate;
     private String note;
+    private String status = "PENDING";
+    private java.time.LocalDateTime receivedDate;
 }
+

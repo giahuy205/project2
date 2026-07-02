@@ -1,57 +1,101 @@
 <div class="dashboard">
   <h2>Tổng quan hệ thống</h2>
   <div class="stats-grid">
-    <div class="card stat-card">
-      <div class="icon" style="background: rgba(79, 70, 229, 0.1); color: var(--primary);">💰</div>
+    <div class="card stat-card" (click)="navigate('/transactions')" title="Click để xem chi tiết giao dịch">
+      <div class="icon-wrap icon-primary">💰</div>
       <div class="data">
         <span>Doanh thu hôm nay</span>
-        <h3>$3,240.50</h3>
+        <h3>{{ todayRevenue | number:'1.0-0' }}đ</h3>
+        <span class="stat-subtext">Thực thu trong ngày</span>
       </div>
     </div>
-    <div class="card stat-card">
-      <div class="icon" style="background: rgba(16, 185, 129, 0.1); color: var(--secondary);">🧾</div>
+    <div class="card stat-card" (click)="navigate('/transactions')" title="Click để xem danh sách đơn hàng">
+      <div class="icon-wrap icon-secondary">🧾</div>
       <div class="data">
         <span>Tổng đơn hàng</span>
-        <h3>142</h3>
+        <h3>{{ todayOrders }}</h3>
+        <span class="stat-subtext">Đơn hàng đã hoàn thành</span>
       </div>
     </div>
-    <div class="card stat-card">
-      <div class="icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">⭐</div>
+    <div class="card stat-card" (click)="navigate('/inventory')" title="Click để xem kho hàng">
+      <div class="icon-wrap icon-warning">⭐</div>
       <div class="data">
         <span>Sản phẩm bán chạy</span>
-        <h3>Espresso</h3>
+        <h3>{{ topProduct }}</h3>
+        <span class="stat-subtext">Mặt hàng bán chạy nhất</span>
       </div>
     </div>
-    <div class="card stat-card">
-      <div class="icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">📦</div>
+    <div class="card stat-card" (click)="navigate('/inventory')" title="Click để nhập hàng / kiểm kê kho">
+      <div class="icon-wrap icon-danger">📦</div>
       <div class="data">
         <span>Cảnh báo hết hàng</span>
-        <h3>14 mặt hàng</h3>
+        <h3 [style.color]="lowStockCount > 0 ? 'var(--danger)' : 'inherit'">{{ lowStockCount }} mặt hàng</h3>
+        <span class="stat-subtext">{{ lowStockCount > 0 ? 'Cần nhập thêm hàng' : 'Kho hàng an toàn' }}</span>
       </div>
     </div>
   </div>
   
   <div class="charts-wrap">
     <div class="card chart-area">
-      <h4>Xu hướng doanh thu</h4>
-      <!-- Mock Chart -->
-      <div class="mock-chart">
-        <svg viewBox="0 0 100 40" class="chart-line">
-          <polyline fill="none" stroke="var(--primary)" stroke-width="2" points="0,30 20,25 40,35 60,15 80,20 100,5" />
-        </svg>
+      <h4>Xu hướng doanh thu (7 ngày qua)</h4>
+      <!-- Dynamic Chart -->
+      <div class="mock-chart" style="display: flex; flex-direction: column; justify-content: flex-end; height: auto; align-items: stretch; width: 100%;">
+        <div style="width: 100%; height: 200px; display: flex; align-items: flex-end; position: relative;">
+          <svg viewBox="0 0 100 40" class="chart-line" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+            <!-- Gradients Definition -->
+            <defs>
+              <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.2" />
+                <stop offset="100%" stop-color="var(--primary)" stop-opacity="0.0" />
+              </linearGradient>
+            </defs>
+
+            <!-- Grid Lines -->
+            <line x1="0" y1="5" x2="100" y2="5" stroke="rgba(229, 231, 235, 0.4)" stroke-width="0.5" />
+            <line x1="0" y1="20" x2="100" y2="20" stroke="rgba(229, 231, 235, 0.4)" stroke-width="0.5" />
+            <line x1="0" y1="35" x2="100" y2="35" stroke="var(--border)" stroke-width="0.5" />
+            
+            <!-- Area Fill -->
+            <path [attr.d]="svgAreaPath" fill="url(#chartGradient)" />
+
+            <!-- Smooth Spline Path -->
+            <path [attr.d]="svgPath" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <!-- Chart Labels -->
+        <div style="display: flex; justify-content: space-between; margin-top: 0.75rem; font-size: 0.75rem; color: var(--text-muted); font-weight: 500; border-top: 1px solid var(--border); padding-top: 0.5rem; width: 100%;">
+          <span *ngFor="let item of revenueTrend">{{ item.dateLabel }}</span>
+        </div>
       </div>
     </div>
     <div class="card recent-tx">
       <h4>Giao dịch gần đây</h4>
-      <div class="table-container" style="box-shadow: none;">
-        <table>
+      <div class="table-container" style="box-shadow: none; margin-top: 1rem; max-height: 235px; overflow-y: auto;">
+        <table style="table-layout: fixed; width: 100%;">
           <thead>
-            <tr><th>Mã đơn</th><th>Thời gian</th><th>Tổng tiền</th><th>Trạng thái</th></tr>
+            <tr>
+              <th style="width: 25%;">Mã đơn</th>
+              <th style="width: 35%;">Thời gian</th>
+              <th style="width: 20%;">Tổng tiền</th>
+              <th style="width: 20%;">PTTT</th>
+            </tr>
           </thead>
           <tbody>
-            <tr><td>#ORD-1002</td><td>10:45 AM</td><td>$45.00</td><td><span class="badge badge-success">Đã thanh toán</span></td></tr>
-            <tr><td>#ORD-1001</td><td>10:30 AM</td><td>$12.50</td><td><span class="badge badge-success">Đã thanh toán</span></td></tr>
-            <tr><td>#ORD-1000</td><td>09:15 AM</td><td>$125.00</td><td><span class="badge badge-warning">Chờ xử lý</span></td></tr>
+            <tr *ngFor="let order of recentOrders" (click)="navigate('/transactions')" title="Xem chi tiết giao dịch">
+              <td style="font-weight: 600; color: var(--primary);">#ORD-{{ order.id }}</td>
+              <td style="color: var(--text-muted);">{{ order.time_label }}</td>
+              <td style="font-weight: 600;">{{ order.total_amount | number:'1.0-0' }}đ</td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'badge-card': order.payment_method === 'Card',
+                  'badge-qr': order.payment_method === 'QR',
+                  'badge-cash': order.payment_method !== 'Card' && order.payment_method !== 'QR'
+                }">{{ order.paymentMethodDisplay }}</span>
+              </td>
+            </tr>
+            <tr *ngIf="recentOrders.length === 0">
+              <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">Chưa có đơn hàng nào hôm nay.</td>
+            </tr>
           </tbody>
         </table>
       </div>

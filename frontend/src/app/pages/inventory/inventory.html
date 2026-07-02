@@ -21,11 +21,18 @@
         <option value="all">Tất cả danh mục</option>
         <option *ngFor="let cat of categories" [value]="cat.id">{{cat.name}}</option>
       </select>
-      <button *ngIf="authService.isAdmin()" class="btn btn-primary" (click)="openProductModal()">+ Thêm sản phẩm</button>
+      <button *ngIf="authService.isAdmin()" class="btn btn-primary" (click)="openProductModal()" title="Thêm sản phẩm mới" style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; padding: 0;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      </button>
+      <button *ngIf="authService.isAdmin()" class="btn btn-outline" (click)="openExcelModal()" title="Nhập Excel" style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; padding: 0;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+      </button>
     </div>
 
     <div *ngIf="viewMode === 'categories'" style="display: flex; align-items: center; gap: 0.5rem;">
-      <button *ngIf="authService.isAdmin()" class="btn btn-primary" (click)="openModal()">+ Thêm danh mục</button>
+      <button *ngIf="authService.isAdmin()" class="btn btn-primary" (click)="openModal()" title="Thêm danh mục mới" style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; padding: 0;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      </button>
     </div>
   </div>
 
@@ -33,20 +40,20 @@
   <div class="card" *ngIf="viewMode === 'products'">
 
     <div class="table-container">
-      <table>
+      <table style="table-layout: fixed; width: 100%;">
         <thead>
           <tr>
-            <th (click)="sortBy('name')" style="cursor: pointer; user-select: none;">Tên <span
+            <th (click)="sortBy('name')" style="width: 32%; cursor: pointer; user-select: none;">Tên <span
                 *ngIf="sortColumn === 'name'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th (click)="sortBy('barcode')" style="cursor: pointer; user-select: none;">Mã vạch <span
+            <th (click)="sortBy('barcode')" style="width: 18%; cursor: pointer; user-select: none;">Mã vạch <span
                 *ngIf="sortColumn === 'barcode'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th (click)="sortBy('category.name')" style="cursor: pointer; user-select: none;">Danh mục <span
+            <th (click)="sortBy('category.name')" style="width: 20%; cursor: pointer; user-select: none;">Danh mục <span
                 *ngIf="sortColumn === 'category.name'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th (click)="sortBy('stockQuantity')" style="cursor: pointer; user-select: none;">Tồn kho <span
+            <th (click)="sortBy('stockQuantity')" style="width: 10%; cursor: pointer; user-select: none;">Tồn kho <span
                 *ngIf="sortColumn === 'stockQuantity'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th (click)="sortBy('salePrice')" style="cursor: pointer; user-select: none;">Giá bán <span
+            <th (click)="sortBy('salePrice')" style="width: 12%; cursor: pointer; user-select: none;">Giá bán <span
                 *ngIf="sortColumn === 'salePrice'">{{sortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th *ngIf="authService.isAdmin()">Thao tác</th>
+            <th *ngIf="authService.isAdmin()" style="width: 8%;">Thao tác</th>
           </tr>
         </thead>
         <tbody>
@@ -75,28 +82,33 @@
     </div>
 
     <!-- Pagination Controls -->
-    <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 1rem;">
-      <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
-        <span>Hiển thị mỗi trang:</span>
-        <select class="form-control" style="width: 80px; padding: 0.35rem 0.5rem; height: auto;" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
-          <option [ngValue]="10">10</option>
-          <option [ngValue]="20">20</option>
-          <option [ngValue]="50">50</option>
-        </select>
-        <span>dòng</span>
-      </div>
-
-      <div style="display: flex; gap: 0.5rem; align-items: center;" *ngIf="totalPages > 1">
-        <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Trang trước</button>
-
-        <div style="display: flex; gap: 0.25rem;">
-          <button *ngFor="let page of pageNumbers" class="btn"
-            [ngClass]="currentPage === page ? 'btn-primary' : 'btn-outline'" (click)="goToPage(page)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">
-            {{page}}
-          </button>
+    <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-top: 1px solid var(--border); flex-wrap: nowrap; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <div style="color: var(--text-muted); font-size: 0.9rem; white-space: nowrap;">
+          Hiển thị {{ startItemIndex }}–{{ endItemIndex }} trong số {{ filteredProducts.length }} sản phẩm
         </div>
 
-        <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Trang sau</button>
+        <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.9rem; white-space: nowrap;">
+          <span>Số hàng mỗi trang:</span>
+          <select class="form-control" style="width: auto; min-width: 70px; padding: 0.35rem 1.75rem 0.35rem 0.5rem; height: 34px; line-height: 1; font-size: 0.9rem; display: inline-block; cursor: pointer;" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.35rem; align-items: center; white-space: nowrap;">
+        <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" style="padding: 0.4rem 0.7rem; font-size: 0.9rem; line-height: 1;" title="Trang trước">&lt;</button>
+
+        <ng-container *ngFor="let page of getVisiblePages()">
+          <span *ngIf="page === '...'" style="color: var(--text-muted); padding: 0 0.25rem; user-select: none;">...</span>
+          <button *ngIf="page !== '...'" class="btn" [ngClass]="currentPage === page ? 'btn-primary' : 'btn-outline'" (click)="goToPage(page)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem; min-width: 36px; height: 34px; display: flex; align-items: center; justify-content: center; line-height: 1;">
+            {{page}}
+          </button>
+        </ng-container>
+
+        <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" style="padding: 0.4rem 0.7rem; font-size: 0.9rem; line-height: 1;" title="Trang sau">&gt;</button>
       </div>
     </div>
   </div>
@@ -104,17 +116,17 @@
   <!-- CATEGORIES VIEW -->
   <div class="card" *ngIf="viewMode === 'categories'">
     <div class="table-container">
-      <table>
+      <table style="table-layout: fixed; width: 100%;">
         <thead>
           <tr>
-            <th (click)="sortCategoryBy('id')" style="cursor: pointer; user-select: none;">ID <span
+            <th (click)="sortCategoryBy('id')" style="width: 10%; cursor: pointer; user-select: none;">ID <span
                 *ngIf="categorySortColumn === 'id'">{{categorySortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th (click)="sortCategoryBy('name')" style="cursor: pointer; user-select: none;">Tên danh mục <span
+            <th (click)="sortCategoryBy('name')" style="width: 35%; cursor: pointer; user-select: none;">Tên danh mục <span
                 *ngIf="categorySortColumn === 'name'">{{categorySortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th (click)="sortCategoryBy('taxRate')" style="cursor: pointer; user-select: none;">Thuế (%) <span
+            <th (click)="sortCategoryBy('taxRate')" style="width: 15%; cursor: pointer; user-select: none;">Thuế (%) <span
                 *ngIf="categorySortColumn === 'taxRate'">{{categorySortDirection === 'asc' ? '▲' : '▼'}}</span></th>
-            <th>Ghi chú</th>
-            <th *ngIf="authService.isAdmin()">Thao tác</th>
+            <th style="width: 30%;">Ghi chú</th>
+            <th *ngIf="authService.isAdmin()" style="width: 10%;">Thao tác</th>
           </tr>
         </thead>
         <tbody>
@@ -179,15 +191,9 @@
         </select>
       </div>
 
-      <div style="display: flex; gap: 1rem;">
-        <div class="form-group" style="flex: 1;">
-          <label class="form-label">Giá nhập</label>
-          <input type="number" class="form-control" [(ngModel)]="newProduct.importPrice">
-        </div>
-        <div class="form-group" style="flex: 1;">
-          <label class="form-label">Giá bán</label>
-          <input type="number" class="form-control" [(ngModel)]="newProduct.salePrice">
-        </div>
+      <div class="form-group">
+        <label class="form-label">Giá bán</label>
+        <input type="number" class="form-control" [(ngModel)]="newProduct.salePrice" placeholder="VD: 10000">
       </div>
 
 
@@ -216,7 +222,7 @@
           <h4 style="margin: 0;">Thông tin chung</h4>
           <div>
             <button *ngIf="authService.isAdmin() && !isEditingBatchProduct" class="btn btn-edit" style="padding: 0.2rem 0.5rem; font-size: 0.85rem;" (click)="isEditingBatchProduct = true">Chỉnh sửa</button>
-            <button *ngIf="isEditingBatchProduct" class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.85rem; margin-right: 0.5rem;" (click)="isEditingBatchProduct = false">Hủy</button>
+            <button *ngIf="isEditingBatchProduct" class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.85rem; margin-right: 0.5rem;" (click)="cancelEditingBatchProduct()">Hủy</button>
           </div>
         </div>
         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
@@ -253,16 +259,16 @@
       
       <h4 style="margin-bottom: 0.5rem;">Lịch sử lô hàng</h4>
       <div class="table-container">
-        <table>
+        <table style="table-layout: fixed; width: 100%;">
           <thead>
             <tr>
-              <th style="text-align: left; padding-left: 0.5rem;">ID Lô</th>
-              <th style="text-align: left;">Ngày nhập</th>
-              <th style="text-align: right;">Giá nhập</th>
-              <th style="text-align: center;">Hạn sử dụng</th>
-              <th style="text-align: right;">SL Nhập</th>
-              <th style="text-align: right;">SL Còn</th>
-              <th style="text-align: center;" *ngIf="authService.isAdmin()">Thao tác</th>
+              <th style="width: 12%; text-align: left; padding-left: 0.5rem;">ID Lô</th>
+              <th style="width: 18%; text-align: left;">Ngày nhập</th>
+              <th style="width: 15%; text-align: right;">Giá nhập</th>
+              <th style="width: 18%; text-align: center;">Hạn sử dụng</th>
+              <th style="width: 14%; text-align: right;">SL Nhập</th>
+              <th style="width: 13%; text-align: right;">SL Còn</th>
+              <th *ngIf="authService.isAdmin()" style="width: 10%; text-align: center;">Thao tác</th>
             </tr>
           </thead>
           <tbody>
@@ -289,6 +295,97 @@
       </div>
 
       <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Nhập Excel -->
+  <div class="modal-overlay" *ngIf="showExcelModal">
+    <div class="modal-content card slide-in" style="width: 550px; max-height: 90vh; overflow-y: auto; padding: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3 style="margin: 0; font-size: 1.25rem;">Nhập sản phẩm từ file Excel</h3>
+        <button style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; line-height: 1; padding: 0;" (click)="closeExcelModal()">✕</button>
+      </div>
+
+      <!-- Drag & Drop Area -->
+      <div 
+        class="drag-drop-zone"
+        (dragover)="onExcelDragOver($event)"
+        (dragleave)="onExcelDragLeave($event)"
+        (drop)="onExcelFileDropped($event)"
+        (click)="fileInput.click()"
+        style="border: 2px dashed #cbd5e1; border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; background-color: #f8fafc; transition: all 0.2s;"
+        [style.border-color]="excelDragOver ? 'var(--primary)' : '#cbd5e1'"
+        [style.background-color]="excelDragOver ? 'rgba(79, 70, 229, 0.05)' : '#f8fafc'"
+      >
+        <input type="file" #fileInput (change)="onExcelFileSelected($event)" accept=".xlsx, .xls" style="display: none;">
+        
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 48px; height: 48px; color: #94a3b8; margin: 0 auto 1rem;">
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="8" y1="13" x2="16" y2="13"></line>
+          <line x1="8" y1="17" x2="16" y2="17"></line>
+          <line x1="10" y1="9" x2="9" y2="9"></line>
+        </svg>
+
+        <p style="margin: 0 0 0.5rem; font-weight: 500; color: #334155;">
+          {{ selectedExcelFile ? selectedExcelFile.name : 'Kéo thả file Excel vào đây hoặc click để chọn' }}
+        </p>
+        <p style="margin: 0; font-size: 0.8rem; color: #64748b;" *ngIf="selectedExcelFile">
+          Dung lượng: {{ (selectedExcelFile.size / 1024) | number:'1.0-1' }} KB
+        </p>
+        <p style="margin: 0; font-size: 0.8rem; color: #94a3b8;" *ngIf="!selectedExcelFile">
+          Hỗ trợ file định dạng .xlsx hoặc .xls
+        </p>
+      </div>
+
+      <!-- Remove selected file button -->
+      <div *ngIf="selectedExcelFile" style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+        <button class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; color: var(--danger); border-color: var(--danger);" (click)="removeSelectedExcelFile()">
+          Xóa file đã chọn
+        </button>
+      </div>
+
+      <!-- Download Template Link -->
+      <div style="margin-top: 1.5rem; font-size: 0.9rem; color: #475569; display: flex; align-items: center; gap: 0.5rem;">
+        <span>Tải file excel mẫu:</span>
+        <a href="javascript:void(0)" (click)="downloadExcelTemplate()" style="color: var(--primary); text-decoration: underline; font-weight: 500;">tải file excel mẫu tại đây</a>
+      </div>
+
+      <!-- Result / Error Messages -->
+      <div *ngIf="excelImportResult" style="margin-top: 1.5rem; padding: 1rem; border-radius: 6px; background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: 0.9rem;">
+        <strong>Kết quả nhập hàng:</strong>
+        <ul style="margin: 0.5rem 0 0; padding-left: 1.2rem;">
+          <li>Thành công: {{ excelImportResult.successCount }} sản phẩm.</li>
+          <li>Bỏ qua (Lỗi): {{ excelImportResult.failedCount }} sản phẩm.</li>
+        </ul>
+      </div>
+
+      <!-- Row-level Errors Scroll Area -->
+      <div *ngIf="excelImportErrors.length > 0" style="margin-top: 1.5rem;">
+        <p style="margin: 0 0 0.5rem; font-weight: 600; color: var(--danger); font-size: 0.9rem;">Chi tiết lỗi theo dòng:</p>
+        <div style="max-height: 150px; overflow-y: auto; border: 1px solid #fecaca; border-radius: 6px; background-color: #fef2f2; padding: 0.75rem; font-size: 0.85rem; color: #991b1b; display: flex; flex-direction: column; gap: 0.35rem;">
+          <div *ngFor="let err of excelImportErrors" style="line-height: 1.4;">
+            • {{ err }}
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="excelGeneralError" style="margin-top: 1.5rem; padding: 0.75rem; border-radius: 6px; background-color: #fef2f2; border: 1px solid #fecaca; color: #991b1b; font-size: 0.85rem;">
+        {{ excelGeneralError }}
+      </div>
+
+      <!-- Footer Buttons -->
+      <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+        <ng-container *ngIf="!excelImportResult">
+          <button class="btn btn-outline" (click)="closeExcelModal()" [disabled]="isUploadingExcel">Hủy</button>
+          <button class="btn btn-primary" (click)="confirmExcelImport()" [disabled]="!selectedExcelFile || isUploadingExcel">
+            {{ isUploadingExcel ? 'Đang xử lý...' : 'Xác nhận' }}
+          </button>
+        </ng-container>
+        <ng-container *ngIf="excelImportResult">
+          <button class="btn btn-primary" (click)="closeExcelModal()">Thoát</button>
+        </ng-container>
       </div>
     </div>
   </div>

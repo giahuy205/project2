@@ -101,7 +101,8 @@ public class OrderService {
                     productRepository.save(product);
 
                     // FEFO Batch deduction & cost calculation
-                    List<DuongGiaHuy._5.project2.entity.ImportItem> batches = importItemRepository.findByProductIdAndRemainingQuantityGreaterThanOrderByExpiryDateAsc(product.getId(), 0.0);
+                    List<DuongGiaHuy._5.project2.entity.ImportItem> batches = importItemRepository.findAvailableReceivedBatches(product.getId(), 0.0);
+
                     double qtyToDeduct = itemQuantity;
                     double totalCostForThisItem = 0.0;
                     for (DuongGiaHuy._5.project2.entity.ImportItem batch : batches) {

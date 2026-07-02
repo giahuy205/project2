@@ -46,6 +46,14 @@ export class Inventory implements OnInit {
   selectedProductForBatches: any = null;
   productBatches: any[] = [];
   errorMessage = '';
+  showExcelModal = false;
+  selectedExcelFile: File | null = null;
+  isUploadingExcel = false;
+  excelDragOver = false;
+  excelImportResult: any = null;
+  excelImportErrors: string[] = [];
+  excelGeneralError = '';
+
   newProduct: any = {
     id: null,
     name: '',
@@ -87,7 +95,13 @@ export class Inventory implements OnInit {
     
     this.http.get<any[]>(this.API_PROD_URL).subscribe({
       next: (data) => {
-        this.products = data.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        this.products = data.sort((a, b) => {
+          const aOut = (a.stockQuantity || 0) <= 0;
+          const bOut = (b.stockQuantity || 0) <= 0;
+          if (aOut && !bOut) return 1;
+          if (!aOut && bOut) return -1;
+          return (a.name || '').localeCompare(b.name || '');
+        });
         this.filterProducts();
         this.cdr.detectChanges();
       },
@@ -185,9 +199,11 @@ export class Inventory implements OnInit {
     this.cdr.detectChanges();
   }
 
-  goToPage(page: number) {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
+  goToPage(page: any) {
+    if (page === '...') return;
+    const pageNum = Number(page);
+    if (pageNum >= 1 && pageNum <= this.totalPages) {
+      this.currentPage = pageNum;
       this.updatePagination();
     }
   }
@@ -195,6 +211,44 @@ export class Inventory implements OnInit {
   onPageSizeChange() {
     this.currentPage = 1;
     this.updatePagination();
+  }
+
+  get startItemIndex(): number {
+    if (this.filteredProducts.length === 0) return 0;
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get endItemIndex(): number {
+    const end = this.currentPage * this.pageSize;
+    return end > this.filteredProducts.length ? this.filteredProducts.length : end;
+  }
+
+  getVisiblePages(): (number | string)[] {
+    const total = this.totalPages;
+    const current = this.currentPage;
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    const pages: (number | string)[] = [];
+    pages.push(1);
+    let start = Math.max(2, current - 2);
+    let end = Math.min(total - 1, current + 2);
+    if (current <= 4) {
+      end = 5;
+    } else if (current >= total - 3) {
+      start = total - 4;
+    }
+    if (start > 2) {
+      pages.push('...');
+    }
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    if (end < total - 1) {
+      pages.push('...');
+    }
+    pages.push(total);
+    return pages;
   }
 
   searchProducts(event: any) {
@@ -213,6 +267,12 @@ export class Inventory implements OnInit {
       alert("Please add at least 1 Category first!");
       return;
     }
+    this.isEditingProduct = false;
+    this.errorMessage = '';
+    this.newProduct = {
+      id: null, name: '', barcode: '', category: { id: null }, 
+      importPrice: 0, salePrice: 0, stockQuantity: 0, lowStock: 10
+    };
     this.showProductModal = true;
   }
 
@@ -310,8 +370,10 @@ export class Inventory implements OnInit {
     if (!this.newProduct.name || !this.newProduct.barcode || !this.newProduct.category.id) return;
     
     this.http.put(`${this.API_PROD_URL}/${this.newProduct.id}`, this.newProduct).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.isEditingBatchProduct = false;
+        this.selectedProductForBatches = res;
+        this.newProduct = { ...res, category: { id: res.category ? res.category.id : null } };
         this.loadData();
         this.showToast('Cập nhật thông tin thành công!');
       },
@@ -326,10 +388,25 @@ export class Inventory implements OnInit {
     });
   }
 
+  cancelEditingBatchProduct() {
+    this.isEditingBatchProduct = false;
+    if (this.selectedProductForBatches) {
+      this.newProduct = {
+        ...this.selectedProductForBatches,
+        category: { id: this.selectedProductForBatches.category ? this.selectedProductForBatches.category.id : null }
+      };
+    }
+    this.errorMessage = '';
+  }
+
   closeBatchModal() {
     this.showBatchModal = false;
     this.selectedProductForBatches = null;
     this.productBatches = [];
+    this.newProduct = {
+      id: null, name: '', barcode: '', category: { id: null }, 
+      importPrice: 0, salePrice: 0, stockQuantity: 0, lowStock: 10
+    };
   }
 
   discardBatch(batchId: number) {
@@ -351,5 +428,137 @@ export class Inventory implements OnInit {
     const now = new Date().getTime();
     const daysLeft = (expiry - now) / (1000 * 60 * 60 * 24);
     return daysLeft >= 0 && daysLeft <= 30; // 30 days threshold
+  }
+
+  openExcelModal() {
+    this.showExcelModal = true;
+    this.selectedExcelFile = null;
+    this.isUploadingExcel = false;
+    this.excelDragOver = false;
+    this.excelImportResult = null;
+    this.excelImportErrors = [];
+    this.excelGeneralError = '';
+  }
+
+  closeExcelModal() {
+    this.showExcelModal = false;
+    this.selectedExcelFile = null;
+    this.isUploadingExcel = false;
+    this.excelDragOver = false;
+    this.excelImportResult = null;
+    this.excelImportErrors = [];
+    this.excelGeneralError = '';
+  }
+
+  onExcelDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.excelDragOver = true;
+  }
+
+  onExcelDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.excelDragOver = false;
+  }
+
+  onExcelFileDropped(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.excelDragOver = false;
+    if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+      const file = event.dataTransfer.files[0];
+      const name = file.name.toLowerCase();
+      if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
+        this.selectedExcelFile = file;
+        this.excelImportResult = null;
+        this.excelImportErrors = [];
+        this.excelGeneralError = '';
+      } else {
+        this.excelGeneralError = 'Vui lòng chọn tệp tin định dạng Excel (.xlsx hoặc .xls).';
+      }
+    }
+  }
+
+  onExcelFileSelected(event: any) {
+    if (event.target.files && event.target.files.length > 0) {
+      const file = event.target.files[0];
+      const name = file.name.toLowerCase();
+      if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
+        this.selectedExcelFile = file;
+        this.excelImportResult = null;
+        this.excelImportErrors = [];
+        this.excelGeneralError = '';
+      } else {
+        this.excelGeneralError = 'Vui lòng chọn tệp tin định dạng Excel (.xlsx hoặc .xls).';
+      }
+    }
+  }
+
+  removeSelectedExcelFile() {
+    this.selectedExcelFile = null;
+    this.excelImportResult = null;
+    this.excelImportErrors = [];
+    this.excelGeneralError = '';
+  }
+
+  downloadExcelTemplate() {
+    this.http.get('/api/products/import-excel/template', { responseType: 'blob' }).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'template_import_san_pham.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        this.excelGeneralError = 'Không thể tải xuống tệp mẫu. Vui lòng kiểm tra kết nối.';
+      }
+    });
+  }
+
+  confirmExcelImport() {
+    if (!this.selectedExcelFile) return;
+
+    this.isUploadingExcel = true;
+    this.excelImportResult = null;
+    this.excelImportErrors = [];
+    this.excelGeneralError = '';
+
+    const formData = new FormData();
+    formData.append('file', this.selectedExcelFile);
+
+    this.http.post<any>('/api/products/import-excel', formData).subscribe({
+      next: (res) => {
+        this.isUploadingExcel = false;
+        this.excelImportResult = res;
+        this.excelImportErrors = res.errors || [];
+        this.loadData(); // reload products to show successful imports
+
+        if (res.failedCount === 0) {
+          this.showToast(`Đã nhập thành công ${res.successCount} sản phẩm!`);
+        } else {
+          this.showToast(`Nhập thành công ${res.successCount} sản phẩm, bỏ qua ${res.failedCount} sản phẩm lỗi.`);
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isUploadingExcel = false;
+        let errMsg = 'Đã xảy ra lỗi khi kết nối với máy chủ.';
+        if (err.error && err.error.errors) {
+          this.excelImportErrors = err.error.errors;
+          errMsg = 'Phát hiện lỗi trong tệp Excel.';
+        } else if (err.error && typeof err.error === 'string') {
+          errMsg = err.error;
+        } else if (err.error && err.error.message) {
+          errMsg = err.error.message;
+        }
+        this.excelGeneralError = errMsg;
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

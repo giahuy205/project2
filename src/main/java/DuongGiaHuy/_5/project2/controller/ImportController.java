@@ -1,6 +1,7 @@
 package DuongGiaHuy._5.project2.controller;
 
 import DuongGiaHuy._5.project2.dto.ImportRequestDTO;
+import DuongGiaHuy._5.project2.dto.ReceiveImportRequestDTO;
 import DuongGiaHuy._5.project2.entity.Import;
 import DuongGiaHuy._5.project2.service.ImportService;
 import DuongGiaHuy._5.project2.config.RequiresRole;
@@ -29,6 +30,16 @@ public class ImportController {
     @PostMapping("/process")
     public Import process(@RequestBody ImportRequestDTO request) {
         return service.processImport(request);
+    }
+
+    @PostMapping("/{id}/receive")
+    public Import receive(@PathVariable Long id, @RequestBody ReceiveImportRequestDTO request) {
+        return service.receiveImport(id, request);
+    }
+
+    @PostMapping("/{id}/cancel")
+    public Import cancel(@PathVariable Long id) {
+        return service.cancelImport(id);
     }
 
     @PostMapping

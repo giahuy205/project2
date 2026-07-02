@@ -15,6 +15,9 @@ export class ImportsComponent implements OnInit {
   importsList: any[] = [];
   products: any[] = [];
   
+  // Tab state
+  activeTab: 'ordered' | 'received' = 'ordered';
+
   // Pagination state
   currentPage: number = 1;
   pageSize: number = 10;
@@ -29,6 +32,11 @@ export class ImportsComponent implements OnInit {
   activeRowIndex: number | null = null;
   isSubmitting = false;
   showConfirmModal = false;
+
+  // Receiving state
+  showReceiveModal = false;
+  receivingImport: any = null;
+  receivingItems: any[] = [];
   
   // Form fields
   newImport: any = {
@@ -71,17 +79,34 @@ export class ImportsComponent implements OnInit {
     });
   }
 
+  getFilteredImports(): any[] {
+    if (this.activeTab === 'ordered') {
+      return this.importsList.filter(imp => imp.status === 'PENDING' || imp.status === 'CANCELLED');
+    } else {
+      return this.importsList.filter(imp => imp.status === 'RECEIVED');
+    }
+  }
+
   updatePagination() {
-    this.totalPages = Math.ceil(this.importsList.length / this.pageSize) || 1;
+    const filtered = this.getFilteredImports();
+    this.totalPages = Math.ceil(filtered.length / this.pageSize) || 1;
     this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
     const start = (this.currentPage - 1) * this.pageSize;
-    this.pagedImports = this.importsList.slice(start, start + this.pageSize);
+    this.pagedImports = filtered.slice(start, start + this.pageSize);
     this.cdr.detectChanges();
   }
 
-  goToPage(page: number) {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
+  switchTab(tab: 'ordered' | 'received') {
+    this.activeTab = tab;
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  goToPage(page: any) {
+    if (page === '...') return;
+    const pageNum = Number(page);
+    if (pageNum >= 1 && pageNum <= this.totalPages) {
+      this.currentPage = pageNum;
       this.updatePagination();
     }
   }
@@ -89,6 +114,50 @@ export class ImportsComponent implements OnInit {
   onPageSizeChange() {
     this.currentPage = 1;
     this.updatePagination();
+  }
+
+  get startItemIndex(): number {
+    const filteredCount = this.getFilteredImports().length;
+    if (filteredCount === 0) return 0;
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get endItemIndex(): number {
+    const filteredCount = this.getFilteredImports().length;
+    const end = this.currentPage * this.pageSize;
+    return end > filteredCount ? filteredCount : end;
+  }
+
+  getFilteredCount(): number {
+    return this.getFilteredImports().length;
+  }
+
+  getVisiblePages(): (number | string)[] {
+    const total = this.totalPages;
+    const current = this.currentPage;
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    const pages: (number | string)[] = [];
+    pages.push(1);
+    let start = Math.max(2, current - 2);
+    let end = Math.min(total - 1, current + 2);
+    if (current <= 4) {
+      end = 5;
+    } else if (current >= total - 3) {
+      start = total - 4;
+    }
+    if (start > 2) {
+      pages.push('...');
+    }
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    if (end < total - 1) {
+      pages.push('...');
+    }
+    pages.push(total);
+    return pages;
   }
 
   loadProducts() {
@@ -130,17 +199,14 @@ export class ImportsComponent implements OnInit {
   }
 
   getFilteredProducts(item: any) {
-    // If we want to show all results (triggered by arrow) and searchTerm is empty
     if (item.showAll && !item.searchTerm) return this.products;
-    
-    // Normal filtering
     if (!item.searchTerm) return item.showAll ? this.products : [];
     
     const term = item.searchTerm.toLowerCase();
     return this.products.filter(p => 
       p.name.toLowerCase().includes(term) || 
       (p.barcode && p.barcode.toLowerCase().includes(term))
-    ).slice(0, 10); // Limit to 10 results
+    ).slice(0, 10);
   }
 
   toggleAllResults(item: any) {
@@ -169,7 +235,6 @@ export class ImportsComponent implements OnInit {
     item.showResults = true;
   }
 
-  // Helper to use in template for blur delay
   hideResults(item: any) {
     setTimeout(() => {
       item.showResults = false;
@@ -187,7 +252,7 @@ export class ImportsComponent implements OnInit {
   onProductSelect(item: any) {
     const product = this.products.find(p => p.id === Number(item.productId));
     if (product) {
-      item.productId = product.id; // ensure it is a number
+      item.productId = product.id;
       item._productDetails = product;
       item.unitPrice = product.importPrice || 0;
       item.newPrice = product.salePrice || 0;
@@ -204,25 +269,22 @@ export class ImportsComponent implements OnInit {
     const errors: string[] = [];
     const hasInvalidQuantity = this.newImport.items.some((i: any) => i.productId && (!i.quantity || i.quantity <= 0));
     const hasInvalidPrice = this.newImport.items.some((i: any) => i.productId && i.newPrice != null && i.unitPrice > 0 && i.newPrice < i.unitPrice);
-    if (hasInvalidQuantity) errors.push('Invalid import quantity');
-    if (hasInvalidPrice) errors.push('Check sale price');
+    if (hasInvalidQuantity) errors.push('Số lượng đặt hàng không hợp lệ');
+    if (hasInvalidPrice) errors.push('Kiểm tra lại giá bán mới (thấp hơn giá nhập)');
     return errors;
   }
 
   saveImport() {
-    // Validate
     if (this.newImport.items.length === 0) {
-      alert("Please add at least 1 product!");
+      alert("Vui lòng thêm ít nhất 1 sản phẩm!");
       return;
     }
     
-    // Check if any product is not selected
     if (this.newImport.items.some((i: any) => !i.productId)) {
-       alert("Please select a product for all lines!");
+       alert("Vui lòng chọn sản phẩm cho tất cả các dòng!");
        return;
     }
 
-    // Check validation errors
     if (this.getValidationErrors().length > 0) {
       return;
     }
@@ -249,13 +311,119 @@ export class ImportsComponent implements OnInit {
       next: () => {
         this.isSubmitting = false;
         this.closeImportModal();
-        this.showToast('Thêm phiếu nhập kho thành công!');
+        this.showToast('Gửi đơn đặt hàng thành công!');
         this.loadImports();
-        this.loadProducts(); // Reload products to update stock/prices locally
+        this.loadProducts();
       },
       error: (err) => {
         this.isSubmitting = false;
-        alert('Error importing products!');
+        alert('Lỗi khi đặt hàng!');
+        console.error(err);
+      }
+    });
+  }
+
+  isCancelable(importDate: string): boolean {
+    if (!importDate) return false;
+    const orderTime = new Date(importDate).getTime();
+    const currentTime = new Date().getTime();
+    const oneHour = 60 * 60 * 1000;
+    return (currentTime - orderTime) < oneHour;
+  }
+
+  cancelOrder(importObj: any) {
+    if (!confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?')) return;
+    
+    this.http.post(`${this.API_IMPORT_URL}/${importObj.id}/cancel`, {}).subscribe({
+      next: () => {
+        this.showToast('Hủy đơn hàng thành công!');
+        this.loadImports();
+      },
+      error: (err) => {
+        alert('Lỗi khi hủy đơn hàng: ' + (err.error?.message || err.message));
+        console.error(err);
+      }
+    });
+  }
+
+  openReceiveModal(importObj: any) {
+    this.receivingImport = importObj;
+    this.http.get<any[]>(`${this.API_IMPORT_ITEM_URL}/import/${importObj.id}`).subscribe({
+      next: (data) => {
+        this.receivingItems = data.map(item => ({
+          ...item,
+          receivedQuantity: item.quantity, // Default to full quantity ordered
+          isFullyReceived: true
+        }));
+        this.showReceiveModal = true;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error fetching import items for receipt', err)
+    });
+  }
+
+  closeReceiveModal() {
+    this.showReceiveModal = false;
+    this.receivingImport = null;
+    this.receivingItems = [];
+  }
+
+  toggleFullyReceived(item: any) {
+    item.isFullyReceived = !item.isFullyReceived;
+    if (item.isFullyReceived) {
+      item.receivedQuantity = item.quantity;
+    } else {
+      item.receivedQuantity = 0;
+    }
+  }
+
+  onReceivedQuantityChange(item: any) {
+    if (item.receivedQuantity === item.quantity) {
+      item.isFullyReceived = true;
+    } else {
+      item.isFullyReceived = false;
+    }
+  }
+
+  receiveAllFully() {
+    this.receivingItems.forEach(item => {
+      item.receivedQuantity = item.quantity;
+      item.isFullyReceived = true;
+    });
+  }
+
+  getActualReceiveCost(): number {
+    return this.receivingItems.reduce((total, item) => {
+      return total + (item.receivedQuantity * (item.unitPrice || 0));
+    }, 0);
+  }
+
+  submitReceive() {
+    const hasInvalid = this.receivingItems.some(item => item.receivedQuantity === null || item.receivedQuantity < 0);
+    if (hasInvalid) {
+      alert('Vui lòng nhập số lượng nhận hợp lệ (lớn hơn hoặc bằng 0)');
+      return;
+    }
+
+    const payload = {
+      items: this.receivingItems.map(item => ({
+        importItemId: item.id,
+        receivedQuantity: item.receivedQuantity
+      }))
+    };
+
+    this.isSubmitting = true;
+    this.http.post(`${this.API_IMPORT_URL}/${this.receivingImport.id}/receive`, payload).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.closeReceiveModal();
+        this.showToast('Nhận hàng và thanh toán thành công!');
+        this.loadImports();
+        this.loadProducts();
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        alert('Lỗi khi nhận hàng: ' + (err.error?.message || err.message));
         console.error(err);
       }
     });
@@ -279,3 +447,4 @@ export class ImportsComponent implements OnInit {
     this.importDetails = [];
   }
 }
+

@@ -30,13 +30,13 @@
     
     <!-- Pagination Controls -->
     <div class="pagination-controls" *ngIf="totalPages > 1" style="display: flex; justify-content: center; align-items: center; padding: 1rem; gap: 0.5rem; margin-top: auto; border-top: 1px solid var(--border);">
-      <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">Trang trước</button>
+      <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" title="Trang trước">‹</button>
       <div style="display: flex; gap: 0.25rem;">
         <button *ngFor="let page of pageNumbers" class="btn" [ngClass]="currentPage === page ? 'btn-primary' : 'btn-outline'" (click)="goToPage(page)">
           {{page}}
         </button>
       </div>
-      <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">Trang sau</button>
+      <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" title="Trang sau">›</button>
     </div>
   </div>
 

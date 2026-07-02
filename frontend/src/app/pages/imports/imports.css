@@ -213,3 +213,61 @@ tr:hover {
   color: var(--text-muted);
 }
 
+/* Badge styles */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 4px;
+  text-align: center;
+  white-space: nowrap;
+}
+.badge-pending {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+.badge-cancelled {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+.badge-received {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+/* Button variants */
+.btn-success {
+  background-color: #10b981;
+  color: white;
+}
+.btn-success:hover {
+  background-color: #059669;
+}
+.btn-disabled {
+  background-color: #f3f4f6 !important;
+  color: #9ca3af !important;
+  border-color: #e5e7eb !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Tabs styles */
+.tab-button.active-tab {
+  color: var(--primary) !important;
+  border-bottom-color: var(--primary) !important;
+}
+.tab-button:hover {
+  color: var(--primary);
+}
+
+/* Highlight row in orange when items are missing on receive */
+.highlight-missing {
+  background-color: #fff7ed !important;
+  border-left: 4px solid #f97316;
+}
+.highlight-missing:hover {
+  background-color: #ffedd5 !important;
+}
+
+

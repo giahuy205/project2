@@ -1,68 +1,72 @@
 <div class="page-layout">
   <div class="header-actions"
-    style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: flex-end;">
+    style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 0.75rem;">
     <div>
-      <h2 style="margin: 0;">Lịch sử giao dịch</h2>
+      <h2 style="margin: 0; white-space: nowrap; font-size: 1.5rem;">Lịch sử giao dịch</h2>
     </div>
 
-    <div class="filters" style="display: flex; gap: 1rem; align-items: center;">
+    <div class="filters" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: nowrap;">
       <!-- Type Filter -->
-      <select class="form-control" [(ngModel)]="filterType" (change)="applyFilters()" style="min-width: 150px;">
+      <select class="form-control" [(ngModel)]="filterType" (change)="applyFilters()" style="min-width: 140px; height: 38px; padding: 0.35rem 1.5rem 0.35rem 0.5rem; font-size: 0.85rem;">
         <option value="ALL">Tất cả giao dịch</option>
         <option value="SALE">Bán hàng</option>
         <option value="REFUND">Hoàn trả</option>
       </select>
 
-      <!-- Date Range Filter -->
-      <select class="form-control" [(ngModel)]="filterDate" (change)="applyFilters()" style="min-width: 150px;">
-        <option value="ALL">Tất cả thời gian</option>
-        <option value="TODAY">Hôm nay</option>
-        <option value="WEEK">Tuần này</option>
-        <option value="MONTH">Tháng này</option>
-        <option value="CUSTOM">Tùy chỉnh</option>
-      </select>
+      <!-- Date Range Filter Buttons -->
+      <div class="btn-group" style="display: flex; background: rgba(0,0,0,0.03); padding: 0.25rem; border-radius: var(--radius-md); border: 1px solid var(--border); height: 38px; align-items: center;">
+        <button class="btn" [ngClass]="filterDate === 'ALL' ? 'btn-primary' : 'btn-outline'" 
+          (click)="setDateRange('ALL')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1;">Tất cả</button>
+        <button class="btn" [ngClass]="filterDate === 'TODAY' ? 'btn-primary' : 'btn-outline'" 
+          (click)="setDateRange('TODAY')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1;">Hôm nay</button>
+        <button class="btn" [ngClass]="filterDate === 'WEEK' ? 'btn-primary' : 'btn-outline'" 
+          (click)="setDateRange('WEEK')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1;">Tuần này</button>
+        <button class="btn" [ngClass]="filterDate === 'MONTH' ? 'btn-primary' : 'btn-outline'" 
+          (click)="setDateRange('MONTH')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1;">Tháng này</button>
+      </div>
 
-      <!-- Custom Date Picker UI -->
-      <div *ngIf="filterDate === 'CUSTOM'"
-        style="display: flex; gap: 0.5rem; align-items: center; background: white; padding: 0.25rem; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
-        <input type="date" class="form-control" [(ngModel)]="customStartDate" style="border: none; padding: 0.25rem;">
-        <span style="color: gray;">-</span>
-        <input type="date" class="form-control" [(ngModel)]="customEndDate" style="border: none; padding: 0.25rem;">
+      <!-- Custom Date Pickers -->
+      <div style="display: flex; align-items: center; gap: 0.25rem; background: var(--surface); padding: 0.25rem 0.4rem; border-radius: var(--radius-md); border: 1px solid var(--border); box-shadow: var(--shadow-sm); height: 38px;">
+        <input type="date" class="form-control" [(ngModel)]="startDate" (change)="onCustomDateChange()" 
+          style="border: none; padding: 0.15rem 0.25rem; font-size: 0.8rem; background: transparent; width: 100px; outline: none; box-shadow: none; height: auto;">
+        <span style="color: var(--text-muted); font-size: 0.85rem;">-</span>
+        <input type="date" class="form-control" [(ngModel)]="endDate" (change)="onCustomDateChange()" 
+          style="border: none; padding: 0.15rem 0.25rem; font-size: 0.8rem; background: transparent; width: 100px; outline: none; box-shadow: none; height: auto;">
       </div>
     </div>
   </div>
 
   <div class="card">
     <div class="table-container">
-      <table>
+      <table style="table-layout: fixed; width: 100%;">
         <thead>
           <tr>
-            <th>Mã giao dịch</th>
-            <th>Ngày & Giờ</th>
-            <th>Loại</th>
-            <th>Khách hàng</th>
-            <th>Số lượng</th>
-            <th>Tổng tiền</th>
-            <th>Thao tác</th>
+            <th style="width: 16%; white-space: nowrap;">Mã giao dịch</th>
+            <th style="width: 20%; white-space: nowrap;">Ngày & Giờ</th>
+            <th style="width: 12%; white-space: nowrap;">Loại</th>
+            <th style="width: 22%; white-space: nowrap;">Khách hàng</th>
+            <th style="width: 10%; white-space: nowrap;">Số lượng</th>
+            <th style="width: 12%; white-space: nowrap;">Tổng tiền</th>
+            <th style="width: 8%; white-space: nowrap;">Thao tác</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let txn of pagedTransactions" [class.row-refund]="txn.type === 'REFUND'">
-            <td><strong>{{txn.id}}</strong></td>
-            <td>{{txn.date | date:'dd/MM/yyyy HH:mm'}}</td>
-            <td>
+            <td style="white-space: nowrap;"><strong>{{txn.id}}</strong></td>
+            <td style="white-space: nowrap;">{{txn.date | date:'dd/MM/yyyy HH:mm'}}</td>
+            <td style="white-space: nowrap;">
               <span class="badge" [ngClass]="txn.type === 'REFUND' ? 'badge-warning' : 'badge-success'">
                 {{txn.type}}
               </span>
             </td>
-            <td>{{txn.customer}}</td>
-            <td>{{txn.items}}</td>
-            <td>
+            <td style="white-space: nowrap;">{{txn.customer}}</td>
+            <td style="white-space: nowrap;">{{txn.items}}</td>
+            <td style="white-space: nowrap;">
               <span [style.color]="txn.type === 'REFUND' ? 'var(--warning)' : 'inherit'">
                 {{txn.type === 'REFUND' ? '-' : ''}}{{txn.total | number:'1.0-0'}}đ
               </span>
             </td>
-            <td>
+            <td style="white-space: nowrap;">
               <button class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;"
                 (click)="viewDetails(txn)">Chi tiết</button>
             </td>
@@ -75,28 +79,33 @@
     </div>
 
     <!-- Pagination Controls -->
-    <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 1rem;">
-      <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
-        <span>Hiển thị mỗi trang:</span>
-        <select class="form-control" style="width: 80px; padding: 0.35rem 0.5rem; height: auto;" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
-          <option [ngValue]="10">10</option>
-          <option [ngValue]="20">20</option>
-          <option [ngValue]="50">50</option>
-        </select>
-        <span>dòng</span>
-      </div>
-
-      <div style="display: flex; gap: 0.5rem; align-items: center;" *ngIf="totalPages > 1">
-        <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Trang trước</button>
-
-        <div style="display: flex; gap: 0.25rem;">
-          <button *ngFor="let page of pageNumbers" class="btn"
-            [ngClass]="currentPage === page ? 'btn-primary' : 'btn-outline'" (click)="goToPage(page)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">
-            {{page}}
-          </button>
+    <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-top: 1px solid var(--border); flex-wrap: nowrap; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <div style="color: var(--text-muted); font-size: 0.9rem; white-space: nowrap;">
+          Hiển thị {{ startItemIndex }}–{{ endItemIndex }} trong số {{ transactions.length }} giao dịch
         </div>
 
-        <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Trang sau</button>
+        <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.9rem; white-space: nowrap;">
+          <span>Số hàng mỗi trang:</span>
+          <select class="form-control" style="width: auto; min-width: 70px; padding: 0.35rem 1.75rem 0.35rem 0.5rem; height: 34px; line-height: 1; font-size: 0.9rem; display: inline-block; cursor: pointer;" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.35rem; align-items: center; white-space: nowrap;">
+        <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" style="padding: 0.4rem 0.7rem; font-size: 0.9rem; line-height: 1;" title="Trang trước">&lt;</button>
+
+        <ng-container *ngFor="let page of getVisiblePages()">
+          <span *ngIf="page === '...'" style="color: var(--text-muted); padding: 0 0.25rem; user-select: none;">...</span>
+          <button *ngIf="page !== '...'" class="btn" [ngClass]="currentPage === page ? 'btn-primary' : 'btn-outline'" (click)="goToPage(page)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem; min-width: 36px; height: 34px; display: flex; align-items: center; justify-content: center; line-height: 1;">
+            {{page}}
+          </button>
+        </ng-container>
+
+        <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" style="padding: 0.4rem 0.7rem; font-size: 0.9rem; line-height: 1;" title="Trang sau">&gt;</button>
       </div>
     </div>
   </div>
@@ -120,13 +129,13 @@
       <div><strong>Trạng thái:</strong> <span class="badge badge-success">Thành công</span></div>
     </div>
 
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;">
+    <table style="table-layout: fixed; width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;">
       <thead style="background: var(--background); border-bottom: 2px solid var(--border);">
         <tr>
-          <th style="padding: 0.75rem; text-align: left;">Sản phẩm</th>
-          <th style="padding: 0.75rem; text-align: right;">Số lượng</th>
-          <th style="padding: 0.75rem; text-align: right;">Đơn giá</th>
-          <th style="padding: 0.75rem; text-align: right;">Thành tiền</th>
+          <th style="width: 55%; padding: 0.75rem; text-align: left;">Sản phẩm</th>
+          <th style="width: 15%; padding: 0.75rem; text-align: right;">Số lượng</th>
+          <th style="width: 15%; padding: 0.75rem; text-align: right;">Đơn giá</th>
+          <th style="width: 15%; padding: 0.75rem; text-align: right;">Thành tiền</th>
         </tr>
       </thead>
       <tbody>

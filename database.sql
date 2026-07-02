@@ -1132,5 +1132,15 @@ WHERE oi.product_id = p.id AND oi.cost_price IS NULL;
 -- PostgreSQL database dump complete
 --
 
+ALTER TABLE public.imports ADD COLUMN IF NOT EXISTS status character varying(50) DEFAULT 'PENDING';
+ALTER TABLE public.imports ADD COLUMN IF NOT EXISTS received_date timestamp with time zone;
+ALTER TABLE public.import_items ADD COLUMN IF NOT EXISTS received_quantity integer DEFAULT 0;
+ALTER TABLE public.import_items ADD COLUMN IF NOT EXISTS new_price numeric(15,2);
+
+-- Drop triggers to prevent automatic stock updates on raw insertion of import items
+DROP TRIGGER IF EXISTS trg_after_insert_import_item ON public.import_items;
+DROP TRIGGER IF EXISTS trg_update_total_import ON public.import_items;
+
+
 \unrestrict h8L3RWTGwlKQadZfjAVk7IFasvWZovx1xr9Cckn68fnZVS6VCHRDoaiLvrffcnv
 

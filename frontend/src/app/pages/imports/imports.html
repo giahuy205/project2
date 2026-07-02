@@ -1,27 +1,85 @@
 <div class="page-layout">
   <div class="header-actions"
     style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-    <h2>Giao dịch nhập hàng</h2>
-    <button class="btn btn-primary" (click)="openImportModal()">+ Nhập hàng</button>
+    <h2>Giao dịch đặt hàng</h2>
+    <button class="btn btn-primary" (click)="openImportModal()" title="Tạo đơn đặt hàng mới" style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; padding: 0;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    </button>
   </div>
 
-  <div class="card">
+  <div class="card" style="padding-top: 0;">
+    <!-- Tabs Navigation -->
+    <div class="tabs-container" style="display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1rem; margin-left: -1rem; margin-right: -1rem; padding-left: 1rem;">
+      <button class="tab-button" [class.active-tab]="activeTab === 'ordered'" (click)="switchTab('ordered')" style="padding: 1rem 1.5rem; background: none; border: none; border-bottom: 3px solid transparent; font-weight: 600; cursor: pointer; color: var(--text-muted); transition: all 0.2s; font-size: 0.95rem;">
+        Đơn đặt hàng ({{ importsList.filter(imp => imp.status === 'PENDING' || imp.status === 'CANCELLED').length }})
+      </button>
+      <button class="tab-button" [class.active-tab]="activeTab === 'received'" (click)="switchTab('received')" style="padding: 1rem 1.5rem; background: none; border: none; border-bottom: 3px solid transparent; font-weight: 600; cursor: pointer; color: var(--text-muted); transition: all 0.2s; font-size: 0.95rem;">
+        Đơn đã nhận ({{ importsList.filter(imp => imp.status === 'RECEIVED').length }})
+      </button>
+    </div>
+
     <div class="table-container">
-      <table>
+      <!-- TABLE: ordered/pending & cancelled -->
+      <table style="table-layout: fixed; width: 100%;" *ngIf="activeTab === 'ordered'">
         <thead>
           <tr>
-            <th>Mã lô nhập</th>
-            <th>Ngày nhập</th>
-            <th>Nhà cung cấp</th>
-            <th>Ghi chú</th>
-            <th>Tổng tiền</th>
-            <th>Thao tác</th>
+            <th style="width: 10%;">Mã đơn</th>
+            <th style="width: 20%;">Ngày đặt</th>
+            <th style="width: 25%;">Nhà cung cấp</th>
+            <th style="width: 18%;">Ghi chú</th>
+            <th style="width: 12%;">Trạng thái</th>
+            <th style="width: 12%;">Dự kiến tổng</th>
+            <th style="width: 13%;">Thao tác</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let imp of pagedImports">
             <td>#{{imp.id}}</td>
             <td>{{imp.importDate | date:'dd/MM/yyyy HH:mm'}}</td>
+            <td>{{imp.supplierName || 'N/A'}}</td>
+            <td>{{imp.note}}</td>
+            <td>
+              <span class="badge" [ngClass]="imp.status === 'PENDING' ? 'badge-pending' : 'badge-cancelled'">
+                {{ imp.status === 'PENDING' ? 'Đang đợi' : 'Đã hủy' }}
+              </span>
+            </td>
+            <td>{{imp.totalCost | number:'1.0-0'}}đ</td>
+            <td>
+              <div style="display: flex; gap: 0.35rem; align-items: center;">
+                <button class="btn btn-outline" style="padding: 0.3rem 0.5rem; line-height: 1;" (click)="viewDetails(imp)" title="Chi tiết">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+                <button *ngIf="imp.status === 'PENDING'" class="btn btn-success" style="padding: 0.3rem 0.5rem; line-height: 1; border: none; border-radius: 4px; display: flex; align-items: center; justify-content: center;" (click)="openReceiveModal(imp)" title="Nhận hàng">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+                <button *ngIf="imp.status === 'PENDING'" class="btn" [ngClass]="isCancelable(imp.importDate) ? 'btn-danger' : 'btn-disabled'" [disabled]="!isCancelable(imp.importDate)" style="padding: 0.3rem 0.5rem; line-height: 1; border-radius: 4px; display: flex; align-items: center; justify-content: center;" (click)="cancelOrder(imp)" [attr.title]="isCancelable(imp.importDate) ? 'Hủy đơn' : 'Đã quá thời gian hủy hàng (quá 1 tiếng)'">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="getFilteredCount() === 0">
+            <td colspan="7" style="text-align: center; color: gray; padding: 2rem;">Chưa có đơn đặt hàng nào.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- TABLE: received -->
+      <table style="table-layout: fixed; width: 100%;" *ngIf="activeTab === 'received'">
+        <thead>
+          <tr>
+            <th style="width: 12%;">Mã lô nhập</th>
+            <th style="width: 20%;">Ngày nhận</th>
+            <th style="width: 25%;">Nhà cung cấp</th>
+            <th style="width: 18%;">Ghi chú</th>
+            <th style="width: 15%;">Tổng thanh toán</th>
+            <th style="width: 10%;">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let imp of pagedImports">
+            <td>#{{imp.id}}</td>
+            <td>{{imp.receivedDate | date:'dd/MM/yyyy HH:mm'}}</td>
             <td>{{imp.supplierName || 'N/A'}}</td>
             <td>{{imp.note}}</td>
             <td>{{imp.totalCost | number:'1.0-0'}}đ</td>
@@ -31,44 +89,49 @@
               </button>
             </td>
           </tr>
-          <tr *ngIf="importsList.length === 0">
-            <td colspan="6" style="text-align: center; color: gray;">Chưa có lịch sử nhập hàng.</td>
+          <tr *ngIf="getFilteredCount() === 0">
+            <td colspan="6" style="text-align: center; color: gray; padding: 2rem;">Chưa có đơn đã nhận hàng.</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <!-- Pagination Controls -->
-    <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 1rem;">
-      <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
-        <span>Hiển thị mỗi trang:</span>
-        <select class="form-control" style="width: 80px; padding: 0.35rem 0.5rem; height: auto;" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
-          <option [ngValue]="10">10</option>
-          <option [ngValue]="20">20</option>
-          <option [ngValue]="50">50</option>
-        </select>
-        <span>dòng</span>
-      </div>
-
-      <div style="display: flex; gap: 0.5rem; align-items: center;" *ngIf="totalPages > 1">
-        <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Trang trước</button>
-
-        <div style="display: flex; gap: 0.25rem;">
-          <button *ngFor="let page of pageNumbers" class="btn"
-            [ngClass]="currentPage === page ? 'btn-primary' : 'btn-outline'" (click)="goToPage(page)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">
-            {{page}}
-          </button>
+    <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-top: 1px solid var(--border); flex-wrap: nowrap; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <div style="color: var(--text-muted); font-size: 0.9rem; white-space: nowrap;">
+          Hiển thị {{ startItemIndex }}–{{ endItemIndex }} trong số {{ getFilteredCount() }} phiếu
         </div>
 
-        <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Trang sau</button>
+        <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.9rem; white-space: nowrap;">
+          <span>Số hàng mỗi trang:</span>
+          <select class="form-control" style="width: auto; min-width: 70px; padding: 0.35rem 1.75rem 0.35rem 0.5rem; height: 34px; line-height: 1; font-size: 0.9rem; display: inline-block; cursor: pointer;" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.35rem; align-items: center; white-space: nowrap;">
+        <button class="btn btn-outline" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" style="padding: 0.4rem 0.7rem; font-size: 0.9rem; line-height: 1;" title="Trang trước">&lt;</button>
+
+        <ng-container *ngFor="let page of getVisiblePages()">
+          <span *ngIf="page === '...'" style="color: var(--text-muted); padding: 0 0.25rem; user-select: none;">...</span>
+          <button *ngIf="page !== '...'" class="btn" [ngClass]="currentPage === page ? 'btn-primary' : 'btn-outline'" (click)="goToPage(page)" style="padding: 0.4rem 0.8rem; font-size: 0.9rem; min-width: 36px; height: 34px; display: flex; align-items: center; justify-content: center; line-height: 1;">
+            {{page}}
+          </button>
+        </ng-container>
+
+        <button class="btn btn-outline" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" style="padding: 0.4rem 0.7rem; font-size: 0.9rem; line-height: 1;" title="Trang sau">&gt;</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal Nhập hàng mới -->
+  <!-- Modal Nhập hàng mới (Đặt hàng) -->
   <div class="modal-overlay" *ngIf="showImportModal">
     <div class="modal-content card slide-in">
-      <h3 style="margin-bottom: 1rem;">Nhập hàng</h3>
+      <h3 style="margin-bottom: 1rem;">Đặt hàng mua mới</h3>
 
       <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
         <div class="form-group" style="flex: 1;">
@@ -78,12 +141,12 @@
         </div>
         <div class="form-group" style="flex: 1;">
           <label class="form-label">Ghi chú</label>
-          <input type="text" class="form-control" [(ngModel)]="newImport.note" placeholder="Ghi chú"
+          <input type="text" class="form-control" [(ngModel)]="newImport.note" placeholder="Ghi chú đơn đặt hàng"
             [disabled]="isSubmitting">
         </div>
       </div>
 
-      <h4 style="margin-bottom: 0.5rem;">Danh sách sản phẩm</h4>
+      <h4 style="margin-bottom: 0.5rem;">Danh sách sản phẩm cần mua</h4>
 
       <div class="item-row" *ngFor="let item of newImport.items; let i = index"
         [class.active-row]="activeRowIndex === i" (click)="setActiveRow(i)">
@@ -114,7 +177,7 @@
         </div>
 
         <div class="form-group" style="flex: 1;">
-          <label class="form-label">Số lượng</label>
+          <label class="form-label">Số lượng đặt</label>
           <input type="number" class="form-control" [(ngModel)]="item.quantity" min="1" (focus)="setActiveRow(i)"
             [disabled]="isSubmitting">
         </div>
@@ -126,7 +189,7 @@
         </div>
 
         <div class="form-group" style="flex: 1.5;">
-          <label class="form-label">Giá nhập</label>
+          <label class="form-label">Giá nhập dự kiến</label>
           <input type="number" class="form-control" [(ngModel)]="item.unitPrice" (focus)="setActiveRow(i)"
             [disabled]="isSubmitting">
         </div>
@@ -139,7 +202,7 @@
 
         <div class="form-group" style="flex: 1.5;">
           <label class="form-label">Giá bán mới</label>
-          <input type="number" class="form-control" [(ngModel)]="item.newPrice" placeholder="Giá bán"
+          <input type="number" class="form-control" [(ngModel)]="item.newPrice" placeholder="Giá bán mới"
             (focus)="setActiveRow(i)" [disabled]="isSubmitting">
         </div>
 
@@ -154,7 +217,7 @@
       </div>
 
       <div style="text-align: right; font-size: 1.2rem; margin-bottom: 1rem;">
-        <strong>Tổng chi phí: </strong> {{ getTotalImportCost() | number:'1.0-0' }}đ
+        <strong>Tổng chi phí ước tính: </strong> {{ getTotalImportCost() | number:'1.0-0' }}đ
       </div>
 
       <div *ngIf="getValidationErrors().length > 0" style="text-align: right; margin-bottom: 0.75rem;">
@@ -168,7 +231,66 @@
         <button class="btn btn-outline" (click)="closeImportModal()" [disabled]="isSubmitting">Hủy</button>
         <button class="btn btn-primary" (click)="saveImport()"
           [disabled]="isSubmitting || getValidationErrors().length > 0">
-          {{ isSubmitting ? 'Đang xử lý...' : 'Xác nhận' }}
+          Xác nhận đặt hàng
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Nhận hàng thực tế (Popup) -->
+  <div class="modal-overlay" *ngIf="showReceiveModal">
+    <div class="modal-content card slide-in" style="max-width: 800px;">
+      <h3 style="margin-bottom: 1rem; color: var(--primary);">Nhận hàng cho Đơn đặt #{{receivingImport?.id}}</h3>
+
+      <div style="background: var(--background); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <p style="margin: 0.25rem 0;"><strong>Nhà cung cấp:</strong> {{ receivingImport?.supplierName || 'N/A' }}</p>
+          <p style="margin: 0.25rem 0;"><strong>Ngày đặt:</strong> {{ receivingImport?.importDate | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+        <button class="btn btn-outline" (click)="receiveAllFully()">Nhận đủ tất cả</button>
+      </div>
+
+      <div style="max-height: 400px; overflow-y: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: 8px;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: var(--background); position: sticky; top: 0; z-index: 2;">
+              <th style="padding: 0.75rem; text-align: left; width: 45%;">Sản phẩm</th>
+              <th style="padding: 0.75rem; text-align: right; width: 15%;">Đơn giá</th>
+              <th style="padding: 0.75rem; text-align: center; width: 12%;">SL đặt</th>
+              <th style="padding: 0.75rem; text-align: center; width: 18%;">SL nhận thực tế</th>
+              <th style="padding: 0.75rem; text-align: center; width: 10%;">Nhận đủ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of receivingItems" style="border-bottom: 1px solid var(--border);">
+              <td style="padding: 0.75rem; text-align: left;">
+                <strong style="display: block;">{{item.product?.name}}</strong>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">{{item.product?.barcode}}</span>
+              </td>
+              <td style="padding: 0.75rem; text-align: right;">{{item.unitPrice | number:'1.0-0'}}đ</td>
+              <td style="padding: 0.75rem; text-align: center; font-weight: 600;">{{item.quantity}}</td>
+              <td style="padding: 0.75rem; text-align: center;">
+                <input type="number" class="form-control" style="width: 80px; text-align: center; padding: 0.35rem; display: inline-block;" [(ngModel)]="item.receivedQuantity" min="0" [max]="item.quantity" (input)="onReceivedQuantityChange(item)" [disabled]="isSubmitting">
+              </td>
+              <td style="padding: 0.75rem; text-align: center;">
+                <input type="checkbox" style="width: 18px; height: 18px; cursor: pointer;" [checked]="item.isFullyReceived" (change)="toggleFullyReceived(item)" [disabled]="isSubmitting">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <span style="color: var(--text-muted); font-size: 0.95rem;"><i>* Số tiền thanh toán sẽ tự động trừ đi ứng với các món thiếu.</i></span>
+        <div style="font-size: 1.25rem; font-weight: bold; color: var(--danger);">
+          Tổng cần thanh toán: <span style="font-size: 1.4rem;">{{ getActualReceiveCost() | number:'1.0-0' }}đ</span>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+        <button class="btn btn-outline" (click)="closeReceiveModal()" [disabled]="isSubmitting">Quay lại</button>
+        <button class="btn btn-primary" (click)="submitReceive()" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Đang thanh toán...' : 'Xác nhận & Thanh toán' }}
         </button>
       </div>
     </div>
@@ -176,36 +298,70 @@
 
   <!-- Modal Chi tiết nhập hàng -->
   <div class="modal-overlay" *ngIf="showDetailModal">
-    <div class="modal-content card slide-in" style="max-width: 600px;">
-      <h3 style="margin-bottom: 1rem;">Chi tiết lô nhập #{{selectedImport?.id}}</h3>
+    <div class="modal-content card slide-in" style="max-width: 650px;">
+      <h3 style="margin-bottom: 1rem;">Chi tiết đơn đặt hàng #{{selectedImport?.id}}</h3>
 
       <div style="margin-bottom: 1rem;">
-        <p><strong>Ngày nhập:</strong> {{selectedImport?.importDate | date:'dd/MM/yyyy HH:mm'}}</p>
+        <p *ngIf="selectedImport?.status === 'RECEIVED'"><strong>Ngày đặt:</strong> {{selectedImport?.importDate | date:'dd/MM/yyyy HH:mm'}}</p>
+        <p *ngIf="selectedImport?.status === 'RECEIVED'"><strong>Ngày nhận:</strong> {{selectedImport?.receivedDate | date:'dd/MM/yyyy HH:mm'}}</p>
+        <p *ngIf="selectedImport?.status !== 'RECEIVED'"><strong>Ngày đặt:</strong> {{selectedImport?.importDate | date:'dd/MM/yyyy HH:mm'}}</p>
         <p><strong>Nhà cung cấp:</strong> {{selectedImport?.supplierName || 'Không rõ'}}</p>
+        <p><strong>Trạng thái:</strong> 
+          <span class="badge" [ngClass]="{'badge-pending': selectedImport?.status === 'PENDING', 'badge-cancelled': selectedImport?.status === 'CANCELLED', 'badge-received': selectedImport?.status === 'RECEIVED'}">
+            {{ selectedImport?.status === 'PENDING' ? 'Chưa nhận' : (selectedImport?.status === 'RECEIVED' ? 'Đã nhận' : 'Đã hủy') }}
+          </span>
+        </p>
         <p><strong>Ghi chú:</strong> {{selectedImport?.note}}</p>
       </div>
 
-      <table style="margin-bottom: 1.5rem;">
+      <!-- If RECEIVED -->
+      <table style="table-layout: fixed; width: 100%; margin-bottom: 1.5rem;" *ngIf="selectedImport?.status === 'RECEIVED'">
         <thead>
           <tr>
-            <th>Sản phẩm</th>
-            <th>Số lượng</th>
-            <th>Giá nhập</th>
-            <th>Tổng tiền</th>
+            <th style="width: 40%;">Sản phẩm</th>
+            <th style="width: 15%; text-align: center;">SL Đặt</th>
+            <th style="width: 15%; text-align: center;">SL Nhận</th>
+            <th style="width: 15%; text-align: right;">Giá nhập</th>
+            <th style="width: 15%; text-align: right;">Thành tiền</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let detail of importDetails">
-            <td>{{detail.product?.name}}</td>
-            <td>{{detail.quantity}}</td>
-            <td>{{detail.unitPrice | number:'1.0-0'}}đ</td>
-            <td>{{(detail.quantity * detail.unitPrice) | number:'1.0-0'}}đ</td>
+          <tr *ngFor="let detail of importDetails" [class.highlight-missing]="detail.receivedQuantity < detail.quantity">
+            <td style="white-space: normal; word-wrap: break-word;">{{detail.product?.name}}</td>
+            <td style="text-align: center;">{{detail.quantity}}</td>
+            <td style="text-align: center; font-weight: bold;">
+              {{detail.receivedQuantity}}
+              <span *ngIf="detail.receivedQuantity < detail.quantity" style="font-size: 0.75rem; display: block; font-weight: normal; color: #b45309;">(Thiếu {{detail.quantity - detail.receivedQuantity}})</span>
+            </td>
+            <td style="text-align: right;">{{detail.unitPrice | number:'1.0-0'}}đ</td>
+            <td style="text-align: right; font-weight: 500;">{{(detail.receivedQuantity * detail.unitPrice) | number:'1.0-0'}}đ</td>
           </tr>
         </tbody>
       </table>
 
-      <div style="text-align: right; font-size: 1.1rem; margin-bottom: 1.5rem;">
-        <strong>Tổng tiền: </strong> {{selectedImport?.totalCost | number:'1.0-0'}}đ
+      <!-- If PENDING or CANCELLED -->
+      <table style="table-layout: fixed; width: 100%; margin-bottom: 1.5rem;" *ngIf="selectedImport?.status !== 'RECEIVED'">
+        <thead>
+          <tr>
+            <th style="width: 50%;">Sản phẩm</th>
+            <th style="width: 16%; text-align: center;">SL Đặt</th>
+            <th style="width: 17%; text-align: right;">Giá nhập</th>
+            <th style="width: 17%; text-align: right;">Thành tiền</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let detail of importDetails">
+            <td style="white-space: normal; word-wrap: break-word;">{{detail.product?.name}}</td>
+            <td style="text-align: center;">{{detail.quantity}}</td>
+            <td style="text-align: right;">{{detail.unitPrice | number:'1.0-0'}}đ</td>
+            <td style="text-align: right; font-weight: 500;">{{(detail.quantity * detail.unitPrice) | number:'1.0-0'}}đ</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="text-align: right; font-size: 1.15rem; margin-bottom: 1.5rem;">
+        <strong>{{ selectedImport?.status === 'RECEIVED' ? 'Thực tế thanh toán: ' : 'Tổng dự chi: ' }}</strong> 
+        <span style="font-size: 1.3rem; color: var(--danger); font-weight: bold;">{{selectedImport?.totalCost | number:'1.0-0'}}đ</span>
       </div>
 
       <div style="display: flex; justify-content: flex-end;">
@@ -213,10 +369,11 @@
       </div>
     </div>
   </div>
+
   <!-- Confirmation Modal (Overlays Import Modal) -->
   <div class="modal-overlay" *ngIf="showConfirmModal" style="z-index: 1100;">
     <div class="modal-content card slide-in" style="max-width: 500px; border: 2px solid var(--primary);">
-      <h3 style="margin-bottom: 1rem; color: var(--primary);">Xác nhận nhập hàng</h3>
+      <h3 style="margin-bottom: 1rem; color: var(--primary);">Xác nhận đặt hàng</h3>
       
       <div style="background: var(--background); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
         <p style="margin: 0.25rem 0;"><strong>Nhà cung cấp:</strong> {{ newImport.supplierName || 'Không rõ' }}</p>
@@ -224,17 +381,17 @@
       </div>
 
       <div style="max-height: 300px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 4px;">
-        <table style="width: 100%; font-size: 0.9rem;">
+        <table style="table-layout: fixed; width: 100%; font-size: 0.9rem;">
           <thead style="background: #f8f9fa; position: sticky; top: 0;">
             <tr>
-              <th style="padding: 0.5rem; text-align: left;">Sản phẩm</th>
-              <th style="padding: 0.5rem; text-align: center;">HSD</th>
-              <th style="padding: 0.5rem; text-align: right;">SL</th>
+              <th style="width: 55%; padding: 0.5rem; text-align: left;">Sản phẩm</th>
+              <th style="width: 30%; padding: 0.5rem; text-align: center;">HSD</th>
+              <th style="width: 15%; padding: 0.5rem; text-align: right;">SL</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let item of newImport.items" style="border-bottom: 1px solid #eee;">
-              <td style="padding: 0.5rem;">{{ item.searchTerm }}</td>
+              <td style="padding: 0.5rem; white-space: normal; word-wrap: break-word;">{{ item.searchTerm }}</td>
               <td style="padding: 0.5rem; text-align: center; color: var(--danger);">{{ item.expiryDate | date:'dd/MM/yyyy' }}</td>
               <td style="padding: 0.5rem; text-align: right; font-weight: bold;">{{ item.quantity }}</td>
             </tr>
@@ -243,16 +400,16 @@
       </div>
 
       <div style="text-align: right; font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--danger);">
-        <strong>Tổng tiền: {{ getTotalImportCost() | number:'1.0-0' }}đ</strong>
+        <strong>Tổng tiền dự tính: {{ getTotalImportCost() | number:'1.0-0' }}đ</strong>
       </div>
 
       <p style="font-size: 0.85rem; color: gray; margin-bottom: 1rem;">
-        <i>* Hệ thống sẽ ngay lập tức cập nhật tồn kho và giá bán.</i>
+        <i>* Đơn hàng này sẽ được lưu ở trạng thái chờ duyệt. Tồn kho và giá chỉ được cập nhật khi nhận hàng thực tế.</i>
       </p>
 
       <div style="display: flex; justify-content: flex-end; gap: 1rem;">
         <button class="btn btn-outline" (click)="showConfirmModal = false">Quay lại</button>
-        <button class="btn btn-primary" (click)="executeSave()">Xác nhận lưu</button>
+        <button class="btn btn-primary" (click)="executeSave()">Gửi đơn đặt</button>
       </div>
     </div>
   </div>

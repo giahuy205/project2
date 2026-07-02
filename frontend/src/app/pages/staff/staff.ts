@@ -28,6 +28,10 @@ export class Staff implements OnInit {
   totalPages = 1;
   pageNumbers: number[] = [];
 
+  // Sorting state
+  sortColumn = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
   // Modal State
   isModalOpen = false;
   isEditMode = false;
@@ -98,14 +102,52 @@ export class Staff implements OnInit {
       result = result.filter(acc => acc.role === 'saler');
     }
 
-    // Sort: active accounts at the top, inactive accounts at the bottom
-    this.filteredAccounts = [...result].sort((a, b) => {
-      if (a.isActive === b.isActive) return 0;
-      return a.isActive ? -1 : 1;
-    });
+    // Sort
+    if (this.sortColumn) {
+      this.filteredAccounts = [...result].sort((a: any, b: any) => {
+        let valA = a[this.sortColumn];
+        let valB = b[this.sortColumn];
+
+        if (valA === null || valA === undefined) valA = '';
+        if (valB === null || valB === undefined) valB = '';
+
+        if (typeof valA === 'boolean' && typeof valB === 'boolean') {
+          if (valA === valB) return 0;
+          return this.sortDirection === 'asc' 
+            ? (valA ? 1 : -1) 
+            : (valA ? -1 : 1);
+        }
+
+        if (typeof valA === 'string' && typeof valB === 'string') {
+          return this.sortDirection === 'asc'
+            ? valA.localeCompare(valB)
+            : valB.localeCompare(valA);
+        }
+
+        if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    } else {
+      // Sort: active accounts at the top, inactive accounts at the bottom
+      this.filteredAccounts = [...result].sort((a, b) => {
+        if (a.isActive === b.isActive) return 0;
+        return a.isActive ? -1 : 1;
+      });
+    }
 
     this.currentPage = 1;
     this.updatePagination();
+  }
+
+  sortBy(column: string) {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.applyFilter();
   }
 
   updatePagination() {
@@ -116,9 +158,11 @@ export class Staff implements OnInit {
     this.cdr.detectChanges();
   }
 
-  goToPage(page: number) {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
+  goToPage(page: any) {
+    if (page === '...') return;
+    const pageNum = Number(page);
+    if (pageNum >= 1 && pageNum <= this.totalPages) {
+      this.currentPage = pageNum;
       this.updatePagination();
     }
   }
@@ -126,6 +170,44 @@ export class Staff implements OnInit {
   onPageSizeChange() {
     this.currentPage = 1;
     this.updatePagination();
+  }
+
+  get startItemIndex(): number {
+    if (this.filteredAccounts.length === 0) return 0;
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get endItemIndex(): number {
+    const end = this.currentPage * this.pageSize;
+    return end > this.filteredAccounts.length ? this.filteredAccounts.length : end;
+  }
+
+  getVisiblePages(): (number | string)[] {
+    const total = this.totalPages;
+    const current = this.currentPage;
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    const pages: (number | string)[] = [];
+    pages.push(1);
+    let start = Math.max(2, current - 2);
+    let end = Math.min(total - 1, current + 2);
+    if (current <= 4) {
+      end = 5;
+    } else if (current >= total - 3) {
+      start = total - 4;
+    }
+    if (start > 2) {
+      pages.push('...');
+    }
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    if (end < total - 1) {
+      pages.push('...');
+    }
+    pages.push(total);
+    return pages;
   }
 
   generateNextEmployeeCode(): string {

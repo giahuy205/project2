@@ -261,7 +261,7 @@ export class Settings implements OnInit {
     this.originalStoreName = this.storeName;
     this.originalStoreAddress = this.storeAddress;
     this.originalStorePhone = this.storePhone;
-    this.storeSuccessMessage = 'Cập nhật cấu hình cửa hàng thành công!';
+    this.storeSuccessMessage = 'Cập nhật thông tin cửa hàng thành công!';
     setTimeout(() => {
       this.storeSuccessMessage = '';
       this.cdr.detectChanges();
