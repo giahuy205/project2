@@ -960,3 +960,8 @@ Thay vì sử dụng các thư viện biểu đồ cồng kềnh của bên th�
 - **Xuất bản báo cáo đa định dạng:** Hỗ trợ xuất dữ liệu danh sách sản phẩm, hóa đơn bán hàng và báo cáo doanh thu ra tệp **PDF / Excel** trực tiếp từ Frontend.
 - **Bổ sung giao diện quản lý biến động giá:** Thiết kế màn hình tra cứu lịch sử thay đổi giá bán/giá nhập sản phẩm dựa trên API sẵn có để hỗ trợ quản lý theo dõi sát sao hơn biến động thị trường.
 - **Phân quyền nâng cao RBAC (Role-Based Access Control):** Chi tiết hóa các quyền hạn của nhân viên (quyền sửa giá, quyền hoàn tiền hóa đơn cần có sự phê duyệt của quản lý).
+- **Phát triển phân hệ Quản lý chuỗi cửa hàng (Multi-Store Management):**
+  - **Quản lý đa chi nhánh:** Mở rộng hệ thống hỗ trợ quản lý danh mục kho hàng và nhân sự của nhiều chi nhánh/cửa hàng trên cùng một nền tảng.
+  - **Nghiệp vụ điều chuyển hàng hóa (Stock Transfer):** Phát triển tính năng cho phép lập phiếu và phê duyệt điều chuyển hàng hóa giữa các kho chi nhánh trực tiếp khi một cửa hàng gặp tình trạng tồn kho thấp (Low Stock) hoặc hết hàng, tự động cập nhật nhật ký kho liên chi nhánh.
+  - **Điều động nhân sự hỗ trợ chi nhánh (Staff Dispatching):** Cho phép Admin ghi nhận lịch điều phối nhân viên từ chi nhánh thừa nhân lực sang hỗ trợ các chi nhánh thiếu hụt tạm thời vào giờ cao điểm, đồng thời hỗ trợ chấm công chéo và tổng hợp hiệu suất công việc linh hoạt.
+  - **Báo cáo doanh thu hợp nhất (Consolidated Reporting):** Phát triển trang báo cáo tổng hợp để so sánh hiệu quả kinh doanh, doanh thu và biên lợi nhuận giữa các chi nhánh cửa hàng khác nhau.
