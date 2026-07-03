@@ -1,76 +1,137 @@
 <div class="dashboard">
   <h2>Tổng quan hệ thống</h2>
   <div class="stats-grid">
-    <div class="card stat-card" (click)="navigate('/transactions')" title="Click để xem chi tiết giao dịch">
-      <div class="icon-wrap icon-primary">💰</div>
-      <div class="data">
+    <!-- CARD 1: GROSS REVENUE (Doanh thu) -->
+    <div class="card stat-card" (click)="navigate('/reports')" title="Click để xem phân tích doanh thu"
+         style="display: flex; flex-direction: column; border-left: 5px solid #3B82F6; margin-bottom: 0; padding: 0.85rem 1.1rem; gap: 0.5rem; min-height: 110px; justify-content: space-between; align-items: stretch; cursor: pointer;">
+      <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+        <span style="font-size: 1.1rem; line-height: 1;">💰</span>
         <span>Doanh thu hôm nay</span>
-        <h3>{{ todayRevenue | number:'1.0-0' }}đ</h3>
-        <span class="stat-subtext">Thực thu trong ngày</span>
+      </div>
+      <div>
+        <h3 style="margin: 0; font-size: 1.45rem; font-weight: 700; color: var(--text-main); line-height: 1.2;">{{ todayRevenue | number:'1.0-0' }}đ</h3>
+        <span class="stat-subtext" style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; display: block;">Thực thu trong ngày</span>
       </div>
     </div>
-    <div class="card stat-card" (click)="navigate('/transactions')" title="Click để xem danh sách đơn hàng">
-      <div class="icon-wrap icon-secondary">🧾</div>
-      <div class="data">
-        <span>Tổng đơn hàng</span>
-        <h3>{{ todayOrders }}</h3>
-        <span class="stat-subtext">Đơn hàng đã hoàn thành</span>
-      </div>
-    </div>
-    <div class="card stat-card" (click)="navigate('/inventory')" title="Click để xem kho hàng">
-      <div class="icon-wrap icon-warning">⭐</div>
-      <div class="data">
+
+    <!-- CARD 2: TOP PRODUCT (SP bán chạy) -->
+    <div class="card stat-card" (click)="navigate('/inventory')" title="Click để xem kho hàng"
+         style="display: flex; flex-direction: column; border-left: 5px solid #10B981; margin-bottom: 0; padding: 0.85rem 1.1rem; gap: 0.5rem; min-height: 110px; justify-content: space-between; align-items: stretch; cursor: pointer;">
+      <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+        <span style="font-size: 1.1rem; line-height: 1;">⭐</span>
         <span>Sản phẩm bán chạy</span>
-        <h3>{{ topProduct }}</h3>
-        <span class="stat-subtext">Mặt hàng bán chạy nhất</span>
+      </div>
+      <div>
+        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--text-main); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" [title]="topProduct">{{ topProduct }}</h3>
+        <span class="stat-subtext" style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; display: block;">Mặt hàng bán chạy nhất</span>
       </div>
     </div>
-    <div class="card stat-card" (click)="navigate('/inventory')" title="Click để nhập hàng / kiểm kê kho">
-      <div class="icon-wrap icon-danger">📦</div>
-      <div class="data">
-        <span>Cảnh báo hết hàng</span>
-        <h3 [style.color]="lowStockCount > 0 ? 'var(--danger)' : 'inherit'">{{ lowStockCount }} mặt hàng</h3>
-        <span class="stat-subtext">{{ lowStockCount > 0 ? 'Cần nhập thêm hàng' : 'Kho hàng an toàn' }}</span>
+
+    <!-- CARD 3: PENDING IMPORTS (Đơn hàng sắp giao) -->
+    <div class="card stat-card" (click)="navigate('/imports')" title="Click để xem danh sách nhập hàng"
+         style="display: flex; flex-direction: column; border-left: 5px solid #F59E0B; margin-bottom: 0; padding: 0.85rem 1.1rem; gap: 0.5rem; min-height: 110px; justify-content: space-between; align-items: stretch; cursor: pointer;">
+      <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+        <span style="font-size: 1.1rem; line-height: 1;">🚚</span>
+        <span>Đơn hàng sắp giao</span>
+      </div>
+      <div>
+        <h3 style="margin: 0; font-size: 1.45rem; font-weight: 700; color: var(--text-main); line-height: 1.2;">{{ pendingImportsCount }} đơn</h3>
+        <span class="stat-subtext" style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; display: block;">
+          {{ pendingImportsCount > 0 ? 'Có đơn đặt hàng chờ giao tới' : 'Không có đơn hàng chờ giao' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- CARD 4: OUT OF STOCK WARNING (Số SP hết hàng) -->
+    <div class="card stat-card" (click)="navigate('/inventory')" title="Click để nhập hàng / kiểm kê kho"
+         style="display: flex; flex-direction: column; border-left: 5px solid #EF4444; margin-bottom: 0; padding: 0.85rem 1.1rem; gap: 0.5rem; min-height: 110px; justify-content: space-between; align-items: stretch; cursor: pointer;">
+      <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+        <span style="font-size: 1.1rem; line-height: 1;">📦</span>
+        <span>Số sản phẩm hết hàng</span>
+      </div>
+      <div>
+        <h3 style="margin: 0; font-size: 1.45rem; font-weight: 700; color: var(--danger); line-height: 1.2;" [style.color]="lowStockCount > 0 ? 'var(--danger)' : 'var(--text-main)'">{{ lowStockCount }} mặt hàng</h3>
+        <span class="stat-subtext" style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; display: block;">
+          {{ lowStockCount > 0 ? 'Cần nhập thêm hàng gấp' : 'Số lượng tồn kho an toàn' }}
+        </span>
       </div>
     </div>
   </div>
   
   <div class="charts-wrap">
-    <div class="card chart-area">
-      <h4>Xu hướng doanh thu (7 ngày qua)</h4>
-      <!-- Dynamic Chart -->
-      <div class="mock-chart" style="display: flex; flex-direction: column; justify-content: flex-end; height: auto; align-items: stretch; width: 100%;">
-        <div style="width: 100%; height: 200px; display: flex; align-items: flex-end; position: relative;">
-          <svg viewBox="0 0 100 40" class="chart-line" preserveAspectRatio="none" style="width: 100%; height: 100%;">
-            <!-- Gradients Definition -->
-            <defs>
-              <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.2" />
-                <stop offset="100%" stop-color="var(--primary)" stop-opacity="0.0" />
-              </linearGradient>
-            </defs>
-
-            <!-- Grid Lines -->
-            <line x1="0" y1="5" x2="100" y2="5" stroke="rgba(229, 231, 235, 0.4)" stroke-width="0.5" />
-            <line x1="0" y1="20" x2="100" y2="20" stroke="rgba(229, 231, 235, 0.4)" stroke-width="0.5" />
-            <line x1="0" y1="35" x2="100" y2="35" stroke="var(--border)" stroke-width="0.5" />
-            
-            <!-- Area Fill -->
-            <path [attr.d]="svgAreaPath" fill="url(#chartGradient)" />
-
-            <!-- Smooth Spline Path -->
-            <path [attr.d]="svgPath" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </div>
-        <!-- Chart Labels -->
-        <div style="display: flex; justify-content: space-between; margin-top: 0.75rem; font-size: 0.75rem; color: var(--text-muted); font-weight: 500; border-top: 1px solid var(--border); padding-top: 0.5rem; width: 100%;">
-          <span *ngFor="let item of revenueTrend">{{ item.dateLabel }}</span>
+    <div class="card chart-area" style="position: relative; overflow: visible; height: 420px; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+        <h4 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: var(--text-main);">
+          Xu hướng doanh thu (7 ngày qua)
+        </h4>
+        
+        <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.8rem; font-weight: 500; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 0.3rem;">
+            <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: var(--primary);"></span>
+            <span style="color: var(--text-muted); font-size: 0.75rem;">Doanh thu</span>
+          </div>
+          <span style="color: var(--text-muted); font-size: 0.75rem;">Đơn vị: Đồng (đ)</span>
         </div>
       </div>
+
+      <!-- SVG Dynamic Render Chart -->
+      <div style="width: 100%; height: 320px; position: relative;" *ngIf="revenueTrend.length > 0">
+        <svg viewBox="0 0 600 250" style="width: 100%; height: 100%; overflow: visible;">
+          <defs>
+            <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.2"/>
+              <stop offset="100%" stop-color="var(--primary)" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Y Axis Gridlines -->
+          <g>
+            <line *ngFor="let y of chartYGrid" x1="50" [attr.y1]="y" x2="550" [attr.y2]="y" 
+              stroke="var(--border)" stroke-width="1" stroke-dasharray="4" />
+          </g>
+
+          <!-- Area Shading Gradient -->
+          <path [attr.d]="revenueAreaPath" fill="url(#revGrad)" />
+
+          <!-- Current Period Revenue Trend Line -->
+          <path [attr.d]="revenuePath" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+
+          <!-- Dots on Revenue Line -->
+          <circle *ngFor="let pt of revenuePointsArray" 
+            [attr.cx]="pt.x" [attr.cy]="pt.y" r="4.5" 
+            fill="var(--primary)" stroke="white" stroke-width="2"
+            style="transition: r 0.2s;"
+            onmouseover="this.setAttribute('r', '6.5')"
+            onmouseout="this.setAttribute('r', '4.5')">
+            <title>{{ pt.label }}: {{ pt.value | number:'1.0-0' }}đ</title>
+          </circle>
+
+          <!-- X Axis Ticks & Date Labels -->
+          <g>
+            <text *ngFor="let tick of chartTicks" [attr.x]="tick.x" y="240" 
+              text-anchor="middle" fill="var(--text-muted)" font-size="10" font-weight="500">
+              {{ tick.label }}
+            </text>
+          </g>
+
+          <!-- Y Axis Values -->
+          <g font-size="9" font-weight="500" fill="var(--text-muted)">
+            <text x="40" y="34" text-anchor="end">{{ chartMaxVal | number:'1.0-0' }}</text>
+            <text x="40" y="99" text-anchor="end">{{ (chartMaxVal * 0.66) | number:'1.0-0' }}</text>
+            <text x="40" y="161" text-anchor="end">{{ (chartMaxVal * 0.33) | number:'1.0-0' }}</text>
+            <text x="40" y="224" text-anchor="end">0</text>
+          </g>
+        </svg>
+      </div>
+
+      <div *ngIf="revenueTrend.length === 0" style="display: flex; justify-content: center; align-items: center; height: 320px; color: var(--text-muted); font-size: 0.95rem;">
+        Không có dữ liệu biểu đồ xu hướng.
+      </div>
     </div>
-    <div class="card recent-tx">
-      <h4>Giao dịch gần đây</h4>
-      <div class="table-container" style="box-shadow: none; margin-top: 1rem; max-height: 235px; overflow-y: auto;">
+    
+    <div class="card recent-tx" style="height: 420px; display: flex; flex-direction: column; padding: 1.5rem; justify-content: space-between;">
+      <h4 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: var(--text-main);">Giao dịch gần đây</h4>
+      <div class="table-container" style="box-shadow: none; margin-top: 0.5rem; flex: 1; overflow: hidden;">
         <table style="table-layout: fixed; width: 100%;">
           <thead>
             <tr>
@@ -81,7 +142,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let order of recentOrders" (click)="navigate('/transactions')" title="Xem chi tiết giao dịch">
+            <tr *ngFor="let order of recentOrders.slice(0, 4)" (click)="navigate('/transactions')" title="Xem chi tiết giao dịch">
               <td style="font-weight: 600; color: var(--primary);">#ORD-{{ order.id }}</td>
               <td style="color: var(--text-muted);">{{ order.time_label }}</td>
               <td style="font-weight: 600;">{{ order.total_amount | number:'1.0-0' }}đ</td>
@@ -98,6 +159,11 @@
             </tr>
           </tbody>
         </table>
+      </div>
+      <div style="text-align: center; padding-top: 0.5rem; border-top: 1px solid var(--border); margin-top: 0.5rem;">
+        <button (click)="navigate('/transactions')" style="background: none; border: none; color: var(--text-muted); font-size: 0.85rem; font-weight: 600; cursor: pointer; padding: 0.25rem 1rem; transition: color 0.2s;" onmouseover="this.style.color='var(--text-main)'" onmouseout="this.style.color='var(--text-muted)'">
+          Xem thêm →
+        </button>
       </div>
     </div>
   </div>

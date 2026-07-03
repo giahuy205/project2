@@ -45,6 +45,13 @@ public class DashboardController {
                 lowStockCount = 0L;
             }
 
+            // 2b. Pending Imports Count (Đơn hàng chờ nhận/giao)
+            String pendingImportsSql = "SELECT COUNT(id) FROM imports WHERE status = 'PENDING'";
+            Long pendingImportsCount = jdbc.queryForObject(pendingImportsSql, Long.class);
+            if (pendingImportsCount == null) {
+                pendingImportsCount = 0L;
+            }
+
             // 3. Top Product Today (or overall)
             String topProductTodaySql = "SELECT p.name, SUM(oi.quantity) as qty " +
                                        "FROM order_items oi " +
@@ -121,6 +128,7 @@ public class DashboardController {
             response.put("todayRevenue", todayRevenue);
             response.put("todayOrders", todayOrders);
             response.put("lowStockCount", lowStockCount);
+            response.put("pendingImportsCount", pendingImportsCount);
             response.put("topProduct", topProduct);
             response.put("recentOrders", recentOrdersMapped);
             response.put("revenueTrend", trend);

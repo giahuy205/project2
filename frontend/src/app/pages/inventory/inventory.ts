@@ -1,7 +1,7 @@
 
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
@@ -15,6 +15,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class Inventory implements OnInit {
   authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
   categories: any[] = [];
   products: any[] = [];
   filteredProducts: any[] = [];
@@ -81,6 +82,13 @@ export class Inventory implements OnInit {
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['filter']) {
+        this.stockFilter = params['filter'];
+        this.filterProducts();
+        this.cdr.detectChanges();
+      }
+    });
     this.loadData();
   }
 

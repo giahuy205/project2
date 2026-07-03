@@ -35,24 +35,25 @@ public class AuthInterceptor implements HandlerInterceptor {
             requiresRole = handlerMethod.getBeanType().getAnnotation(RequiresRole.class);
         }
 
+
+        String authHeader = request.getHeader("Authorization");
+        Account account = null;
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            account = tokenService.parseToken(token);
+            if (account != null) {
+                request.setAttribute("currentUser", account);
+            }
+        }
+
         if (requiresRole == null) {
             return true; // Endpoint is public
         }
 
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("text/plain;charset=UTF-8");
-            response.getWriter().write("Unauthorized: Missing or invalid token");
-            return false;
-        }
-
-        String token = authHeader.substring(7);
-        Account account = tokenService.parseToken(token);
         if (account == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("text/plain;charset=UTF-8");
-            response.getWriter().write("Unauthorized: Token is expired or invalid");
+            response.getWriter().write("Unauthorized: Missing, expired or invalid token");
             return false;
         }
 
@@ -65,8 +66,6 @@ public class AuthInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        // Add user info to request so controllers can use it if needed
-        request.setAttribute("currentUser", account);
         return true;
     }
 }

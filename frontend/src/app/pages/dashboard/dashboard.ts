@@ -18,13 +18,17 @@ export class Dashboard implements OnInit {
   todayRevenue = 0;
   todayOrders = 0;
   lowStockCount = 0;
+  pendingImportsCount = 0;
   topProduct = 'Đang tải...';
   recentOrders: any[] = [];
   revenueTrend: any[] = [];
 
-  svgPoints = '0,30 20,25 40,35 60,15 80,20 100,5'; // default fallback points
-  svgPath = 'M 0 35 L 100 35';
-  svgAreaPath = 'M 0 35 L 100 35 L 100 35 L 0 35 Z';
+  chartMaxVal = 1000;
+  chartYGrid: number[] = [];
+  revenuePointsArray: { x: number, y: number, value: number, label: string }[] = [];
+  revenuePath = '';
+  revenueAreaPath = '';
+  chartTicks: { x: number, label: string }[] = [];
 
   ngOnInit() {
     this.loadStats();
@@ -36,6 +40,7 @@ export class Dashboard implements OnInit {
         this.todayRevenue = res.todayRevenue || 0;
         this.todayOrders = res.todayOrders || 0;
         this.lowStockCount = res.lowStockCount || 0;
+        this.pendingImportsCount = res.pendingImportsCount || 0;
         this.topProduct = res.topProduct || 'Chưa có';
         this.recentOrders = res.recentOrders || [];
         this.revenueTrend = res.revenueTrend || [];
@@ -48,45 +53,78 @@ export class Dashboard implements OnInit {
     });
   }
 
+  getSplinePath(points: { x: number, y: number }[]): string {
+    if (points.length === 0) return '';
+    if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
+    
+    let path = `M ${points[0].x} ${points[0].y}`;
+    const n = points.length;
+    for (let i = 0; i < n - 1; i++) {
+      const p0 = points[i];
+      const p1 = points[i + 1];
+      const cp1x = p0.x + (p1.x - p0.x) / 3;
+      const cp1y = p0.y;
+      const cp2x = p1.x - (p1.x - p0.x) / 3;
+      const cp2y = p1.y;
+      path += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p1.x.toFixed(1)} ${p1.y.toFixed(1)}`;
+    }
+    return path;
+  }
+
   generateSvgPoints() {
+    const width = 600;
+    const height = 250;
+    const paddingX = 50;
+    const paddingY = 30;
+    
     if (this.revenueTrend.length === 0) {
-      this.svgPoints = '0,35 100,35';
-      this.svgPath = 'M 0 35 L 100 35';
-      this.svgAreaPath = 'M 0 35 L 100 35 L 100 35 L 0 35 Z';
+      this.chartMaxVal = 1000;
+      this.revenuePointsArray = [];
+      this.revenuePath = '';
+      this.revenueAreaPath = '';
+      this.chartTicks = [];
+      this.chartYGrid = [height - paddingY, paddingY];
       return;
     }
 
     const revenues = this.revenueTrend.map(d => d.revenue);
-    const maxRev = Math.max(...revenues, 1000);
+    let max = Math.max(...revenues);
+    if (max === 0) max = 1000;
+    this.chartMaxVal = max;
 
-    const points: string[] = [];
-    const pts: { x: number; y: number }[] = [];
-    const count = this.revenueTrend.length;
-    for (let i = 0; i < count; i++) {
-      const x = (i * 100) / (count - 1 || 1);
-      const y = 35 - ((this.revenueTrend[i].revenue / maxRev) * 30);
-      points.push(`${x.toFixed(1)},${y.toFixed(1)}`);
-      pts.push({ x, y });
-    }
-    this.svgPoints = points.join(' ');
+    const chartWidth = width - 2 * paddingX;
+    const chartHeight = height - 2 * paddingY;
 
-    if (count > 1) {
-      let path = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
-      for (let i = 0; i < count - 1; i++) {
-        const p0 = pts[i];
-        const p1 = pts[i + 1];
-        const cp1x = p0.x + (p1.x - p0.x) / 3;
-        const cp1y = p0.y;
-        const cp2x = p1.x - (p1.x - p0.x) / 3;
-        const cp2y = p1.y;
-        path += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p1.x.toFixed(1)} ${p1.y.toFixed(1)}`;
-      }
-      this.svgPath = path;
-      this.svgAreaPath = `${path} L ${pts[count - 1].x.toFixed(1)} 35 L ${pts[0].x.toFixed(1)} 35 Z`;
-    } else {
-      this.svgPath = `M 0 ${pts[0].y.toFixed(1)} L 100 ${pts[0].y.toFixed(1)}`;
-      this.svgAreaPath = `M 0 ${pts[0].y.toFixed(1)} L 100 ${pts[0].y.toFixed(1)} L 100 35 L 0 35 Z`;
+    this.chartYGrid = [
+      height - paddingY,
+      height - paddingY - chartHeight * 0.33,
+      height - paddingY - chartHeight * 0.66,
+      paddingY
+    ];
+
+    const n = this.revenueTrend.length;
+    this.chartTicks = [];
+    let pointsList: { x: number, y: number, value: number, label: string }[] = [];
+
+    this.revenueTrend.forEach((d, i) => {
+      const x = paddingX + (n > 1 ? (i / (n - 1)) * chartWidth : chartWidth / 2);
+      const yVal = height - paddingY - (d.revenue / max) * chartHeight;
+      pointsList.push({ x, y: yVal, value: d.revenue, label: d.dateLabel });
+      this.chartTicks.push({ x, label: d.dateLabel });
+    });
+
+    const bottomY = height - paddingY;
+    const pathStr = this.getSplinePath(pointsList);
+    let areaPathStr = '';
+    if (pointsList.length > 0) {
+      const startX = pointsList[0].x;
+      const endX = pointsList[pointsList.length - 1].x;
+      areaPathStr = `${pathStr} L ${endX} ${bottomY} L ${startX} ${bottomY} Z`;
     }
+
+    this.revenuePointsArray = pointsList;
+    this.revenuePath = pathStr;
+    this.revenueAreaPath = areaPathStr;
   }
 
   navigate(path: string) {

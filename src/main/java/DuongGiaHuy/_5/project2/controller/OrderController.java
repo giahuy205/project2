@@ -63,8 +63,14 @@ public class OrderController {
     @GetMapping("/fix-created-by")
     public String fixCreatedBy() {
         try {
-            jdbc.execute("ALTER TABLE orders ADD COLUMN created_by VARCHAR(50);");
-            return "Added created_by column!";
+            try {
+                jdbc.execute("ALTER TABLE orders ADD COLUMN created_by VARCHAR(50);");
+            } catch (Exception e) {
+                // Ignore if column already exists
+            }
+            jdbc.execute("UPDATE orders o SET created_by = a.full_name || ' (' || a.employee_code || ')' " +
+                         "FROM accounts a WHERE o.created_by = a.username");
+            return "Fixed created_by column and updated historical data!";
         } catch (Exception e) {
             return "Failed: " + e.getMessage();
         }

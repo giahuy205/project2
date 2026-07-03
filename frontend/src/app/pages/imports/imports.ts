@@ -50,6 +50,7 @@ export class ImportsComponent implements OnInit {
   API_PROD_URL = '/api/products';
 
   toastMessage = '';
+  excelWarnings: string[] = [];
   showToast(msg: string) {
     this.toastMessage = msg;
     setTimeout(() => {
@@ -171,6 +172,7 @@ export class ImportsComponent implements OnInit {
 
   openImportModal() {
     this.newImport = { supplierName: '', note: '', items: [] };
+    this.excelWarnings = [];
     this.activeRowIndex = 0;
     this.addLine(); // Add an empty line by default
     this.showImportModal = true;
@@ -352,8 +354,8 @@ export class ImportsComponent implements OnInit {
       next: (data) => {
         this.receivingItems = data.map(item => ({
           ...item,
-          receivedQuantity: item.quantity, // Default to full quantity ordered
-          isFullyReceived: true
+          receivedQuantity: 0,
+          isFullyReceived: false
         }));
         this.showReceiveModal = true;
         this.cdr.detectChanges();
@@ -445,6 +447,74 @@ export class ImportsComponent implements OnInit {
     this.showDetailModal = false;
     this.selectedImport = null;
     this.importDetails = [];
+  }
+
+  downloadTemplate() {
+    this.http.get(`${this.API_IMPORT_URL}/template`, { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'template_nhap_hang.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        alert('Lỗi tải tệp tin mẫu!');
+        console.error(err);
+      }
+    });
+  }
+
+  onExcelUploaded(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    this.isSubmitting = true;
+    this.excelWarnings = [];
+    this.http.post<any>(`${this.API_IMPORT_URL}/parse-excel`, formData).subscribe({
+      next: (res) => {
+        this.isSubmitting = false;
+        event.target.value = '';
+        if (res.items && res.items.length > 0) {
+          const mappedItems = res.items.map((i: any) => {
+            const product = this.products.find(p => p.id === i.productId);
+            return {
+              productId: i.productId,
+              searchTerm: i.productName,
+              showResults: false,
+              showAll: false,
+              quantity: i.quantity,
+              unitPrice: i.unitPrice,
+              newPrice: i.newPrice,
+              expiryDate: i.expiryDate,
+              _productDetails: product
+            };
+          });
+          
+          this.newImport.items = mappedItems;
+          this.activeRowIndex = 0;
+        } else {
+          alert('Không tìm thấy dòng sản phẩm hợp lệ nào trong tệp Excel!');
+        }
+        
+        if (res.warnings && res.warnings.length > 0) {
+          this.excelWarnings = res.warnings;
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        event.target.value = '';
+        alert('Lỗi xử lý tệp Excel: ' + (err.error?.message || err.error || err.message));
+        console.error(err);
+      }
+    });
   }
 }
 

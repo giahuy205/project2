@@ -8,7 +8,7 @@
   height: 64px;
   position: sticky;
   top: 0;
-  z-index: 90;
+  z-index: 1000;
 }
 
 .clock-container {
@@ -118,7 +118,15 @@
   gap: 12px;
   padding: 12px 16px;
   border-bottom: 1px solid #f1f5f9;
-  transition: background 0.2s;
+  transition: all 0.2s;
+}
+
+.notification-item.read {
+  opacity: 0.6;
+}
+
+.notification-item.read:hover {
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .notification-item:hover {
@@ -183,4 +191,105 @@
 .topbar-avatar svg {
   width: 22px;
   height: 22px;
+}
+
+/* Profile Dropdown Menu */
+.profile-dropdown {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 220px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  z-index: 100;
+  padding: 6px 0;
+  animation: slideDown 0.18s ease-out forwards;
+}
+
+[data-theme='dark'] .profile-dropdown {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+[data-theme='dark'] .dropdown-item {
+  color: #cbd5e1;
+}
+
+.dropdown-item:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+[data-theme='dark'] .dropdown-item:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+.dropdown-icon {
+  width: 16px;
+  height: 16px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .dropdown-icon {
+  color: #94a3b8;
+}
+
+.dropdown-item:hover .dropdown-icon {
+  color: #0f172a;
+}
+
+[data-theme='dark'] .dropdown-item:hover .dropdown-icon {
+  color: #f8fafc;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: #e2e8f0;
+  margin: 6px 0;
+}
+
+[data-theme='dark'] .dropdown-divider {
+  background-color: #334155;
+}
+
+.dropdown-item.logout {
+  color: #ef4444;
+}
+
+.dropdown-item.logout:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+[data-theme='dark'] .dropdown-item.logout:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.dropdown-item.logout .dropdown-icon {
+  color: #ef4444;
+}
+
+.dropdown-item.logout:hover .dropdown-icon {
+  color: #dc2626;
+}
+
+[data-theme='dark'] .dropdown-item.logout:hover .dropdown-icon {
+  color: #fca5a5;
 }

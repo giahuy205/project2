@@ -1,5 +1,5 @@
 .sidebar {
-  width: 260px;
+  width: 200px;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -11,7 +11,7 @@
 }
 
 .sidebar.collapsed {
-  width: 80px;
+  width: 60px;
 }
 
 /* Sidebar Toggle Button */
@@ -46,16 +46,16 @@
 
 /* Logo Section */
 .logo {
-  padding: 24px 20px;
+  padding: 12px 20px;
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 80px;
+  height: 64px;
 }
 
 .sidebar.collapsed .logo {
   justify-content: center;
-  padding: 24px 0;
+  padding: 12px 0;
 }
 
 .logo-circle {
@@ -217,8 +217,8 @@
   height: 22px;
 }
 
-/* Logout Button */
-.logout-btn {
+/* Bottom Toggle Button */
+.toggle-btn {
   background: transparent;
   border: none;
   color: rgba(255, 255, 255, 0.75);
@@ -236,7 +236,7 @@
   transition: all 0.2s ease-in-out;
 }
 
-.sidebar.collapsed .logout-btn {
+.sidebar.collapsed .toggle-btn {
   justify-content: center;
   padding: 12px;
   margin: 2px 12px;
@@ -244,15 +244,15 @@
   gap: 0;
 }
 
-.logout-icon {
+.toggle-icon {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
 }
 
-.logout-btn:hover {
-  background-color: rgba(239, 68, 68, 0.15);
-  color: #fca5a5;
+.toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
 }
 
 /* Settings Active Profile Card Styles */

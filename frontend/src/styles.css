@@ -8,7 +8,7 @@ html {
   --primary: #4F46E5;
   --primary-hover: #4338CA;
   --secondary: #10B981;
-  --background: #F3F4F6;
+  --background: #f4f7fc;
   --surface: #FFFFFF;
   --surface-rgb: 255, 255, 255;
   --text-main: #111827;
@@ -68,7 +68,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background-color: #f4f7fc;
+  background-color: var(--background);
   padding: 0;
 }
 

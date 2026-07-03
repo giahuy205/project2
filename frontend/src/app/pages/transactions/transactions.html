@@ -14,15 +14,15 @@
       </select>
 
       <!-- Date Range Filter Buttons -->
-      <div class="btn-group" style="display: flex; background: rgba(0,0,0,0.03); padding: 0.25rem; border-radius: var(--radius-md); border: 1px solid var(--border); height: 38px; align-items: center;">
+      <div class="btn-group" style="display: flex; flex-shrink: 0; background: rgba(0,0,0,0.03); padding: 0.25rem; border-radius: var(--radius-md); border: 1px solid var(--border); height: 38px; align-items: center;">
         <button class="btn" [ngClass]="filterDate === 'ALL' ? 'btn-primary' : 'btn-outline'" 
-          (click)="setDateRange('ALL')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1;">Tất cả</button>
+          (click)="setDateRange('ALL')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1; white-space: nowrap;">Tất cả</button>
         <button class="btn" [ngClass]="filterDate === 'TODAY' ? 'btn-primary' : 'btn-outline'" 
-          (click)="setDateRange('TODAY')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1;">Hôm nay</button>
+          (click)="setDateRange('TODAY')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1; white-space: nowrap;">Hôm nay</button>
         <button class="btn" [ngClass]="filterDate === 'WEEK' ? 'btn-primary' : 'btn-outline'" 
-          (click)="setDateRange('WEEK')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1;">Tuần này</button>
+          (click)="setDateRange('WEEK')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1; white-space: nowrap;">Tuần này</button>
         <button class="btn" [ngClass]="filterDate === 'MONTH' ? 'btn-primary' : 'btn-outline'" 
-          (click)="setDateRange('MONTH')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1;">Tháng này</button>
+          (click)="setDateRange('MONTH')" style="padding: 0.35rem 0.6rem; border: none; font-size: 0.8rem; border-radius: 8px; box-shadow: none; height: 30px; line-height: 1; white-space: nowrap;">Tháng này</button>
       </div>
 
       <!-- Custom Date Pickers -->

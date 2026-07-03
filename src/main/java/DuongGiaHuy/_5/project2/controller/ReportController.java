@@ -180,7 +180,9 @@ public class ReportController {
 
         String sql = "SELECT " +
                 "  COALESCE(c.name, 'Chưa phân loại') as category_name, " +
-                "  COALESCE(SUM(oi.quantity * oi.unit_price * (1 + COALESCE(oi.applied_tax_rate, 0))), 0) as revenue " +
+                "  COALESCE(SUM(oi.quantity * oi.unit_price * (1 + COALESCE(oi.applied_tax_rate, 0))), 0) as revenue, " +
+                "  COALESCE(COUNT(DISTINCT o.id), 0) as order_count, " +
+                "  COALESCE(SUM(oi.quantity), 0) as quantity_sold " +
                 "FROM order_items oi " +
                 "JOIN orders o ON oi.order_id = o.id " +
                 "JOIN products p ON oi.product_id = p.id " +
@@ -196,6 +198,8 @@ public class ReportController {
             Map<String, Object> item = new HashMap<>();
             item.put("categoryName", row.get("category_name"));
             item.put("revenue", ((Number) (row.get("revenue") != null ? row.get("revenue") : 0.0)).doubleValue());
+            item.put("orderCount", ((Number) (row.get("order_count") != null ? row.get("order_count") : 0)).longValue());
+            item.put("quantitySold", ((Number) (row.get("quantity_sold") != null ? row.get("quantity_sold") : 0)).longValue());
             categories.add(item);
         }
         return categories;

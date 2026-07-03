@@ -31,6 +31,8 @@ public class OrderService {
 
     private final DuongGiaHuy._5.project2.repository.InventoryLogRepository inventoryLogRepository;
 
+    private final DuongGiaHuy._5.project2.repository.AccountRepository accountRepository;
+
     public void deleteById(Long id) {
         repository.deleteById(id);
     }
@@ -63,7 +65,23 @@ public class OrderService {
         org.springframework.web.context.request.ServletRequestAttributes attrs = (org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
         if (attrs != null && attrs.getRequest().getAttribute("currentUser") != null) {
             DuongGiaHuy._5.project2.entity.Account account = (DuongGiaHuy._5.project2.entity.Account) attrs.getRequest().getAttribute("currentUser");
-            order.setCreatedBy(account.getUsername());
+            
+            // Fetch full account from database to ensure fullName and employeeCode are populated
+            DuongGiaHuy._5.project2.entity.Account fullAccount = accountRepository.findById(account.getId()).orElse(account);
+            
+            String sellerInfo = "";
+            if (fullAccount.getFullName() != null && !fullAccount.getFullName().isEmpty()) {
+                sellerInfo = fullAccount.getFullName();
+                if (fullAccount.getEmployeeCode() != null && !fullAccount.getEmployeeCode().isEmpty()) {
+                    sellerInfo += " (" + fullAccount.getEmployeeCode() + ")";
+                }
+            } else {
+                sellerInfo = fullAccount.getUsername();
+            }
+            if (sellerInfo.length() > 50) {
+                sellerInfo = sellerInfo.substring(0, 47) + "...";
+            }
+            order.setCreatedBy(sellerInfo);
         } else {
             order.setCreatedBy("admin");
         }

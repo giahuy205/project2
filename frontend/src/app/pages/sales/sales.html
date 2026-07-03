@@ -1,25 +1,43 @@
 <div class="sales-layout">
   <div class="product-section">
     <div class="filters">
-      <button class="btn btn-primary"
-        [ngClass]="{'btn-primary': selectedCategoryId === null, 'btn-outline': selectedCategoryId !== null}"
-        (click)="filterByCategory(null)">Tất cả</button>
-      <button class="btn" *ngFor="let cat of categories"
-        [ngClass]="{'btn-primary': selectedCategoryId === cat.id, 'btn-outline': selectedCategoryId !== cat.id}"
-        (click)="filterByCategory(cat.id)">{{cat.name}}</button>
-      <input type="text" class="form-control" placeholder="Tìm kiếm sản phẩm hoặc mã vạch..."
-        style="margin-left: auto; width: 250px;" (input)="searchProducts($event)">
+      <div class="categories-list">
+        <button class="btn"
+          [ngClass]="{'btn-primary': selectedCategoryId === null, 'btn-outline': selectedCategoryId !== null}"
+          (click)="filterByCategory(null)">Tất cả</button>
+        <button class="btn" *ngFor="let cat of categories"
+          [ngClass]="{'btn-primary': selectedCategoryId === cat.id, 'btn-outline': selectedCategoryId !== cat.id}"
+          (click)="filterByCategory(cat.id)">{{cat.name}}</button>
+      </div>
+      <input type="text" class="form-control search-bar" placeholder="Tìm kiếm sản phẩm hoặc mã vạch..."
+        (input)="searchProducts($event)">
     </div>
 
     <div class="product-grid">
-      <div class="product-card" *ngFor="let p of pagedProducts" (click)="addToCart(p)">
-        <div class="img-placeholder">
-          <!-- Placeholder for image, could add img url later -->
-          <span style="font-size: 2rem; color: #ddd;">{{p.name.charAt(0)}}</span>
+      <div class="product-card" *ngFor="let p of pagedProducts" 
+        [class.out-of-stock]="p.stockQuantity <= 0"
+        (click)="addToCart(p)">
+        
+        <div class="card-header-row">
+          <!-- Letter initial inside category-based pastel color circle -->
+          <div class="avatar-circle" [style.background]="getCategoryColor(p.category?.name)">
+            {{p.name.charAt(0)}}
+          </div>
+          
+          <!-- Stock status badge -->
+          <div class="stock-badge">
+            <span *ngIf="p.stockQuantity <= 0" class="badge badge-danger">Hết hàng</span>
+            <span *ngIf="p.stockQuantity > 0 && p.stockQuantity <= p.lowStock" class="badge badge-warning">Sắp hết ({{p.stockQuantity}})</span>
+            <span *ngIf="p.stockQuantity > p.lowStock" class="stock-count">Kho: {{p.stockQuantity}}</span>
+          </div>
         </div>
+
         <div class="p-info">
-          <h5>{{p.name}}</h5>
-          <span>{{p.salePrice | number:'1.0-0'}}đ</span>
+          <h5 class="product-name" [title]="p.name">{{p.name}}</h5>
+          <div class="price-row">
+            <span class="product-price">{{p.salePrice | number:'1.0-0'}}đ</span>
+            <span class="product-barcode" *ngIf="p.barcode">{{p.barcode}}</span>
+          </div>
         </div>
       </div>
       <div *ngIf="pagedProducts.length === 0"

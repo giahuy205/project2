@@ -49,11 +49,195 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Dark mode adjust for background transparent hover */
 [data-theme='dark'] .btn-group .btn.btn-outline:hover {
   background: rgba(255, 255, 255, 0.08);
+}
+
+/* Segmented Control Lọc Ngày */
+.segmented-control {
+  display: flex;
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  height: 38px;
+  align-items: center;
+}
+
+[data-theme='dark'] .segmented-control {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.segmented-control .btn {
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 6px;
+  height: 30px;
+  line-height: 1;
+  white-space: nowrap;
+  padding: 0.35rem 0.75rem;
+  color: #64748b;
+  background: transparent;
+  transition: all 0.2s ease;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.segmented-control .btn:hover {
+  color: #0f172a;
+}
+
+[data-theme='dark'] .segmented-control .btn:hover {
+  color: #f8fafc;
+}
+
+.segmented-control .btn.active {
+  background: #ffffff;
+  color: #4f46e5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  font-weight: 600;
+}
+
+[data-theme='dark'] .segmented-control .btn.active {
+  background: #0f172a;
+  color: #818cf8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Điểm Dữ Liệu Biểu Đồ */
+.chart-dot {
+  transition: r 0.2s ease-in-out, stroke-width 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.chart-dot:hover {
+  r: 6.5;
+  stroke-width: 3px;
+}
+
+.chart-bar {
+  cursor: pointer;
+}
+
+.chart-bar:hover {
+  filter: brightness(1.1);
+}
+
+/* Tabbed Layout Navigation */
+.tabs-container {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.tab-btn {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  position: relative;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.tab-btn:hover {
+  color: var(--text-main);
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme='dark'] .tab-btn:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.tab-btn.active {
+  color: var(--primary);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--primary);
+  border-radius: 2px;
+}
+
+/* Adjust table styles for rankings tab */
+.rankings-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .rankings-grid {
+    grid-template-columns: 1.4fr 1fr;
+  }
+}
+
+/* Sticky Header for Filters */
+.sticky-filter-header {
+  position: sticky;
+  top: -24px;
+  /* Cover padding of page container exactly */
+  z-index: 900;
+  background: rgba(244, 247, 252, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 12px 24px;
+  margin-top: -24px;
+  /* Offset top margin to fit sticky spacing */
+  margin-left: -24px;
+  margin-right: -24px;
+  border-bottom: none;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+[data-theme='dark'] .sticky-filter-header {
+  background: rgba(17, 24, 39, 0.8);
+  border-bottom-color: transparent;
+}
+
+/* Responsive Grid for KPI Cards */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .kpi-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
 }

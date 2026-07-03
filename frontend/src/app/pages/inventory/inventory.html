@@ -12,7 +12,7 @@
 
     <div *ngIf="viewMode === 'products'" style="display: flex; align-items: center; gap: 0.5rem;">
       <input type="text" class="form-control" placeholder="Tìm sản phẩm/mã vạch" style="width: 200px;" (input)="searchProducts($event)">
-      <select class="form-control" style="width: 150px;" (change)="onStockFilterChange($event)">
+      <select class="form-control" style="width: 150px;" [value]="stockFilter" (change)="onStockFilterChange($event)">
         <option value="all">Tất cả</option>
         <option value="low">Sắp hết (1-30)</option>
         <option value="out">Hết hàng (0)</option>
