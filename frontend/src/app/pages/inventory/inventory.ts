@@ -641,15 +641,24 @@ export class Inventory implements OnInit {
       },
       error: (err) => {
         this.isSavingBatchCategories = false;
-        if (err.error && err.error.errors) {
-          this.batchCategoryErrors = err.error.errors;
-        } else if (err.error && typeof err.error === 'string') {
-          this.batchCategoryErrors = [err.error];
-        } else if (err.error && err.error.message) {
-          this.batchCategoryErrors = [err.error.message];
+        console.error('Batch save categories failed:', err);
+        let detailMsg = 'Không rõ nguyên nhân';
+        if (err.error) {
+          if (err.error.errors) {
+            this.batchCategoryErrors = err.error.errors;
+            this.cdr.detectChanges();
+            return;
+          } else if (typeof err.error === 'string') {
+            detailMsg = err.error;
+          } else if (err.error.message) {
+            detailMsg = err.error.message;
+          } else {
+            detailMsg = JSON.stringify(err.error);
+          }
         } else {
-          this.batchCategoryErrors = ['Đã xảy ra lỗi khi lưu danh mục.'];
+          detailMsg = err.message || err.statusText || 'Lỗi kết nối';
         }
+        this.batchCategoryErrors = [`Lỗi hệ thống: ${detailMsg}`];
         this.cdr.detectChanges();
       }
     });

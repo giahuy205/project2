@@ -8,6 +8,7 @@ import DuongGiaHuy._5.project2.config.RequiresRole;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.util.CellRangeAddressList;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -232,6 +233,36 @@ public class ProductImportController {
         for (int i = 0; i < headers.length; i++) {
             sheet1.autoSizeColumn(i);
         }
+
+        // Query current categories
+        List<Category> categories = categoryRepository.findAll();
+        List<String> catNames = new ArrayList<>();
+        for (Category c : categories) {
+            if (c.getName() != null && !c.getName().trim().isEmpty()) {
+                catNames.add(c.getName().trim());
+            }
+        }
+        if (catNames.isEmpty()) {
+            catNames.add("Khác");
+        }
+
+        // Sheet 3: Hidden category data list for dropdown referencing
+        Sheet hiddenSheet = workbook.createSheet("CategoriesListData");
+        for (int i = 0; i < catNames.size(); i++) {
+            Row row = hiddenSheet.createRow(i);
+            Cell cell = row.createCell(0);
+            cell.setCellValue(catNames.get(i));
+        }
+        workbook.setSheetHidden(workbook.getSheetIndex("CategoriesListData"), true);
+
+        // Data validation for Category column (index 3)
+        CellRangeAddressList addressList = new CellRangeAddressList(1, 999, 3, 3);
+        DataValidationHelper validationHelper = sheet1.getDataValidationHelper();
+        DataValidationConstraint constraint = validationHelper.createFormulaListConstraint("CategoriesListData!$A$1:$A$" + catNames.size());
+        DataValidation validation = validationHelper.createValidation(constraint, addressList);
+        validation.setShowErrorBox(true);
+        validation.createErrorBox("Lỗi chọn danh mục", "Vui lòng chọn danh mục hợp lệ từ danh sách dropdown.");
+        sheet1.addValidationData(validation);
 
         // Sheet 2: Instructions
         Sheet sheet2 = workbook.createSheet("Hướng dẫn");
