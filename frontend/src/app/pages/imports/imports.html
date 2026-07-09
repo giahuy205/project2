@@ -1,6 +1,6 @@
 <div class="page-layout">
   <div class="header-actions"
-    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
     <h2>Giao dịch đặt hàng</h2>
     <button class="btn btn-primary" (click)="openImportModal()" title="Tạo đơn đặt hàng mới" style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; padding: 0;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -20,7 +20,7 @@
 
     <div class="table-container">
       <!-- TABLE: ordered/pending & cancelled -->
-      <table style="table-layout: fixed; width: 100%;" *ngIf="activeTab === 'ordered'">
+      <table style="table-layout: fixed; width: 100%; min-width: 850px;" *ngIf="activeTab === 'ordered'">
         <thead>
           <tr>
             <th style="width: 10%;">Mã đơn</th>
@@ -65,7 +65,7 @@
       </table>
 
       <!-- TABLE: received -->
-      <table style="table-layout: fixed; width: 100%;" *ngIf="activeTab === 'received'">
+      <table style="table-layout: fixed; width: 100%; min-width: 800px;" *ngIf="activeTab === 'received'">
         <thead>
           <tr>
             <th style="width: 12%;">Mã lô nhập</th>
@@ -260,7 +260,7 @@
       </div>
 
       <div style="max-height: 400px; overflow-y: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: 8px;">
-        <table style="width: 100%; border-collapse: collapse;">
+        <table style="width: 100%; min-width: 900px; border-collapse: collapse;">
           <thead>
             <tr style="background: var(--background); position: sticky; top: 0; z-index: 2;">
               <th style="padding: 0.75rem; text-align: left; width: 25%;">Sản phẩm</th>
@@ -334,7 +334,7 @@
       </div>
 
       <!-- If RECEIVED -->
-      <table style="table-layout: fixed; width: 100%; margin-bottom: 1.5rem;" *ngIf="selectedImport?.status === 'RECEIVED'">
+      <table style="table-layout: fixed; width: 100%; min-width: 650px; margin-bottom: 1.5rem;" *ngIf="selectedImport?.status === 'RECEIVED'">
         <thead>
           <tr>
             <th style="width: 40%;">Sản phẩm</th>
@@ -359,7 +359,7 @@
       </table>
 
       <!-- If PENDING or CANCELLED -->
-      <table style="table-layout: fixed; width: 100%; margin-bottom: 1.5rem;" *ngIf="selectedImport?.status !== 'RECEIVED'">
+      <table style="table-layout: fixed; width: 100%; min-width: 600px; margin-bottom: 1.5rem;" *ngIf="selectedImport?.status !== 'RECEIVED'">
         <thead>
           <tr>
             <th style="width: 50%;">Sản phẩm</th>

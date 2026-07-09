@@ -400,3 +400,15 @@ input[type=number] {
   font-size: 1rem;
   font-weight: 600;
 }
+
+@media (max-width: 992px) {
+  .sales-layout {
+    flex-direction: column;
+    height: auto;
+    overflow-y: auto;
+  }
+  .cart-section {
+    width: 100%;
+    margin-top: 1rem;
+  }
+}
