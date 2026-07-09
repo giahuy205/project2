@@ -272,9 +272,7 @@ export class ImportsComponent implements OnInit {
   getValidationErrors(): string[] {
     const errors: string[] = [];
     const hasInvalidQuantity = this.newImport.items.some((i: any) => i.productId && (!i.quantity || i.quantity <= 0));
-    const hasInvalidPrice = this.newImport.items.some((i: any) => i.productId && i.newPrice != null && i.unitPrice > 0 && i.newPrice < i.unitPrice);
     if (hasInvalidQuantity) errors.push('Số lượng đặt hàng không hợp lệ');
-    if (hasInvalidPrice) errors.push('Kiểm tra lại giá bán mới (thấp hơn giá nhập)');
     return errors;
   }
 
@@ -357,7 +355,9 @@ export class ImportsComponent implements OnInit {
         this.receivingItems = data.map(item => ({
           ...item,
           receivedQuantity: 0,
-          isFullyReceived: false
+          isFullyReceived: false,
+          newPrice: (item.newPrice != null && item.newPrice > 0) ? item.newPrice : (item.product ? item.product.salePrice : 0),
+          expiryDate: item.expiryDate ? item.expiryDate : null
         }));
         this.showReceiveModal = true;
         this.cdr.detectChanges();
@@ -409,10 +409,24 @@ export class ImportsComponent implements OnInit {
       return;
     }
 
+    const hasInvalidPrice = this.receivingItems.some(item => item.receivedQuantity > 0 && (item.newPrice == null || item.newPrice < 0));
+    if (hasInvalidPrice) {
+      this.showToast('Vui lòng nhập giá bán mới hợp lệ cho các sản phẩm nhận hàng', 'error');
+      return;
+    }
+
+    const hasLowPrice = this.receivingItems.some(item => item.receivedQuantity > 0 && item.newPrice != null && item.unitPrice > 0 && item.newPrice < item.unitPrice);
+    if (hasLowPrice) {
+      this.showToast('Kiểm tra lại giá bán mới (thấp hơn giá nhập của nhà cung cấp)', 'error');
+      return;
+    }
+
     const payload = {
       items: this.receivingItems.map(item => ({
         importItemId: item.id,
-        receivedQuantity: item.receivedQuantity
+        receivedQuantity: item.receivedQuantity,
+        newPrice: item.receivedQuantity > 0 ? item.newPrice : null,
+        expiryDate: item.receivedQuantity > 0 ? item.expiryDate : null
       }))
     };
 

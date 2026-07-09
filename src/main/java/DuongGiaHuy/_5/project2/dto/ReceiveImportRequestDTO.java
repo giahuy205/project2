@@ -11,5 +11,7 @@ public class ReceiveImportRequestDTO {
     public static class ReceiveItemDTO {
         private Long importItemId;
         private Integer receivedQuantity;
+        private Double newPrice;
+        private java.time.LocalDate expiryDate;
     }
 }

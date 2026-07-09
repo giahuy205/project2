@@ -193,11 +193,7 @@
             [disabled]="isSubmitting">
         </div>
 
-        <div class="form-group" style="flex: 1.2;">
-          <label class="form-label">Hạn sử dụng</label>
-          <input type="date" class="form-control" [(ngModel)]="item.expiryDate" (focus)="setActiveRow(i)"
-            [disabled]="isSubmitting">
-        </div>
+
 
         <div class="form-group" style="flex: 1.5;">
           <label class="form-label">Giá nhập dự kiến</label>
@@ -205,17 +201,7 @@
             [disabled]="isSubmitting">
         </div>
 
-        <div class="form-group" style="flex: 1.5;">
-          <label class="form-label">Giá bán hiện tại</label>
-          <input type="number" class="form-control" [value]="item._productDetails?.salePrice || 0" disabled
-            style="opacity: 0.6;">
-        </div>
 
-        <div class="form-group" style="flex: 1.5;">
-          <label class="form-label">Giá bán mới</label>
-          <input type="number" class="form-control" [(ngModel)]="item.newPrice" placeholder="Giá bán mới"
-            (focus)="setActiveRow(i)" [disabled]="isSubmitting">
-        </div>
 
         <button class="btn btn-remove" style="padding: 0.4rem; display: flex; align-items: center; justify-content: center;" (click)="removeLine(i); $event.stopPropagation()" title="Xóa"
           *ngIf="newImport.items.length > 1" [disabled]="isSubmitting">
@@ -259,8 +245,11 @@
 
   <!-- Modal Nhận hàng thực tế (Popup) -->
   <div class="modal-overlay" *ngIf="showReceiveModal">
-    <div class="modal-content card slide-in" style="max-width: 800px;">
-      <h3 style="margin-bottom: 1rem; color: var(--primary);">Nhận hàng cho Đơn đặt #{{receivingImport?.id}}</h3>
+    <div class="modal-content card slide-in" style="max-width: 1000px;">
+      <h3 style="margin-bottom: 1rem; color: #059669; display: flex; align-items: center; gap: 0.5rem;">
+        <span style="background: rgba(16, 185, 129, 0.15); color: #059669; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">NHẬN HÀNG</span>
+        Nhận hàng cho Đơn đặt #{{receivingImport?.id}}
+      </h3>
 
       <div style="background: var(--background); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
         <div>
@@ -274,11 +263,14 @@
         <table style="width: 100%; border-collapse: collapse;">
           <thead>
             <tr style="background: var(--background); position: sticky; top: 0; z-index: 2;">
-              <th style="padding: 0.75rem; text-align: left; width: 45%;">Sản phẩm</th>
-              <th style="padding: 0.75rem; text-align: right; width: 15%;">Đơn giá</th>
-              <th style="padding: 0.75rem; text-align: center; width: 12%;">SL đặt</th>
-              <th style="padding: 0.75rem; text-align: center; width: 18%;">SL nhận thực tế</th>
-              <th style="padding: 0.75rem; text-align: center; width: 10%;">Nhận đủ</th>
+              <th style="padding: 0.75rem; text-align: left; width: 25%;">Sản phẩm</th>
+              <th style="padding: 0.75rem; text-align: right; width: 10%;">Giá nhập</th>
+              <th style="padding: 0.75rem; text-align: right; width: 10%;">Giá bán HT</th>
+              <th style="padding: 0.75rem; text-align: center; width: 13%;">Giá bán mới</th>
+              <th style="padding: 0.75rem; text-align: center; width: 18%;">Hạn sử dụng</th>
+              <th style="padding: 0.75rem; text-align: center; width: 8%;">SL đặt</th>
+              <th style="padding: 0.75rem; text-align: center; width: 10%;">SL nhận thực tế</th>
+              <th style="padding: 0.75rem; text-align: center; width: 6%;">Nhận đủ</th>
             </tr>
           </thead>
           <tbody>
@@ -288,6 +280,13 @@
                 <span style="font-size: 0.8rem; color: var(--text-muted);">{{item.product?.barcode}}</span>
               </td>
               <td style="padding: 0.75rem; text-align: right;">{{item.unitPrice | number:'1.0-0'}}đ</td>
+              <td style="padding: 0.75rem; text-align: right; color: var(--text-muted);">{{(item.product?.salePrice || 0) | number:'1.0-0'}}đ</td>
+              <td style="padding: 0.75rem; text-align: center;">
+                <input type="number" class="form-control" style="width: 100px; text-align: center; padding: 0.35rem; display: inline-block;" [(ngModel)]="item.newPrice" placeholder="Giá bán mới" [disabled]="isSubmitting">
+              </td>
+              <td style="padding: 0.75rem; text-align: center;">
+                <input type="date" class="form-control" style="width: 140px; text-align: center; padding: 0.35rem; display: inline-block;" [(ngModel)]="item.expiryDate" [disabled]="isSubmitting || !item.receivedQuantity || item.receivedQuantity <= 0">
+              </td>
               <td style="padding: 0.75rem; text-align: center; font-weight: 600;">{{item.quantity}}</td>
               <td style="padding: 0.75rem; text-align: center;">
                 <input type="number" class="form-control" style="width: 80px; text-align: center; padding: 0.35rem; display: inline-block;" [(ngModel)]="item.receivedQuantity" min="0" [max]="item.quantity" (input)="onReceivedQuantityChange(item)" [disabled]="isSubmitting">

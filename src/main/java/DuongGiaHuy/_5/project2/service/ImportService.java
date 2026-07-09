@@ -116,6 +116,12 @@ public class ImportService {
             
             item.setReceivedQuantity(receivedQuantity);
             item.setRemainingQuantity((double) receivedQuantity);
+            if (receiveDTO.getNewPrice() != null) {
+                item.setNewPrice(receiveDTO.getNewPrice());
+            }
+            if (receiveDTO.getExpiryDate() != null) {
+                item.setExpiryDate(receiveDTO.getExpiryDate());
+            }
             importItemRepository.save(item);
             
             actualTotalCost += receivedQuantity * (item.getUnitPrice() != null ? item.getUnitPrice() : 0.0);
@@ -134,17 +140,18 @@ public class ImportService {
                 }
                 
                 // Update sale price
-                if (item.getNewPrice() != null && !item.getNewPrice().equals(product.getSalePrice())) {
+                Double finalNewPrice = item.getNewPrice();
+                if (finalNewPrice != null && !finalNewPrice.equals(product.getSalePrice())) {
                     PriceHistory history = new PriceHistory();
                     history.setProduct(product);
                     history.setOldSellingPrice(product.getSalePrice());
-                    history.setNewSellingPrice(item.getNewPrice());
+                    history.setNewSellingPrice(finalNewPrice);
                     history.setOldImportPrice(product.getImportPrice());
                     history.setNewImportPrice(item.getUnitPrice());
                     history.setUpdatedAt(LocalDateTime.now());
                     priceHistoryRepository.save(history);
                     
-                    product.setSalePrice(item.getNewPrice());
+                    product.setSalePrice(finalNewPrice);
                 }
                 productRepository.save(product);
                 

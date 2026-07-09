@@ -78,9 +78,7 @@ public class ImportController {
             String[] headers = {
                 "Mã vạch (Barcode)", 
                 "Số lượng đặt", 
-                "Giá nhập dự kiến", 
-                "Giá bán mới", 
-                "Hạn sử dụng (yyyy-MM-dd)"
+                "Giá nhập dự kiến"
             };
             for (int i = 0; i < headers.length; i++) {
                 org.apache.poi.ss.usermodel.Cell cell = header.createCell(i);
@@ -92,8 +90,6 @@ public class ImportController {
             sampleRow.createCell(0).setCellValue("8930000000001");
             sampleRow.createCell(1).setCellValue(10);
             sampleRow.createCell(2).setCellValue(15000);
-            sampleRow.createCell(3).setCellValue(20000);
-            sampleRow.createCell(4).setCellValue("2027-12-31");
             
             // Auto size columns
             for (int i = 0; i < headers.length; i++) {
@@ -161,32 +157,14 @@ public class ImportController {
                     
                     double unitPrice = getCellNumericValue(row.getCell(2), product.getImportPrice() != null ? product.getImportPrice() : 0.0);
                     
-                    Double newPrice = null;
-                    org.apache.poi.ss.usermodel.Cell newPriceCell = row.getCell(3);
-                    if (newPriceCell != null && newPriceCell.getCellType() != org.apache.poi.ss.usermodel.CellType.BLANK) {
-                        newPrice = getCellNumericValue(newPriceCell, product.getSalePrice() != null ? product.getSalePrice() : 0.0);
-                    } else {
-                        newPrice = product.getSalePrice();
-                    }
-                    
-                    java.time.LocalDate expiryDate = null;
-                    String expiryStr = getCellStringValue(row.getCell(4));
-                    if (expiryStr != null && !expiryStr.trim().isEmpty()) {
-                        try {
-                            expiryDate = java.time.LocalDate.parse(expiryStr.trim());
-                        } catch (Exception e) {
-                            warnings.add("Dòng " + (i + 1) + " (" + product.getName() + "): Hạn sử dụng '" + expiryStr + "' không đúng định dạng yyyy-MM-dd");
-                        }
-                    }
-                    
                     Map<String, Object> item = new HashMap<>();
                     item.put("productId", product.getId());
                     item.put("productName", product.getName());
                     item.put("barcode", product.getBarcode());
                     item.put("quantity", quantity);
                     item.put("unitPrice", unitPrice);
-                    item.put("newPrice", newPrice);
-                    item.put("expiryDate", expiryDate != null ? expiryDate.toString() : null);
+                    item.put("newPrice", null);
+                    item.put("expiryDate", null);
                     
                     parsedItems.add(item);
                 }
