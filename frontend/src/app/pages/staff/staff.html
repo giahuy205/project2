@@ -146,9 +146,7 @@
         <button class="close-btn" (click)="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
       </div>
 
-      <div *ngIf="errorMessage" class="alert alert-danger" style="padding: 1rem; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); border-radius: var(--radius-md); color: var(--danger); margin-bottom: 1.5rem;">
-        {{ errorMessage }}
-      </div>
+
 
       <form (ngSubmit)="saveAccount()">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -227,12 +225,26 @@
   </div>
 
   <!-- Toast Notification -->
-  <div class="toast-popup" *ngIf="toastMessage" style="position: fixed; bottom: 20px; right: 20px; background-color: #ecfdf5; color: #059669; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999; display: flex; align-items: flex-start; gap: 0.75rem; transition: all 0.3s ease; border: 1px solid #a7f3d0; min-width: 250px;">
-    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; margin-top: 2px;">
+  <div class="toast-popup" *ngIf="toastMessage" 
+       [style.background-color]="toastType === 'success' ? '#ecfdf5' : '#fef2f2'"
+       [style.color]="toastType === 'success' ? '#059669' : '#dc2626'"
+       [style.border-color]="toastType === 'success' ? '#a7f3d0' : '#fecaca'"
+       style="position: fixed; bottom: 20px; right: 20px; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999; display: flex; align-items: flex-start; gap: 0.75rem; transition: all 0.3s ease; border: 1px solid; min-width: 250px;">
+    
+    <!-- Success Icon -->
+    <svg *ngIf="toastType === 'success'" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; margin-top: 2px;">
       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
     </svg>
+
+    <!-- Error/Warning Icon -->
+    <svg *ngIf="toastType === 'error'" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; margin-top: 2px;">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+    </svg>
+
     <div style="display: flex; flex-direction: column;">
-      <span style="font-weight: 600; font-size: 1.05rem; margin-bottom: 0.2rem;">Thành công!</span>
+      <span style="font-weight: 600; font-size: 1.05rem; margin-bottom: 0.2rem;">
+        {{ toastType === 'success' ? 'Thành công!' : 'Thông báo!' }}
+      </span>
       <span style="font-weight: 400; font-size: 0.95rem;">{{ toastMessage }}</span>
     </div>
   </div>

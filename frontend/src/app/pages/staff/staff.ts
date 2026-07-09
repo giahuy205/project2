@@ -39,6 +39,15 @@ export class Staff implements OnInit {
   errorMessage = '';
   saving = false;
   toastMessage = '';
+  toastType: 'success' | 'error' = 'success';
+  showToast(msg: string, type: 'success' | 'error' = 'success') {
+    this.toastMessage = msg;
+    this.toastType = type;
+    setTimeout(() => {
+      this.toastMessage = '';
+      this.cdr.detectChanges();
+    }, 5000);
+  }
 
   // Form Model
   currentAccount: Account = {
@@ -263,7 +272,7 @@ export class Staff implements OnInit {
 
   saveAccount() {
     if (!this.currentAccount.phone || !this.currentAccount.phone.trim()) {
-      this.errorMessage = 'Số điện thoại là bắt buộc';
+      this.showToast('Số điện thoại là bắt buộc', 'error');
       return;
     }
 
@@ -276,17 +285,13 @@ export class Staff implements OnInit {
         next: () => {
           this.saving = false;
           this.closeModal();
-          this.toastMessage = 'Cập nhật nhân viên thành công!';
-          setTimeout(() => {
-             this.toastMessage = '';
-             this.cdr.detectChanges();
-          }, 5000);
+          this.showToast('Cập nhật nhân viên thành công!');
           this.loadAccounts();
         },
         error: (err) => {
           this.saving = false;
           console.error(err);
-          this.errorMessage = err.error || 'Update failed. Please try again.';
+          this.showToast(err.error || 'Cập nhật nhân viên thất bại. Vui lòng thử lại.', 'error');
         }
       });
     } else {
@@ -294,17 +299,13 @@ export class Staff implements OnInit {
         next: () => {
           this.saving = false;
           this.closeModal();
-          this.toastMessage = 'Thêm nhân viên mới thành công!';
-          setTimeout(() => {
-             this.toastMessage = '';
-             this.cdr.detectChanges();
-          }, 5000);
+          this.showToast('Thêm nhân viên mới thành công!');
           this.loadAccounts();
         },
         error: (err) => {
           this.saving = false;
           console.error(err);
-          this.errorMessage = err.error || 'Failed to add staff. Please try again.';
+          this.showToast(err.error || 'Thêm nhân viên thất bại. Vui lòng thử lại.', 'error');
         }
       });
     }
@@ -319,7 +320,7 @@ export class Staff implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        alert('Failed to change status: ' + (err.error || ''));
+        this.showToast('Lỗi thay đổi trạng thái: ' + (err.error || ''), 'error');
       }
     });
   }
@@ -333,7 +334,7 @@ export class Staff implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          alert('Failed to delete staff: ' + (err.error || ''));
+          this.showToast('Lỗi xóa nhân viên: ' + (err.error || ''), 'error');
         }
       });
     }

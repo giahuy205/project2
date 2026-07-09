@@ -76,8 +76,10 @@ export class Inventory implements OnInit {
   API_IMPORT_ITEM_URL = '/api/importitems';
 
   toastMessage = '';
-  showToast(msg: string) {
+  toastType: 'success' | 'error' = 'success';
+  showToast(msg: string, type: 'success' | 'error' = 'success') {
     this.toastMessage = msg;
+    this.toastType = type;
     setTimeout(() => {
       this.toastMessage = '';
       this.cdr.detectChanges();
@@ -277,7 +279,7 @@ export class Inventory implements OnInit {
 
   openProductModal() {
     if (this.categories.length === 0) {
-      alert("Please add at least 1 Category first!");
+      this.showToast("Vui lòng thêm ít nhất 1 danh mục trước!", "error");
       return;
     }
     this.isEditingProduct = false;
@@ -365,7 +367,7 @@ export class Inventory implements OnInit {
         this.closeModal();
         this.showToast('Lưu danh mục thành công!');
       },
-      error: (err) => alert('Save failed! Is the backend running?')
+      error: (err) => this.showToast('Lưu danh mục thất bại! Vui lòng kiểm tra lại kết nối.', 'error')
     });
   }
 
@@ -436,7 +438,7 @@ export class Inventory implements OnInit {
           this.loadData(); // reload products to update total stock
           this.showToast('Hủy lô hàng thành công!');
         },
-        error: (err) => alert("Lỗi khi hủy lô hàng!")
+        error: (err) => this.showToast('Lỗi khi hủy lô hàng!', 'error')
       });
     }
   }
@@ -605,11 +607,9 @@ export class Inventory implements OnInit {
   }
 
   saveCategoryBatch() {
-    this.batchCategoryErrors = [];
-
     const validRows = this.batchCategories.filter(cat => cat.name && cat.name.trim() !== '');
     if (validRows.length === 0) {
-      this.batchCategoryErrors = ['Vui lòng điền tên danh mục cho ít nhất 1 dòng.'];
+      this.showToast('Vui lòng điền tên danh mục cho ít nhất 1 dòng.', 'error');
       return;
     }
 
@@ -618,7 +618,7 @@ export class Inventory implements OnInit {
     for (let i = 0; i < validRows.length; i++) {
       const name = validRows[i].name.trim().toLowerCase();
       if (namesSet.has(name)) {
-        this.batchCategoryErrors = [`Tên danh mục '${validRows[i].name}' bị lặp lại trong danh sách.`];
+        this.showToast(`Tên danh mục '${validRows[i].name}' bị lặp lại trong danh sách.`, 'error');
         return;
       }
       namesSet.add(name);
@@ -645,7 +645,7 @@ export class Inventory implements OnInit {
         let detailMsg = 'Không rõ nguyên nhân';
         if (err.error) {
           if (err.error.errors) {
-            this.batchCategoryErrors = err.error.errors;
+            this.showToast(err.error.errors.join('\n'), 'error');
             this.cdr.detectChanges();
             return;
           } else if (typeof err.error === 'string') {
@@ -658,7 +658,7 @@ export class Inventory implements OnInit {
         } else {
           detailMsg = err.message || err.statusText || 'Lỗi kết nối';
         }
-        this.batchCategoryErrors = [`Lỗi hệ thống: ${detailMsg}`];
+        this.showToast(`Lỗi hệ thống: ${detailMsg}`, 'error');
         this.cdr.detectChanges();
       }
     });

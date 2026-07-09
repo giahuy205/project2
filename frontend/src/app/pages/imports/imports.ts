@@ -50,9 +50,11 @@ export class ImportsComponent implements OnInit {
   API_PROD_URL = '/api/products';
 
   toastMessage = '';
+  toastType: 'success' | 'error' = 'success';
   excelWarnings: string[] = [];
-  showToast(msg: string) {
+  showToast(msg: string, type: 'success' | 'error' = 'success') {
     this.toastMessage = msg;
+    this.toastType = type;
     setTimeout(() => {
       this.toastMessage = '';
       this.cdr.detectChanges();
@@ -278,12 +280,12 @@ export class ImportsComponent implements OnInit {
 
   saveImport() {
     if (this.newImport.items.length === 0) {
-      alert("Vui lòng thêm ít nhất 1 sản phẩm!");
+      this.showToast("Vui lòng thêm ít nhất 1 sản phẩm!", "error");
       return;
     }
     
     if (this.newImport.items.some((i: any) => !i.productId)) {
-       alert("Vui lòng chọn sản phẩm cho tất cả các dòng!");
+       this.showToast("Vui lòng chọn sản phẩm cho tất cả các dòng!", "error");
        return;
     }
 
@@ -319,7 +321,7 @@ export class ImportsComponent implements OnInit {
       },
       error: (err) => {
         this.isSubmitting = false;
-        alert('Lỗi khi đặt hàng!');
+        this.showToast('Lỗi khi đặt hàng!', 'error');
         console.error(err);
       }
     });
@@ -342,7 +344,7 @@ export class ImportsComponent implements OnInit {
         this.loadImports();
       },
       error: (err) => {
-        alert('Lỗi khi hủy đơn hàng: ' + (err.error?.message || err.message));
+        this.showToast('Lỗi khi hủy đơn hàng: ' + (err.error?.message || err.message), 'error');
         console.error(err);
       }
     });
@@ -403,7 +405,7 @@ export class ImportsComponent implements OnInit {
   submitReceive() {
     const hasInvalid = this.receivingItems.some(item => item.receivedQuantity === null || item.receivedQuantity < 0);
     if (hasInvalid) {
-      alert('Vui lòng nhập số lượng nhận hợp lệ (lớn hơn hoặc bằng 0)');
+      this.showToast('Vui lòng nhập số lượng nhận hợp lệ (lớn hơn hoặc bằng 0)', 'error');
       return;
     }
 
@@ -425,7 +427,7 @@ export class ImportsComponent implements OnInit {
       },
       error: (err) => {
         this.isSubmitting = false;
-        alert('Lỗi khi nhận hàng: ' + (err.error?.message || err.message));
+        this.showToast('Lỗi khi nhận hàng: ' + (err.error?.message || err.message), 'error');
         console.error(err);
       }
     });
@@ -462,7 +464,7 @@ export class ImportsComponent implements OnInit {
         window.URL.revokeObjectURL(url);
       },
       error: (err) => {
-        alert('Lỗi tải tệp tin mẫu!');
+        this.showToast('Lỗi tải tệp tin mẫu!', 'error');
         console.error(err);
       }
     });
@@ -500,7 +502,7 @@ export class ImportsComponent implements OnInit {
           this.newImport.items = mappedItems;
           this.activeRowIndex = 0;
         } else {
-          alert('Không tìm thấy dòng sản phẩm hợp lệ nào trong tệp Excel!');
+          this.showToast('Không tìm thấy dòng sản phẩm hợp lệ nào trong tệp Excel!', 'error');
         }
         
         if (res.warnings && res.warnings.length > 0) {
@@ -511,7 +513,7 @@ export class ImportsComponent implements OnInit {
       error: (err) => {
         this.isSubmitting = false;
         event.target.value = '';
-        alert('Lỗi xử lý tệp Excel: ' + (err.error?.message || err.error || err.message));
+        this.showToast('Lỗi xử lý tệp Excel: ' + (err.error?.message || err.error || err.message), 'error');
         console.error(err);
       }
     });
