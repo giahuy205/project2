@@ -23,6 +23,10 @@ public class CategoryService {
         return repository.save(entity);
     }
 
+    public List<Category> saveAll(List<Category> entities) {
+        return repository.saveAll(entities);
+    }
+
     public void deleteById(Long id) {
         repository.deleteById(id);
     }

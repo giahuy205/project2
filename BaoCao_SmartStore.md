@@ -1,47 +1,38 @@
-# BÁO CÁO ĐỒ ÁN MÔN HỌC: PROJECT 2
+# BÁO CÁO ĐỒ ÁN MÔN HỌC: PROJECT 2 - Project II (IT3930)
 ## Đề tài: Hệ thống quản lý bán hàng SmartStore (POS Management System)
+**Giảng viên hướng dẫn:** Vũ Đức Vượng  
 **Sinh viên thực hiện:** Dương Gia Huy  
 **Mã số sinh viên:** 20236035  
 **Trường:** Đại học Bách Khoa Hà Nội  
 
----
+## MỤC LỤC
+- (điền sau tự làm)
 
-# TÓM TẮT ĐỒ ÁN (ABSTRACT)
-Đồ án tập trung nghiên cứu và phát triển hệ thống **SmartStore — POS Management System**, một giải pháp phần mềm quản lý bán hàng tại quầy và quản lý kho toàn diện dành riêng cho các mô hình kinh doanh bán lẻ quy mô vừa và nhỏ. Hệ thống được xây dựng dựa trên kiến trúc phân tách Client-Server 3 lớp (3-tier architecture) hiện đại và độc lập. Trong đó, tầng Frontend sử dụng **Angular Framework 21.2.0** và **TypeScript 5.9.2** để phát triển giao diện đơn trang (Single Page Application) phản hồi nhanh; tầng Backend sử dụng ngôn ngữ **Java 21** kết hợp với **Spring Boot 4.0.7** để xây dựng các RESTful API chuẩn hóa; tầng Database sử dụng hệ quản trị cơ sở dữ liệu quan hệ **PostgreSQL 16**. 
 
-Điểm nhấn kỹ thuật nổi bật của đồ án nằm ở việc **tối ưu hóa hiệu năng dữ liệu trực tiếp tại tầng cơ sở dữ liệu** thông qua lập trình hệ thống Trigger và Stored Procedure. Toàn bộ các nghiệp vụ phức tạp về biến động tồn kho (trừ kho khi bán lẻ, cộng kho khi nhập hàng, hoàn kho có điều kiện lỗi/tốt khi trả hàng), ghi nhận nhật ký kho chi tiết (`inventory_logs`), tính toán tiền thuế VAT động theo từng danh mục, ghi lịch sử thay đổi giá (`price_histories`) và ngăn chặn xóa hóa đơn đều được tự động hóa hoàn toàn bằng trigger của PostgreSQL. Thiết kế này giúp loại bỏ nguy cơ bất đồng bộ dữ liệu (Race Condition) khi có nhiều phiên giao dịch đồng thời và giảm thiểu đáng kể tải xử lý cho Backend.
 
-Phía giao diện Frontend, ứng dụng được tối ưu dung lượng phân phối bằng việc áp dụng kỹ thuật **Custom SVG Path Binding** để tự thiết kế biểu đồ thống kê doanh số động dạng Spline và phân đoạn Donut mà không cần nhúng các thư viện biểu đồ cồng kềnh từ bên thứ ba. Hệ thống cũng tích hợp thư viện **Apache POI 5.2.5** để xử lý đọc/ghi hàng loạt sản phẩm và phiếu nhập từ các tệp tin Excel mẫu một cách nhanh chóng. Đồ án đã được cấu hình API Proxy thông qua tệp `vercel.json` để triển khai thành công trên môi trường đám mây (Vercel cho Frontend và Render cho Backend), vượt qua các kịch bản kiểm thử tích hợp thực tế và sẵn sàng chuyển giao sử dụng.
-
----
 
 # I. TỔNG QUAN ĐỀ TÀI
 
 ## 1.1. Đặt vấn đề (Sự cần thiết của hệ thống quản lý bán hàng POS)
-Trong kỷ nguyên số hóa và sự phát triển mạnh mẽ của ngành bán lẻ, các cửa hàng, siêu thị mini và điểm bán lẻ truyền thống đang phải đối mặt với áp lực lớn trong việc nâng cao hiệu quả vận hành và tối ưu hóa trải nghiệm khách hàng. Các phương pháp quản lý bán hàng truyền thống như ghi chép sổ sách thủ công hay sử dụng các bảng tính Excel đơn giản bộc lộ nhiều hạn chế nghiêm trọng:
-- **Tốc độ giao dịch chậm:** Việc tính toán tiền hàng, thuế giá trị gia tăng (VAT), và tiền thừa cho khách hàng một cách thủ công tốn nhiều thời gian, dễ gây nhầm lẫn và ùn tắc tại quầy thanh toán vào giờ cao điểm.
-- **Thất thoát hàng tồn kho:** Không thể theo dõi biến động kho hàng theo thời gian thực (real-time). Khi hàng hóa được bán ra hoặc nhập thêm, số lượng thực tế trong kho không được cập nhật ngay lập tức dẫn đến tình trạng hết hàng đột ngột hoặc tồn kho quá mức mà quản lý không kịp thời phát hiện.
-- **Thiếu kiểm soát lịch sử giá:** Giá bán và giá nhập của các sản phẩm thường xuyên biến động theo thị trường và nhà cung cấp. Việc không lưu lại lịch sử thay đổi giá khiến cửa hàng khó đánh giá biên lợi nhuận và dễ xảy ra tình trạng sai lệch giá bán.
-- **Rủi ro thất thoát dữ liệu và gian lận:** Việc nhân viên tự ý xóa sửa hóa đơn đã xuất hoặc điều chỉnh tùy tiện số lượng tồn kho mà không có cơ chế giám sát (nhật ký kho hàng) tạo điều kiện cho các hành vi gian lận tài chính.
+Trong bối cảnh chuyển đổi số của ngành bán lẻ, các cửa hàng truyền thống đang gặp nhiều khó khăn khi quản lý thủ công qua sổ sách hoặc Excel do các hạn chế lớn sau:
+- Tốc độ thanh toán chậm và dễ xảy ra sai sót khi tính toán thủ công.
+- Không theo dõi được biến động số lượng hàng tồn kho theo thời gian thực.
+- Khó cập nhật và kiểm soát lịch sử thay đổi giá bán cũng như giá nhập sản phẩm.
+- Dễ thất thoát tài chính do thiếu cơ chế lưu vết hóa đơn và nhật ký kho.
 
-Chính vì vậy, việc xây dựng và triển khai một **Hệ thống quản lý bán hàng tại quầy (Point of Sale — POS) tự động hóa, tin cậy và tối ưu** là vô cùng cấp thiết. Hệ thống này không chỉ chuẩn hóa quy trình thanh toán mà còn là công cụ giúp quản lý cửa hàng kiểm soát chặt chẽ toàn bộ vòng đời của sản phẩm từ khâu nhập kho, điều chỉnh giá, bán hàng, cho đến hoàn trả hàng lỗi.
+Do đó, việc xây dựng hệ thống bán hàng tại quầy (POS) tự động hóa và tin cậy là vô cùng cấp thiết nhằm chuẩn hóa quy trình giao dịch, tối ưu hóa vận hành và bảo vệ toàn vẹn dữ liệu.
 
 ## 1.2. Mục tiêu đề tài (SmartStore POS Management System)
 Đề tài nghiên cứu và xây dựng hệ thống **SmartStore POS Management System** nhằm giải quyết triệt để các thách thức trong quản lý bán lẻ thông qua các mục tiêu cụ thể sau:
-- **Tự động hóa quy trình bán hàng tại quầy:** Xây dựng giao diện POS trực quan, cho phép nhân viên quét mã vạch sản phẩm, tự động tính toán tổng tiền, áp dụng thuế suất VAT động (8% hoặc 10% tùy danh mục sản phẩm) và tự động tính tiền thối lại cho khách dựa trên phương thức thanh toán linh hoạt (Tiền mặt, Thẻ, Chuyển khoản QR).
-- **Kiểm soát tồn kho theo thời gian thực (Real-time Inventory control):** Thiết kế cơ chế tự động trừ kho khi bán hàng, cộng kho khi nhập hàng, và xử lý hoàn trả kho có điều kiện đối với hàng lỗi/hỏng hoặc hàng còn tốt thông qua các nghiệp vụ lưu trữ đồng bộ.
-- **Đảm bảo tính toàn vẹn dữ liệu và an toàn hệ thống:** Xây dựng cơ chế lưu vết lịch sử biến động giá (`price_histories`), lưu nhật ký kho chi tiết (`inventory_logs`) và ngăn chặn triệt để hành vi xóa hóa đơn trực tiếp từ phía người dùng nhằm chống thất thoát tài chính.
-- **Quản lý nhập hàng khoa học:** Hỗ trợ tạo phiếu nhập kho từ nhiều nhà cung cấp, cho phép điều chỉnh giá bán trực tiếp ngay tại thời điểm nhập hàng để cập nhật kịp thời xu hướng thị trường.
-- **Thống kê báo cáo trực quan:** Cung cấp các công cụ báo cáo doanh thu, chi phí nhập hàng, và lợi nhuận thực tế theo khoảng thời gian bằng cách trực quan hóa dữ liệu qua biểu đồ động.
+- Tự động hóa quy trình bán hàng bằng giao diện POS trực quan, hỗ trợ tính tiền, thuế VAT động và đa dạng phương thức thanh toán.
+- Kiểm soát tồn kho thời gian thực qua cơ chế tự động cộng trừ kho khi bán hàng, nhập kho hoặc hoàn trả hàng.
+- Bảo vệ toàn vẹn dữ liệu hệ thống bằng cách lưu vết lịch sử biến động giá, nhật ký kho và ngăn chặn hành vi xóa hóa đơn.
+- Quản lý nhập hàng từ nhà cung cấp và cho phép cập nhật nhanh giá bán trực tiếp tại thời điểm nhập kho.
+- Thống kê doanh thu, chi phí nhập và lợi nhuận thực tế thông qua các biểu đồ báo cáo trực quan.
 
 ## 1.3. Phạm vi nghiên cứu và đối tượng áp dụng
-- **Phạm vi nghiên cứu:** 
-  - Đề tài tập trung nghiên cứu kiến trúc ứng dụng Web 3 lớp phân tách rõ ràng (Client-Server).
-  - Trọng tâm kỹ thuật đặt vào việc **tối ưu hóa hiệu năng nghiệp vụ dữ liệu bằng cách lập trình trực tiếp các Trigger và Database Functions trên PostgreSQL**. Việc này giúp hệ thống tự động hóa các nghiệp vụ tính toán tiền, ghi log lịch sử giá và thay đổi tồn kho trực tiếp tại tầng CSDL mà không phụ thuộc hoàn toàn vào logic xử lý của ứng dụng Backend.
-  - Xây dựng giao diện Single Page Application (SPA) phản hồi nhanh bằng Angular và kết nối API RESTful thông qua tầng trung gian Spring Boot.
-- **Đối tượng áp dụng:**
-  - Hệ thống được thiết kế tối ưu cho các cửa hàng bán lẻ quy mô vừa và nhỏ (siêu thị mini, cửa hàng tạp hóa, shop thời trang, cửa hàng tiện lợi) có nhu cầu quản lý bán hàng tập trung tại một cửa hàng (Single-Store).
-  - Đối tượng sử dụng trực tiếp bao gồm Nhân viên bán hàng tại quầy (Staff) thực hiện nghiệp vụ thanh toán và Admin/Quản lý cửa hàng thực hiện kiểm soát kho, lập phiếu nhập và theo dõi báo cáo doanh thu.
+- Phạm vi nghiên cứu tập trung vào kiến trúc ứng dụng Web 3 lớp phân tách độc lập (Angular, Spring Boot, PostgreSQL) và tối ưu hóa xử lý nghiệp vụ thông qua Trigger/Functions ở tầng cơ sở dữ liệu.
+- Đối tượng áp dụng hướng tới các cửa hàng bán lẻ quy mô vừa và nhỏ cần quản lý bán hàng tập trung với hai vai trò người dùng chính là nhân viên bán hàng và quản trị viên.
 
 ---
 
@@ -96,34 +87,31 @@ graph TD
 ```
 *Hình 2.1 - Sơ đồ kiến trúc 3 lớp của hệ thống SmartStore POS*
 
-Sự tương tác giữa các lớp được thực hiện thông qua giao thức truyền tải siêu văn bản HTTP/HTTPS bằng kiến trúc **RESTful API**:
-1. **Presentation Layer (Client - Angular):** Đảm nhận nhiệm vụ dựng giao diện người dùng động, tiếp nhận các tương tác và gửi yêu cầu (Request) bất đồng bộ dưới dạng định dạng JSON tới Backend. Lớp này không thực hiện trực tiếp các tính toán nghiệp vụ hay truy cập cơ sở dữ liệu để đảm bảo tính bảo mật và nhẹ nhàng cho trình duyệt.
-2. **Application Layer (Server - Spring Boot):** Đóng vai trò là cổng tiếp nhận API (API Gate), thực hiện kiểm tra tính hợp lệ dữ liệu (Validation), điều phối luồng xử lý và giao tiếp với cơ sở dữ liệu thông qua Spring Data JPA.
-3. **Database Layer (PostgreSQL):** Không chỉ lưu trữ dữ liệu dạng bảng quan hệ, lớp này còn tích hợp trực tiếp logic nghiệp vụ xử lý dữ liệu nặng thông qua **Trigger và Function**. Các phép tính toán tổng tiền hóa đơn, cập nhật số lượng tồn kho và ghi log lịch sử được thực thi trực tiếp tại đây giúp loại bỏ nguy cơ bất đồng bộ dữ liệu khi có nhiều giao dịch diễn ra đồng thời.
+Sự tương tác giữa các lớp được thực hiện qua giao thức HTTP/HTTPS với kiến trúc **RESTful API**:
+1. **Presentation Layer (Client - Angular):** Xây dựng giao diện động, tiếp nhận tương tác và gửi yêu cầu bất đồng bộ dưới dạng JSON tới Backend nhằm đảm bảo tính bảo mật và giảm tải cho Client.
+2. **Application Layer (Server - Spring Boot):** Tiếp nhận API, kiểm tra tính hợp lệ dữ liệu (Validation), điều phối luồng xử lý và giao tiếp với Database qua Spring Data JPA.
+3. **Database Layer (PostgreSQL):** Lưu trữ dữ liệu và tích hợp logic nghiệp vụ nặng qua **Trigger & Function** (tính toán hóa đơn, cập nhật tồn kho, ghi log), giúp ngăn chặn Race Condition khi có nhiều giao dịch đồng thời.
 
 ## 2.2. Công nghệ phía Frontend (Angular 21 & TypeScript)
-Trái với các thiết kế sử dụng thư viện đơn lẻ như React hay Vue đòi hỏi tích hợp nhiều công cụ bên thứ ba, dự án lựa chọn **Angular** làm nền tảng phát triển phía Client. Thực tế trong cấu hình `package.json` của dự án, các phiên bản công nghệ được áp dụng bao gồm:
-- **Angular Framework (Phiên bản 21.2.0):** Cung cấp giải pháp toàn diện (All-in-one) để xây dựng ứng dụng SPA chất lượng cao. Cơ chế định tuyến (`@angular/router`) giúp chuyển trang mượt mà không cần tải lại toàn bộ trang. Cơ chế quản lý form mạnh mẽ (`@angular/forms`) hỗ trợ theo dõi trạng thái nhập liệu của nhân viên tại quầy theo thời gian thực.
-- **TypeScript (Phiên bản 5.9.2):** Là một siêu ngôn ngữ (superset) của JavaScript, bổ sung cơ chế kiểm soát kiểu dữ liệu tĩnh (Strong Typing). TypeScript giúp phát hiện các lỗi logic ngay trong quá trình biên dịch (Compile-time), cải thiện chất lượng code và hỗ trợ đắc lực cho việc định nghĩa các interface dữ liệu trao đổi với Backend.
-- **RxJS (Reactive Extensions for JavaScript - Phiên bản 7.8.0):** Cung cấp các Observable giúp xử lý các sự kiện bất đồng bộ như gọi API, bắt sự kiện nhập liệu tìm kiếm sản phẩm theo thời gian thực (debounce time) một cách mượt mà và tối ưu hóa hiệu năng.
+Dự án lựa chọn **Angular** làm nền tảng toàn diện phát triển phía Client với các công nghệ chính:
+- **Angular Framework (21.2.0):** Xây dựng ứng dụng SPA hiệu năng cao. Cơ chế Routing định tuyến mượt mà và Form Module hỗ trợ xử lý dữ liệu nhập tại quầy theo thời gian thực.
+- **TypeScript (5.9.2):** Hỗ trợ kiểm soát kiểu dữ liệu tĩnh (Strong Typing), phát hiện lỗi trong quá trình biên dịch và đồng bộ interface dữ liệu với Backend.
+- **RxJS (7.8.0):** Xử lý bất đồng bộ các luồng sự kiện (gọi API, tìm kiếm sản phẩm real-time với debounce time) giúp tối ưu hóa hiệu năng giao diện.
 
 ## 2.3. Công nghệ phía Backend (Java & Spring Boot 3 / Thực tế Java 21 & Spring Boot 4.0.7)
-Mã nguồn phía Backend của hệ thống được tổ chức dựa trên hệ sinh thái Java hiện đại, cụ thể cấu hình tệp `pom.xml` sử dụng các công nghệ:
-- **Java 21:** Phiên bản hỗ trợ dài hạn (LTS) mang lại nhiều cải tiến về hiệu năng bộ nhớ, các cấu trúc ngôn ngữ mới giúp viết mã nguồn ngắn gọn và tối ưu hóa luồng xử lý.
-- **Spring Boot (Phiên bản 4.0.7):** Cung cấp bộ khung ứng dụng Backend mạnh mẽ với các starter dependencies giúp giảm thiểu tối đa việc cấu hình thủ công:
-  - `spring-boot-starter-webmvc`: Hỗ trợ xây dựng các API RESTful theo mô hình MVC, định tuyến các endpoint và chuyển đổi dữ liệu tự động giữa Java Object và JSON.
-  - `spring-boot-starter-data-jpa`: Tích hợp Hibernate giúp ánh xạ đối tượng xuống cơ sở dữ liệu quan hệ (ORM) và cung cấp các hàm truy vấn dữ liệu chuẩn mà không cần viết các câu lệnh SQL thuần túy phức tạp.
-  - `spring-boot-starter-validation`: Thực hiện kiểm tra ràng buộc dữ liệu đầu vào (ví dụ kiểm tra số lượng sản phẩm nhập phải lớn hơn 0, barcode không được để trống) ngay tại tầng Controller.
-- **Apache POI (Phiên bản 5.2.5):** Thư viện hỗ trợ đọc và ghi các định dạng tệp tin của Microsoft Office. Trong dự án này, Apache POI đóng vai trò quan trọng trong việc phân tích các tệp tin Excel nhập hàng hàng loạt (được minh chứng qua tệp mẫu `test_200_rows.xlsx` chứa dữ liệu sản phẩm mẫu).
-- **Lombok:** Công cụ hỗ trợ tạo tự động các hàm Getter, Setter, Constructor, Builder thông qua Annotation, giúp mã nguồn Java sạch sẽ và dễ bảo trì.
+Mã nguồn Backend tổ chức dựa trên Java kết hợp các công nghệ cấu hình trong `pom.xml`:
+- **Java 21 (LTS):** Cải tiến hiệu năng bộ nhớ và hỗ trợ các cú pháp lập trình hiện đại, tối ưu hóa xử lý đa luồng.
+- **Spring Boot (4.0.7):** Rút ngắn thời gian phát triển thông qua các thư viện tự cấu hình:
+  - `spring-boot-starter-webmvc`: Xây dựng RESTful API và định tuyến endpoint.
+  - `spring-boot-starter-data-jpa`: Tích hợp ORM Hibernate truy xuất cơ sở dữ liệu nhanh chóng.
+  - `spring-boot-starter-validation`: Kiểm tra ràng buộc dữ liệu đầu vào trực tiếp từ tầng Controller.
+- **Apache POI (5.2.5):** Đọc ghi Excel, hỗ trợ nhập hàng loạt sản phẩm và hóa đơn từ file mẫu.
+- **Lombok:** Tự động sinh mã Boilerplate (getter, setter, constructor) qua Annotation, tối giản mã nguồn.
 
 ## 2.4. Hệ quản trị cơ sở dữ liệu (PostgreSQL 16)
-Dự án sử dụng hệ quản trị cơ sở dữ liệu quan hệ mã nguồn mở **PostgreSQL** để lưu trữ và vận hành dữ liệu. 
-- **Cấu hình kết nối:** Được thiết lập trong tệp `application.properties` kết nối qua Driver `org.postgresql.Driver` tới cơ sở dữ liệu `project2_db`.
-- **Cơ chế đồng bộ hóa:** Dự án cấu hình thuộc tính `spring.jpa.hibernate.ddl-auto=none` nhằm ngăn Hibernate tự động can thiệp sửa đổi cấu trúc bảng, đảm bảo cấu trúc database được quản lý và khởi tạo hoàn toàn thông qua tệp [database.sql](file:///d:/Hust/project.2/database.sql) bằng thuộc tính `spring.sql.init.schema-locations=file:database.sql`.
-- **Vai trò đặc biệt của PostgreSQL trong dự án:**
-  - Thay vì xử lý toàn bộ logic nghiệp vụ cập nhật tồn kho ở tầng Java (dễ dẫn đến lỗi tranh chấp dữ liệu khi nhiều luồng cùng truy cập - Race Condition), dự án đã chuyển dịch toàn bộ logic này xuống PostgreSQL thông qua việc sử dụng **Trigger** kết hợp với từ khóa **FOR UPDATE** để khóa dòng dữ liệu sản phẩm đang giao dịch.
-  - Hỗ trợ cơ chế tự động hóa nghiệp vụ: Khi một bản ghi được chèn vào bảng `order_items` hay `import_items`, hệ thống trigger tương ứng trên PostgreSQL sẽ tự động tính toán tổng tiền, tính thuế VAT dựa trên quan hệ giữa bảng `products` và `categories`, cập nhật số lượng tồn kho của sản phẩm, đồng thời ghi lại nhật ký thay đổi tồn kho (`inventory_logs`) mà không cần bất kỳ lệnh SQL bổ sung nào từ Backend Spring Boot.
+Hệ thống sử dụng **PostgreSQL 16** để quản lý dữ liệu:
+- **Cấu hình kết nối & Đồng bộ:** Kết nối qua `project2_db` trong `application.properties`. Hệ thống đặt `ddl-auto=none` và khởi tạo cấu trúc bảng hoàn toàn thông qua tệp [database.sql](file:///d:/Hust/project.2/database.sql) để kiểm soát cấu trúc chặt chẽ.
+- **Xử lý nghiệp vụ tại database:** Toàn bộ logic cập nhật tồn kho được đẩy xuống PostgreSQL bằng **Trigger** kết hợp từ khóa **FOR UPDATE** để khóa dòng dữ liệu sản phẩm, tránh lỗi Race Condition. Khi chèn dữ liệu vào bảng chi tiết (`order_items`, `import_items`), trigger sẽ tự động cập nhật số lượng tồn kho, tính thuế VAT động, cập nhật lịch sử giá và ghi nhật ký thay đổi (`inventory_logs`).
 
 ---
 
@@ -134,76 +122,63 @@ Dự án sử dụng hệ quản trị cơ sở dữ liệu quan hệ mã nguồ
 Hệ thống có hai tác nhân chính là **Quản trị viên (Admin)** và **Nhân viên bán hàng (Staff)**. 
 
 ```mermaid
-usecaseDiagram
-    actor Admin
-    actor Staff
-    
-    rect System_Boundary ["SmartStore POS Boundary"]
-        usecase UC001_Login ["UC001: Đăng nhập"]
-        usecase UC002_POS ["UC002: Bán hàng tại quầy"]
-        usecase UC003_Return ["UC003: Trả hàng"]
-        usecase UC004_ViewInv ["UC004: Tra cứu tồn kho"]
-        usecase UC005_ViewTrans ["UC005: Xem lịch sử giao dịch"]
-        usecase UC006_ManageEmp ["UC006: Quản lý nhân sự"]
-        usecase UC007_ManageProd ["UC007: Quản lý sản phẩm"]
-        usecase UC008_ManageCat ["UC008: Quản lý danh mục"]
-        usecase UC009_Import ["UC009: Nhập hàng từ Excel/Thủ công"]
-        usecase UC010_ViewRep ["UC010: Xem báo cáo doanh thu"]
+flowchart LR
+    Admin["  O  <br/> /|\\ <br/> / \\ <br/>Admin"]
+    Staff["  O  <br/> /|\\ <br/> / \\ <br/>Staff"]
+
+    subgraph System ["SmartStore POS Boundary"]
+        UC001(["UC001: Đăng nhập"])
+        UC002(["UC002: Bán hàng và Tạo đơn hàng (POS Checkout)"])
+        UC003(["UC003: Tra cứu tồn kho"])
+        UC004(["UC004: Xem lịch sử giao dịch"])
+        UC005(["UC005: Quản lý nhân sự"])
+        UC006(["UC006: Quản lý sản phẩm"])
+        UC007(["UC007: Quản lý danh mục"])
+        UC008(["UC008: Nhập hàng từ Excel/Thủ công"])
+        UC009(["UC009: Xem báo cáo doanh thu"])
     end
 
-    Admin --> UC001_Login
-    Admin --> UC002_POS
-    Admin --> UC003_Return
-    Admin --> UC004_ViewInv
-    Admin --> UC005_ViewTrans
-    Admin --> UC006_ManageEmp
-    Admin --> UC007_ManageProd
-    Admin --> UC008_ManageCat
-    Admin --> UC009_Import
-    Admin --> UC010_ViewRep
+    Admin --> UC001
+    Admin --> UC002
+    Admin --> UC003
+    Admin --> UC004
+    Admin --> UC005
+    Admin --> UC006
+    Admin --> UC007
+    Admin --> UC008
+    Admin --> UC009
 
-    Staff --> UC001_Login
-    Staff --> UC002_POS
-    Staff --> UC003_Return
-    Staff --> UC004_ViewInv
-    Staff --> UC005_ViewTrans
+    Staff --> UC001
+    Staff --> UC002
+    Staff --> UC003
+    Staff --> UC004
 ```
 *Hình 3.1 - Sơ đồ Use Case tổng quan hệ thống SmartStore*
 
 ### Đặc tả chi tiết ca sử dụng cốt lõi:
 
-*Bảng 3.1 - Đặc tả ca sử dụng UC002: Bán hàng tại quầy (POS Checkout)*
+*Bảng 3.1 - Đặc tả ca sử dụng UC002: Bán hàng và Tạo đơn hàng (POS Checkout)*
 
 | Thành phần đặc tả | Nội dung chi tiết |
 |---|---|
-| **Tên ca sử dụng** | UC002: Bán hàng tại quầy (POS Checkout) |
+| **Tên ca sử dụng** | UC002: Bán hàng và Tạo đơn hàng (POS Checkout) |
 | **Tác nhân** | Nhân viên bán hàng (Staff), Quản trị viên (Admin) |
-| **Mô tả ngắn** | Nhân viên thực hiện quét barcode/chọn sản phẩm, tự động tính tổng tiền, thuế VAT, tiền thừa và xuất hóa đơn. |
+| **Mô tả ngắn** | Nhân viên chọn sản phẩm từ danh sách hoặc quét barcode, hệ thống tự động tính tổng tiền, thuế VAT động, tiền thừa và tạo đơn hàng. |
 | **Điều kiện tiên quyết** | Nhân viên đã đăng nhập thành công vào hệ thống. |
-| **Luồng sự kiện chính** | 1. Nhân viên tìm kiếm sản phẩm hoặc quét mã vạch sản phẩm để thêm vào giỏ hàng.<br>2. Hệ thống truy vấn thông tin sản phẩm và tự động điền đơn giá, tính thuế VAT dựa trên danh mục.<br>3. Nhân viên điều chỉnh số lượng sản phẩm.<br>4. Hệ thống cập nhật tổng tiền cần thanh toán.<br>5. Nhân viên chọn phương thức thanh toán (Tiền mặt/Thẻ/QR). Nhập số tiền nhận từ khách.<br>6. Hệ thống tự động tính tiền thừa và nhân viên nhấn nút xác nhận.<br>7. Hệ thống ghi nhận hóa đơn mới và kích hoạt trigger tự động trừ kho hàng. |
-| **Điều kiện sau** | Số lượng tồn kho được cập nhật chính xác, hóa đơn được ghi nhận vào hệ thống. |
+| **Luồng sự kiện chính** | 1. Nhân viên tìm kiếm sản phẩm hoặc quét mã vạch sản phẩm để thêm vào giỏ hàng.<br>2. Hệ thống truy vấn thông tin sản phẩm, tự động tính thuế VAT dựa trên danh mục.<br>3. Nhân viên điều chỉnh số lượng sản phẩm.<br>4. Hệ thống cập nhật tổng tiền cần thanh toán.<br>5. Nhân viên chọn phương thức thanh toán (Tiền mặt/Thẻ/QR). Nhập số tiền nhận từ khách.<br>6. Hệ thống tự động tính tiền thừa và nhân viên nhấn nút xác nhận thanh toán.<br>7. Hệ thống ghi nhận đơn hàng mới và kích hoạt trigger tự động trừ số lượng kho hàng. |
+| **Điều kiện sau** | Số lượng tồn kho được cập nhật chính xác, đơn hàng được ghi nhận thành công. |
 
-*Bảng 3.2 - Đặc tả ca sử dụng UC009: Nhập hàng (Import)*
+*Bảng 3.2 - Đặc tả ca sử dụng UC008: Nhập hàng (Import)*
 
 | Thành phần đặc tả | Nội dung chi tiết |
 |---|---|
-| **Tên ca sử dụng** | UC009: Nhập hàng |
+| **Tên ca sử dụng** | UC008: Nhập hàng |
 | **Tác nhân** | Quản trị viên (Admin) |
 | **Mô tả ngắn** | Admin tạo phiếu nhập kho (thủ công hoặc nhập hàng loạt từ tệp Excel), cập nhật giá nhập/bán và số lượng tồn kho của các sản phẩm. |
 | **Điều kiện tiên quyết** | Tài khoản có quyền Admin và các sản phẩm đã được khai báo trên hệ thống. |
 | **Luồng sự kiện chính** | 1. Admin truy cập màn hình Nhập hàng và chọn hình thức tạo phiếu nhập (chọn sản phẩm thủ công hoặc tải lên tệp Excel).<br>2. Admin điền thông tin nhà cung cấp, số lượng nhập, giá nhập và giá bán mới.<br>3. Admin gửi yêu cầu xác nhận lưu phiếu nhập ở trạng thái PENDING.<br>4. Khi hàng về kho thực tế, Admin kiểm tra số lượng và bấm xác nhận nhận hàng (RECEIVE).<br>5. Hệ thống cập nhật trạng thái phiếu nhập thành RECEIVED, tăng tồn kho sản phẩm tương ứng và lưu lịch sử thay đổi giá nếu có. |
 | **Điều kiện sau** | Tồn kho sản phẩm được cộng thêm tương ứng, tệp nhật ký kho và lịch sử giá được cập nhật. |
 
-*Bảng 3.3 - Đặc tả ca sử dụng UC003: Xử lý hoàn trả hàng (Return Item)*
-
-| Thành phần đặc tả | Nội dung chi tiết |
-|---|---|
-| **Tên ca sử dụng** | UC003: Xử lý hoàn trả hàng (Return Item) |
-| **Tác nhân** | Nhân viên bán hàng (Staff), Quản trị viên (Admin) |
-| **Mô tả ngắn** | Nhân viên thực hiện hoàn trả hàng cho khách từ hóa đơn cũ, hệ thống tự động cộng kho có điều kiện (hàng còn tốt/hàng hỏng) và tính tổng hoàn tiền. |
-| **Điều kiện tiên quyết** | Hóa đơn bán hàng cũ tồn tại trong hệ thống. |
-| **Luồng sự kiện chính** | 1. Nhân viên tìm kiếm hóa đơn gốc dựa trên mã hóa đơn.<br>2. Hệ thống hiển thị chi tiết hóa đơn cũ.<br>3. Nhân viên chọn sản phẩm hoàn trả, nhập số lượng trả, giá hoàn tiền và chọn trạng thái hàng hóa (Hàng còn tốt - Good / Hàng bị lỗi, hỏng - Damaged).<br>4. Hệ thống tự động kiểm tra số lượng trả phải nhỏ hơn hoặc bằng số lượng mua.<br>5. Nhân viên xác nhận hoàn trả.<br>6. Hệ thống tạo phiếu trả hàng, nếu hàng còn tốt (Good) thì cộng lại vào kho thực tế, nếu hỏng (Damaged) thì giữ nguyên kho, đồng thời tự động cập nhật tổng tiền hoàn. |
-| **Điều kiện sau** | Phiếu trả hàng được ghi nhận, tồn kho thay đổi tương ứng theo tình trạng sản phẩm. |
 
 ## 3.2. Thiết kế Cơ sở dữ liệu (Sơ đồ thực thể liên kết ERD và mô tả chi tiết các bảng)
 
@@ -743,126 +718,128 @@ sequenceDiagram
 ```
 *Hình 3.4 - Biểu đồ tuần tự Quy trình nhập hàng và cập nhật kho tự động (Import Inventory)*
 
-### 3.5.3. Quy trình xử lý hoàn trả hàng (Return Item)
-Biểu đồ mô tả quy trình trả hàng, xử lý kiểm tra điều kiện hàng trả trực tiếp dưới Database:
+### 3.5.3. Quy trình thống kê và trực quan hóa báo cáo doanh số (Revenue Reporting)
+Biểu đồ mô tả luồng truy vấn dữ liệu báo cáo từ giao diện của Admin, xử lý tổng hợp ở Backend và cơ chế tự tính toán vẽ biểu đồ SVG động ở Frontend:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Staff as Nhân viên
+    actor Admin as Quản lý (Admin)
     participant FE as Frontend (Angular)
     participant BE as Backend (Spring Boot)
     participant DB as Database (PostgreSQL)
 
-    Staff->>FE: Tìm mã hóa đơn cũ cần trả hàng
-    FE->>BE: GET /api/orders/{id}
-    BE->>DB: SELECT * FROM orders & order_items
-    DB-->>BE: Trả về thông tin hóa đơn
-    BE-->>FE: Hiển thị chi tiết hóa đơn lên giao diện
-    Staff->>FE: Chọn sản phẩm trả, Nhập số lượng, Chọn điều kiện (Good/Damaged)
-    Staff->>FE: Nhấn "Xác nhận trả hàng"
-    FE->>BE: POST /api/returns (ReturnOrderRequest)
+    Admin->>FE: Truy cập màn hình Báo cáo & Chọn khoảng thời gian
+    FE->>BE: GET /api/reports/revenue?startDate=...&endDate=...
     activate BE
-    BE->>DB: INSERT INTO returns (order_id, reason, total_refund_amount = 0)
+    BE->>DB: Truy vấn tổng hợp doanh thu từ đơn hàng & chi phí từ phiếu nhập
     activate DB
-    DB-->>BE: Trả về Return ID
-    loop Mỗi sản phẩm hoàn trả
-        BE->>DB: INSERT INTO return_items (return_id, product_id, quantity, refund_price, item_condition)
-        Note over DB: Trigger trg_after_insert_return_item:<br>1. Nếu item_condition = 'Good' -> Cộng stock_quantity trong products<br>2. Nếu item_condition = 'Damaged' -> Giữ nguyên stock_quantity sản phẩm<br>3. Ghi log 'RETURN' vào inventory_logs<br>4. Cộng dồn tiền hoàn vào total_refund_amount của returns
-    end
-    DB-->>BE: Commit Transaction hoàn tất
+    DB-->>BE: Trả về số liệu doanh thu và chi phí theo thời gian
     deactivate DB
-    BE-->>FE: Trả về Return Entity đã tính toán
+    BE->>BE: Tính toán lợi nhuận thực tế (Doanh thu - Chi phí)
+    BE-->>FE: Trả về JSON chứa chuỗi báo cáo tổng hợp
     deactivate BE
-    FE->>Staff: Hiển thị phiếu trả hàng thành công & Hoàn tiền khách
+    FE->>FE: Tính toán tọa độ các điểm trên biểu đồ spline & donut
+    FE->>FE: Binds dữ liệu vào Custom SVG Path
+    FE->>Admin: Vẽ biểu đồ thống kê động trực quan trên giao diện
 ```
-*Hình 3.5 - Biểu đồ tuần tự Quy trình xử lý hoàn trả hàng (Return Item)*
+*Hình 3.5 - Biểu đồ tuần tự Quy trình thống kê và trực quan hóa báo cáo doanh số*
+
+### 3.5.4. Quy trình quản lý dữ liệu danh mục, sản phẩm và nhân sự (CRUD Operations)
+Biểu đồ mô tả cách hệ thống tiếp nhận thông tin, thực hiện kiểm tra tính hợp lệ dữ liệu (Validation) ở cả hai phía Client-Server và lưu trữ vào cơ sở dữ liệu:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as Quản lý (Admin)
+    participant FE as Frontend (Angular)
+    participant BE as Backend (Spring Boot)
+    participant DB as Database (PostgreSQL)
+
+    Admin->>FE: Nhập thông tin trên Form (Thêm/Sửa Sản phẩm, Nhân sự, Danh mục)
+    Admin->>FE: Bấm nút "Lưu" (Save)
+    FE->>FE: Kiểm tra định dạng dữ liệu phía Client (Form Validation)
+    alt Dữ liệu hợp lệ
+        FE->>BE: Gửi HTTP POST/PUT /api/{resource} (JSON Body)
+        activate BE
+        BE->>BE: Kiểm tra ràng buộc dữ liệu phía Server (@Valid Validation)
+        alt Ràng buộc hợp lệ
+            alt Nghiệp vụ thêm mới/cập nhật Nhân sự
+                BE->>BE: Băm bảo mật mật khẩu tài khoản
+            end
+            BE->>DB: Thực hiện câu lệnh SQL tương ứng (INSERT/UPDATE)
+            activate DB
+            DB-->>BE: Xác nhận ghi nhận thành công (Success)
+            deactivate DB
+            BE-->>FE: Trả về đối tượng dữ liệu đã lưu (200 OK / 201 Created)
+            FE->>FE: Cập nhật danh sách hiển thị trên giao diện (UI Grid)
+            FE->>Admin: Hiển thị thông báo lưu thành công
+        else Ràng buộc vi phạm (trùng barcode, mã nhân viên, thiếu thông tin bắt buộc)
+            BE-->>FE: Trả về lỗi 400 Bad Request (Error Details)
+            deactivate BE
+            FE->>Admin: Hiển thị cảnh báo lỗi chi tiết trên màn hình
+        end
+    else Form nhập liệu không hợp lệ
+        FE->>Admin: Đánh dấu đỏ các trường nhập lỗi và chặn gửi yêu cầu
+    end
+```
+*Hình 3.6 - Biểu đồ tuần tự Quy trình quản lý dữ liệu (CRUD)*
+
+
 
 ---
 
 # IV. KẾT QUẢ GIAO DIỆN HỆ THỐNG
 
-## 4.1. Tổng quan giao diện hệ thống (Sidebar navigation & layout)
-Hệ thống sử dụng bố cục giao diện responsive hiện đại chia thành hai khu vực chính:
-1. **Sidebar Navigation (`app-sidebar`):** Thanh điều hướng cố định nằm bên trái màn hình. Dựa vào vai trò (role) của tài khoản đăng nhập để hiển thị các menu chức năng phù hợp:
-   - Các chức năng cho nhân viên và quản lý: Bán hàng tại quầy (Sales/POS), Tra cứu tồn kho (Inventory), Lịch sử giao dịch (Transactions), Cài đặt thông tin (Settings).
-   - Các chức năng nâng cao chỉ hiển thị cho Admin: Bảng Tổng quan (Dashboard), Phiếu nhập hàng (Imports), Báo cáo doanh số (Reports), Quản lý nhân viên (Staff).
-2. **Main Content Container:** Nằm bên phải, chứa thanh Topbar hiển thị tên người dùng và vai trò, cùng khu vực render nội dung trang web động (`router-outlet`) giúp chuyển trang mượt mà mà không tải lại toàn bộ trang (SPA).
+## 4.1. Bố cục và Thanh điều hướng giao diện chính
+Hệ thống sử dụng bố cục giao diện phản hồi (responsive) hiện đại chia thành hai khu vực chính:
+1. **Thanh điều hướng bên trái:** Được ghim cố định ở bên trái màn hình. Dựa vào vai trò của tài khoản đăng nhập để hiển thị các menu chức năng phù hợp:
+   - Các chức năng cho nhân viên và quản lý: Bán hàng tại quầy, Tra cứu tồn kho, Lịch sử đơn hàng, Cài đặt tài khoản.
+   - Các chức năng quản trị chỉ hiển thị cho Quản trị viên: Bảng tổng quan (Dashboard), Nhập kho, Báo cáo doanh số, Quản lý nhân viên.
+2. **Khu vực hiển thị nội dung chính:** Nằm bên phải, chứa thanh tiêu đề hiển thị tên người dùng và vai trò, cùng khu vực kết xuất nội dung động của màn hình giúp chuyển trang mượt mà không cần tải lại toàn bộ trang (ứng dụng đơn trang - SPA).
 
-## 4.2. Giao diện Bán hàng tại quầy (POS Page)
+## 4.2. Giao diện Bán hàng tại quầy
 Màn hình bán hàng được thiết kế tối ưu hóa tốc độ thao tác cho nhân viên thu ngân:
-- **Khu vực danh sách sản phẩm (Bên trái):** Hiển thị danh mục sản phẩm trực quan dưới dạng thẻ hoặc lưới, cho phép tìm kiếm nhanh theo tên sản phẩm hoặc quét mã vạch trực tiếp. Các danh mục sản phẩm (ví dụ: Đồ uống, Thực phẩm, Hóa mỹ phẩm) được phân nhóm rõ ràng.
-- **Khu vực giỏ hàng (Bên phải):** Hiển thị chi tiết các sản phẩm được chọn, số lượng và tổng tiền tạm tính. Thu ngân có thể nhanh chóng tăng giảm số lượng sản phẩm bằng nút bấm, hoặc xóa sản phẩm khỏi giỏ hàng.
-- **Khu vực thanh toán:** Hiển thị tiền hàng chưa thuế, thuế VAT (8% hoặc 10% tính động theo từng danh mục sản phẩm), và tổng số tiền khách phải trả. Cung cấp bàn phím số ảo giúp thu ngân nhập nhanh số tiền khách đưa và hệ thống tự động hiển thị tiền thừa thối lại cho khách.
+- **Khu vực danh mục và sản phẩm (Bên trái):** Hiển thị danh mục sản phẩm trực quan dưới dạng ô lưới, cho phép tìm kiếm nhanh theo tên sản phẩm hoặc quét mã vạch sản phẩm. Các nhóm sản phẩm như Đồ uống, Thực phẩm, Hóa mỹ phẩm được phân loại rõ ràng.
+- **Khu vực giỏ hàng (Bên phải):** Hiển thị chi tiết danh sách sản phẩm được chọn, số lượng và tổng tiền tạm tính. Thu ngân có thể tăng giảm số lượng sản phẩm bằng nút bấm nhanh hoặc xóa trực tiếp sản phẩm khỏi giỏ hàng.
+- **Khu vực thanh toán:** Hiển thị tiền hàng chưa thuế, thuế VAT (8% hoặc 10% tính động theo từng nhóm sản phẩm) và tổng số tiền khách cần thanh toán. Hệ thống cung cấp bàn phím số ảo hỗ trợ thu ngân nhập nhanh số tiền khách đưa và tự động hiển thị tiền thừa thối lại cho khách.
 
-## 4.3. Giao diện Quản lý Kho hàng (Inventory Page)
-Giao diện quản lý kho cung cấp cái nhìn toàn diện về trạng thái tồn kho của cửa hàng:
-- **Bảng dữ liệu hàng hóa:** Hiển thị chi tiết mã vạch (barcode), tên sản phẩm, danh mục sản phẩm, giá bán, giá nhập và tồn kho thực tế.
+## 4.3. Giao diện Quản lý kho hàng
+Giao diện quản lý kho cung cấp cái nhìn toàn diện về trạng thái tồn kho thực tế của cửa hàng:
+- **Bảng dữ liệu hàng hóa:** Hiển thị chi tiết mã vạch sản phẩm, tên sản phẩm, danh mục, giá bán, giá nhập và số lượng tồn kho thực tế.
 - **Cảnh báo tồn kho trực quan:**
-  - Hàng hết (`stock_quantity = 0`): Hệ thống tự động highlight màu đỏ dòng sản phẩm, đi kèm trạng thái "Hết hàng" (Out of Stock).
-  - Hàng sắp hết (`stock_quantity <= low_stock`): Tự động hiển thị trạng thái cảnh báo màu cam "Sắp hết hàng" (Low Stock).
-- **Bộ lọc & Tìm kiếm:** Cho phép lọc nhanh theo danh mục, trạng thái tồn kho và sắp xếp động theo từng cột.
+  - Hàng đã hết: Hệ thống tự động tô đỏ dòng sản phẩm và hiển thị trạng thái "Hết hàng".
+  - Hàng sắp hết: Tự động hiển thị trạng thái cảnh báo màu cam "Sắp hết hàng" khi tồn kho dưới mức tối thiểu.
+- **Bộ lọc & Tìm kiếm:** Cho phép tìm kiếm nhanh theo tên sản phẩm, lọc theo danh mục hoặc trạng thái tồn kho.
 
-## 4.4. Giao diện Lập phiếu nhập hàng (Imports Page)
+## 4.4. Giao diện Lập phiếu nhập hàng
 Hỗ trợ quản lý tạo các phiếu nhập kho từ nhà cung cấp:
-- **Lập phiếu thủ công:** Cho phép tìm kiếm và thêm sản phẩm vào phiếu nhập từ thanh combobox thông minh, nhập số lượng, giá nhập dự kiến và giá bán mới.
-- **Nhập hàng loạt bằng Excel (Excel Import):** Cho phép người dùng tải lên file Excel chứa danh sách hàng trăm sản phẩm. Frontend gửi file lên API `/api/imports/parse-excel`, Backend dùng thư viện Apache POI phân tích tệp tin, tự động kiểm tra xem sản phẩm có tồn tại không và trả về kết quả hiển thị dạng lưới kèm các cảnh báo lỗi định dạng (ví dụ định dạng ngày tháng của hạn sử dụng bị sai, số lượng <= 0) giúp tối ưu hóa thời gian nhập kho.
+- **Lập phiếu thủ công:** Cho phép tìm kiếm và thêm sản phẩm vào phiếu nhập qua hộp chọn thông minh, điền số lượng, giá nhập và giá bán mới.
+- **Nhập hàng loạt từ Excel:** Cho phép người dùng tải lên tệp Excel danh sách sản phẩm. Hệ thống tự động phân tích tệp tin, kiểm tra tính hợp lệ của dữ liệu (mã vạch sản phẩm, số lượng, hạn sử dụng) và hiển thị kết quả dạng bảng kèm các cảnh báo lỗi định dạng để tối ưu thời gian nhập kho.
 
-## 4.5. Giao diện Lịch sử giao dịch và trả hàng (Transactions Page)
-Quản lý lịch sử bán hàng và hoàn trả của cửa hàng:
-- **Danh sách giao dịch:** Hiển thị lịch sử hóa đơn bán hàng và phiếu hoàn trả, hỗ trợ lọc theo thời gian và phân trang.
-- **Xem chi tiết giao dịch:** Hiển thị hóa đơn chi tiết bao gồm từng mặt hàng, số lượng, đơn giá bán, thuế suất áp dụng tại thời điểm bán và tổng số tiền thanh toán.
-- **Chức năng hoàn trả hàng:** Thu ngân có thể bấm nút "Trả hàng" trực tiếp trên chi tiết hóa đơn cũ. Hệ thống mở ra màn hình chọn sản phẩm hoàn trả, cho phép điều chỉnh số lượng trả, nhập giá hoàn tiền, lý do trả và lựa chọn tình trạng sản phẩm (Hàng còn tốt - Good / Hàng lỗi hỏng - Damaged) để DB tự động hoàn kho và tính toán dòng tiền.
+## 4.5. Giao diện Lịch sử đơn hàng
+Quản lý lịch sử đơn hàng của cửa hàng:
+- **Danh sách đơn hàng:** Hiển thị danh sách lịch sử hóa đơn bán hàng theo thời gian thực, hỗ trợ các chức năng lọc theo khoảng thời gian và phân trang dữ liệu.
+- **Xem chi tiết đơn hàng:** Hiển thị chi tiết từng hóa đơn bao gồm thông tin sản phẩm, số lượng, đơn giá, mức thuế suất VAT thực tế áp dụng tại thời điểm thanh toán và tổng tiền hóa đơn.
 
-## 4.6. Giao diện Thống kê Báo cáo Doanh thu & Lợi nhuận động (Reports Page)
-Màn hình Báo cáo cung cấp các báo cáo chỉ số tài chính cho Admin:
-- **KPI Indicators:** Hiển thị 6 thẻ chỉ số tài chính (Doanh thu, Giá vốn, Lợi nhuận gộp, Biên lợi nhuận, Số đơn hàng, Số sản phẩm bán ra) cùng tỉ lệ tăng/giảm phần trăm so với kỳ trước đó.
-- **Biểu đồ động:** Trực quan hóa doanh thu & lợi nhuận theo xu hướng thời gian.
+## 4.6. Giao diện Thống kê Báo cáo Doanh thu & Lợi nhuận
+Màn hình Báo cáo cung cấp các chỉ số tài chính phục vụ cho công tác quản lý:
+- **Các chỉ số tài chính cốt lõi (KPI):** Hiển thị các thẻ chỉ số gồm Doanh thu, Giá vốn, Lợi nhuận gộp, Biên lợi nhuận, Số đơn hàng, Số sản phẩm đã bán cùng tỉ lệ tăng/giảm phần trăm so với kỳ trước đó.
+- **Biểu đồ động:** Trực quan hóa doanh thu và lợi nhuận theo thời gian bằng biểu đồ đường cong và biểu đồ tròn phân đoạn tự vẽ qua kỹ thuật **Custom SVG Path Binding** (tính toán tọa độ các điểm Bezier trực tiếp ở component và gắn vào thuộc tính `d` của thẻ `<path>` trong `<svg>`). Thiết kế này giúp tối ưu hóa hiệu năng render và giảm đáng kể dung lượng tải trang do không cần sử dụng thư viện biểu đồ bên thứ ba.
 
-### 4.6.1. Thiết kế biểu đồ xu hướng tự vẽ bằng Custom SVG Path Binding trong Angular
-Thay vì sử dụng các thư viện biểu đồ cồng kềnh của bên thứ ba (như Chart.js, D3.js) làm tăng dung lượng bundle và ảnh hưởng hiệu năng tải trang, hệ thống SmartStore áp dụng kỹ thuật **Custom SVG Path Binding**.
-- **Cơ chế hoạt động:**
-  - Component [Reports](file:///d:/Hust/project.2/frontend/src/app/pages/reports/reports.ts) tiếp nhận dữ liệu doanh số từ API Backend, xác định giá trị lớn nhất (`maxVal`) để làm thang đo trục Y.
-  - Tọa độ (X, Y) của từng điểm dữ liệu trên biểu đồ được tính toán dựa trên kích thước khung hình SVG (`600px x 250px`).
-  - Hàm `getSplinePath` sử dụng thuật toán nội suy Bezier Curve `C` để tạo ra chuỗi path vẽ đường cong mềm mại nối các điểm nút dữ liệu:
-  
-  ```typescript
-  getSplinePath(points: { x: number, y: number }[]): string {
-    if (points.length === 0) return '';
-    if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
-    
-    let path = `M ${points[0].x} ${points[0].y}`;
-    for (let i = 0; i < points.length - 1; i++) {
-      const p0 = points[i];
-      const p1 = points[i + 1];
-      
-      // Tính toán các điểm điều khiển (Control Points) để tạo đường cong mượt mà
-      const cpX1 = p0.x + (p1.x - p0.x) / 3;
-      const cpY1 = p0.y;
-      const cpX2 = p0.x + 2 * (p1.x - p0.x) / 3;
-      const cpY2 = p1.y;
-      
-      path += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p1.x} ${p1.y}`;
-    }
-    return path;
-  }
-  ```
-  - Vùng màu nền bên dưới đường xu hướng được khép kín bằng cách nối điểm cuối và điểm đầu của đường cong xuống trục hoành (Bottom Y):
-    `areaPathStr = ${pathStr} L ${endX} ${bottomY} L ${startX} ${bottomY} Z`
-  - Trên [reports.html](file:///d:/Hust/project.2/frontend/src/app/pages/reports/reports.html), Angular thực hiện bind trực tiếp chuỗi path này vào thuộc tính `d` của thẻ `<path>` trong `<svg>`:
-    `<path [attr.d]="revenuePath" class="revenue-line" ... />`
-    `<path [attr.d]="revenueAreaPath" fill="url(#revGrad)" ... />`
-  - Bằng cách này, trình duyệt render biểu đồ cực kỳ mượt mà, tối ưu hóa hiệu năng, giảm bundle size của ứng dụng và cho phép tùy biến giao diện biểu đồ (hiệu ứng gradient mờ dần, các điểm nút tròn hover động) thông qua CSS thuần.
 
 ---
 
 # V. TRIỂN KHAI, KIỂM THỬ VÀ ĐÁNH GIÁ HỆ THỐNG
 
 ## 5.1. Triển khai hệ thống lên môi trường đám mây (Cloud Deployment)
+Hệ thống SmartStore đã được triển khai trực tuyến trên môi trường điện toán đám mây công cộng. Người dùng có thể tham chiếu các liên kết sau để truy cập mã nguồn và chạy thử nghiệm thực tế:
+- **Mã nguồn dự án trên GitHub:** [giahuy205/project2](https://github.com/giahuy205/project2)
+- **Phiên bản demo thực tế trên Vercel:** [SmartStore Demo](https://project2-abu205.vercel.app/)
 
 ### 5.1.1. Triển khai Frontend Angular lên nền tảng Vercel & cấu hình API Proxy Rewrite (`vercel.json`)
 - Phân hệ Frontend Angular được biên dịch sang mã tĩnh (HTML/JS/CSS) và đẩy lên dịch vụ **Vercel Hosting**.
-- Để giải quyết vấn đề CORS (Cross-Origin Resource Sharing) khi gọi API sang Backend và đảm bảo định tuyến Client-side Router hoạt động chính xác khi người dùng tải lại trang (reload), tệp [vercel.json](file:///d:/Hust/project.2/frontend/vercel.json) được cấu hình như sau:
+- Để tránh lỗi CORS khi gọi API và lỗi định tuyến 404 khi người dùng tải lại trang, tệp [vercel.json](file:///d:/Hust/project.2/frontend/vercel.json) được cấu hình:
 
 ```json
 {
@@ -890,57 +867,34 @@ Thay vì sử dụng các thư viện biểu đồ cồng kềnh của bên th�
 - Cơ sở dữ liệu PostgreSQL được khởi tạo và chạy trên dịch vụ đám mây công khai (Cloud Database).
 - Thông tin kết nối CSDL được cung cấp thông qua các biến môi trường cấu hình tại cài đặt ứng dụng Render của Backend, đảm bảo an toàn bảo mật thông tin tài khoản Database.
 
-## 5.2. Kịch bản kiểm thử chức năng (Test Cases)
+## 5.2. Kịch bản kiểm thử các chức năng hệ thống (Test Cases)
 
-### 5.2.1. Kiểm thử phân hệ Bán hàng & tự động tính tiền thừa, thuế VAT
-*Bảng 5.1 - Kịch bản kiểm thử nghiệp vụ bán hàng tại quầy (POS)*
+Để tinh gọn và thuận tiện cho việc trình bày trên Microsoft Word không bị tràn khung bảng, toàn bộ các kịch bản kiểm thử chức năng của hệ thống SmartStore được tổng hợp chi tiết trong một bảng dưới đây:
 
-| ID | Tên kịch bản | Dữ liệu đầu vào | Các bước thực hiện | Kết quả mong đợi | Trạng thái |
-|---|---|---|---|---|---|
-| TC-001 | Tính thuế VAT động theo danh mục | Chọn SP thuộc nhóm "Nước ngọt" (thuế suất 8%) và "Đồ ăn liền" (thuế suất 10%) | 1. Quét sản phẩm Đồ uống và Thực phẩm vào giỏ hàng.<br>2. Xem giá trị thuế tính toán hiển thị. | Thuế của từng dòng sản phẩm được tính đúng tỉ lệ, tổng tiền thuế hóa đơn = tổng thuế các dòng con. | Đạt |
-| TC-002 | Tính tiền thừa cho khách | Tổng đơn: 150.000đ. Khách đưa: 200.000đ | 1. Nhập số tiền 200.000đ vào ô tiền khách đưa.<br>2. Kiểm tra tiền thừa. | Hệ thống hiển thị tiền thối lại là 50.000đ. Nút thanh toán được kích hoạt. | Đạt |
+*Bảng 5.1 - Danh sách kịch bản kiểm thử tích hợp hệ thống SmartStore*
 
-### 5.2.2. Kiểm thử phân hệ Quản lý kho & Cảnh báo tồn kho thấp (Low Stock)
-*Bảng 5.2 - Kịch bản kiểm thử quản lý tồn kho và cảnh báo*
+| Mã TC | Chức năng kiểm thử | Các bước thực hiện & Dữ liệu đầu vào | Kết quả mong đợi | Kết quả |
+|---|---|---|---|---|
+| **TC-001** | Đăng nhập thành công | Nhập tài khoản `admin` và mật khẩu đúng; bấm nút đăng nhập | Đăng nhập thành công, điều hướng người dùng tới Bảng tổng quan | Đạt |
+| **TC-002** | Đăng nhập thất bại | Nhập sai tài khoản hoặc mật khẩu; bấm nút đăng nhập | Hệ thống hiển thị cảnh báo tài khoản hoặc mật khẩu không chính xác | Đạt |
+| **TC-003** | Tính thuế VAT động | Thêm vào giỏ hàng SP Nước ngọt (thuế 8%) và SP Đồ hộp (thuế 10%) | Thuế của từng dòng sản phẩm tính đúng tỷ lệ; tổng thuế đơn hàng chính xác | Đạt |
+| **TC-004** | Tính tiền thừa thối lại | Tổng hóa đơn thanh toán: 150.000đ; nhập tiền khách đưa: 200.000đ | Hệ thống hiển thị số tiền thừa thối lại cho khách là 50.000đ | Đạt |
+| **TC-005** | Thanh toán & Trừ kho | Nhấn nút xác nhận thanh toán đơn hàng có sản phẩm A (số lượng mua: 2) | Lưu đơn hàng thành công, số lượng tồn kho sản phẩm A giảm đi 2 | Đạt |
+| **TC-006** | Cảnh báo tồn kho thấp | Xem bảng tồn kho, sản phẩm B có tồn kho = 8 (ngưỡng cảnh báo = 10) | Sản phẩm B hiển thị cảnh báo nhãn màu cam "Sắp hết hàng" | Đạt |
+| **TC-007** | Highlight sản phẩm hết hàng | Xem bảng tồn kho, sản phẩm C có số lượng tồn kho = 0 | Dòng sản phẩm C bôi đỏ nền và hiển thị nhãn trạng thái "Hết hàng" | Đạt |
+| **TC-008** | Đọc file Excel nhập hàng | Chọn file `test_200_rows.xlsx` chứa 200 sản phẩm và bấm tải lên | Đọc thành công toàn bộ danh sách sản phẩm Excel lên bảng chuẩn bị nhập | Đạt |
+| **TC-009** | Nhận hàng & Tăng kho | Nhấp nút xác nhận "Nhận hàng" cho phiếu nhập trạng thái RECEIVED | Tồn kho thực tế của các sản phẩm được cộng thêm tương ứng | Đạt |
 
-| ID | Tên kịch bản | Dữ liệu đầu vào | Các bước thực hiện | Kết quả mong đợi | Trạng thái |
-|---|---|---|---|---|---|
-| TC-003 | Cảnh báo tồn kho thấp (Low Stock) | Sản phẩm có tồn kho = 8 (ngưỡng cảnh báo low_stock = 10) | 1. Truy cập trang Inventory.<br>2. Tìm sản phẩm tương ứng. | Sản phẩm hiển thị nhãn cảnh báo màu cam "Sắp hết hàng" (Low Stock). | Đạt |
-| TC-004 | Highlight sản phẩm hết hàng | Sản phẩm có tồn kho = 0 | 1. Truy cập trang Inventory. | Dòng sản phẩm được bôi nền đỏ nhạt và hiển thị trạng thái "Hết hàng" (Out of Stock). | Đạt |
-
-### 5.2.3. Kiểm thử phân hệ Nhập hàng & Cập nhật giá bán/giá nhập
-*Bảng 5.3 - Kịch bản kiểm thử quy trình nhập hàng*
-
-| ID | Tên kịch bản | Dữ liệu đầu vào | Các bước thực hiện | Kết quả mong đợi | Trạng thái |
-|---|---|---|---|---|---|
-| TC-005 | Cập nhật giá bán/giá nhập mới khi nhận hàng | Phiếu nhập PENDING có sản phẩm A (giá nhập mới: 12.000đ, giá bán mới: 15.000đ) | 1. Nhấp nút "Nhận hàng" (Receive).<br>2. Truy cập trang Sản phẩm kiểm tra giá trị của sản phẩm A. | Giá nhập và giá bán của sản phẩm A được cập nhật chính xác sang 12.000đ và 15.000đ. | Đạt |
-
-### 5.2.4. Kiểm thử phân hệ Trả hàng & Tự động hoàn kho có điều kiện (Good/Damaged)
-*Bảng 5.4 - Kịch bản kiểm thử hoàn trả hàng có điều kiện*
-
-| ID | Tên kịch bản | Dữ liệu đầu vào | Các bước thực hiện | Kết quả mong đợi | Trạng thái |
-|---|---|---|---|---|---|
-| TC-006 | Hoàn trả hàng tốt (Good) | Số lượng trả: 2, Tình trạng: Good. Tồn kho cũ: 10 | 1. Xác nhận phiếu trả hàng.<br>2. Xem tồn kho sản phẩm. | Tồn kho sản phẩm được cộng lại thành 12. Ghi nhật ký kho 'RETURN'. | Đạt |
-| TC-007 | Hoàn trả hàng lỗi/hỏng (Damaged) | Số lượng trả: 2, Tình trạng: Damaged. Tồn kho cũ: 10 | 1. Xác nhận phiếu trả hàng.<br>2. Xem tồn kho sản phẩm. | Tồn kho sản phẩm giữ nguyên là 10. Ghi nhật ký kho 'RETURN'. | Đạt |
-
-### 5.2.5. Kiểm thử cơ chế lưu vết lịch sử giá (Price History) và log tồn kho (Inventory Logs)
-*Bảng 5.5 - Kịch bản kiểm thử cơ chế lưu vết log*
-
-| ID | Tên kịch bản | Dữ liệu đầu vào | Các bước thực hiện | Kết quả mong đợi | Trạng thái |
-|---|---|---|---|---|---|
-| TC-008 | Tự động ghi nhật ký tồn kho khi bán hàng | Bán sản phẩm B số lượng 5. Tồn kho cũ: 100 | 1. Hoàn tất thanh toán hóa đơn bán hàng.<br>2. Kiểm tra bảng `inventory_logs`. | Hệ thống tự động tạo 1 dòng log trong `inventory_logs`: change_amount = -5, old_stock = 100, new_stock = 95, type = 'SALE'. | Đạt |
-| TC-009 | Tự động ghi lịch sử thay đổi giá | Thay đổi giá bán sản phẩm C từ 20.000đ lên 25.000đ | 1. Cập nhật giá sản phẩm.<br>2. Kiểm tra bảng `price_histories`. | Bảng `price_histories` tự động chèn 1 dòng: old_selling_price = 20.000, new_selling_price = 25.000, updated_at = thời điểm sửa. | Đạt |
 
 ## 5.3. Đánh giá ưu điểm và hạn chế của hệ thống
 
 ### 5.3.1. Ưu điểm
-- **Kiến trúc Client-Server rõ ràng:** Phân tách hoàn toàn giao diện người dùng và API xử lý giúp hệ thống hoạt động nhẹ nhàng, dễ mở rộng và bảo trì.
-- **Tối ưu hóa hiệu năng nghiệp vụ dữ liệu bằng Trigger và Function:** Đẩy toàn bộ các nghiệp vụ tính toán nặng và đồng bộ tồn kho xuống mức PostgreSQL. Điều này loại bỏ hoàn toàn hiện tượng bất đồng bộ dữ liệu, tăng tốc độ xử lý của API Spring Boot và phòng ngừa lỗi Race Condition.
-- **Thiết kế biểu đồ SVG tự vẽ tối ưu:** Tận dụng Custom SVG Path Binding giúp Frontend không cần nhúng các thư viện đồ họa cồng kềnh, giảm kích thước bundle của ứng dụng Angular và tải trang cực nhanh.
+- **Hiệu năng & Đồng bộ cao:** Nghiệp vụ kho, lịch sử giá và thuế VAT được tự động hóa bằng Trigger ở tầng PostgreSQL giúp triệt tiêu lỗi tranh chấp dữ liệu (Race Condition) và giảm tải cho Backend.
+- **Giao diện mượt mà & Tối ưu:** Ứng dụng SPA Angular kết hợp tự vẽ biểu đồ động qua Custom SVG Path giúp trang tải nhanh, nhẹ do không cần nhúng thư viện đồ họa bên thứ ba.
 
 ### 5.3.2. Hạn chế còn tồn tại
-- **Chưa hiển thị lịch sử biến động giá lên giao diện:** Mặc dù cơ chế lưu vết lịch sử giá (`price_histories`) đã được thiết lập tự động dưới Database và Backend đã xây dựng API `/api/pricehistorys`, nhưng Frontend Angular hiện tại chưa triển khai trang hiển thị các thông tin này lên giao diện cho người dùng theo dõi.
-- **Hệ thống phân quyền và bảo mật ở mức cơ bản:** Chỉ sử dụng các role guard cơ bản trên Frontend để kiểm soát quyền truy cập trang, chưa tích hợp giao thức bảo mật chặt chẽ như JSON Web Token (JWT) hay Spring Security để mã hóa và xác thực các request API gửi lên Server.
+- **Chưa hỗ trợ giao diện hoàn trả và lịch sử biến động giá:** Dù Database đã thiết lập đầy đủ cơ chế hoàn trả hàng có điều kiện (lỗi/tốt) và lưu vết lịch sử giá, nhưng Frontend hiện tại chưa xây dựng màn hình để người dùng thao tác trực tiếp hai tính năng này.
+- **Bảo mật ở mức cơ bản:** Chỉ sử dụng Router Guard ở Frontend để kiểm soát quyền truy cập trang, chưa tích hợp giao thức JWT hay Spring Security để mã hóa và xác thực API ở Backend.
 
 ---
 
@@ -956,6 +910,7 @@ Thay vì sử dụng các thư viện biểu đồ cồng kềnh của bên th�
 ## 6.2. Hướng phát triển trong tương lai
 Để hệ thống hoàn thiện và ứng dụng tốt hơn vào thực tế, các hướng phát triển tiếp theo bao gồm:
 - **Tích hợp Spring Security và JWT:** Xây dựng hệ thống đăng nhập bảo mật chuẩn, mã hóa Token trao đổi để bảo vệ tài nguyên API.
+- **Xây dựng phân hệ Hoàn trả hàng (Return Goods) trên Frontend:** Thiết kế màn hình hoàn trả hàng ở giao diện Angular, kết nối với API Backend để hỗ trợ nhân viên xử lý trả hàng và tự động cập nhật kho hàng thực tế.
 - **In hóa đơn trực tiếp:** Tích hợp tính năng kết nối trực tiếp với máy in nhiệt K80 thông qua Web Bluetooth hoặc Web USB để in hóa đơn bán hàng ngay khi xác nhận thanh toán.
 - **Xuất bản báo cáo đa định dạng:** Hỗ trợ xuất dữ liệu danh sách sản phẩm, hóa đơn bán hàng và báo cáo doanh thu ra tệp **PDF / Excel** trực tiếp từ Frontend.
 - **Bổ sung giao diện quản lý biến động giá:** Thiết kế màn hình tra cứu lịch sử thay đổi giá bán/giá nhập sản phẩm dựa trên API sẵn có để hỗ trợ quản lý theo dõi sát sao hơn biến động thị trường.

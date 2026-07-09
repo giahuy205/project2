@@ -36,7 +36,7 @@ export class Inventory implements OnInit {
   newCategory: any = {
     id: null,
     name: '',
-    taxRate: 0,
+    taxRate: 8,
     note: ''
   };
 
@@ -54,6 +54,11 @@ export class Inventory implements OnInit {
   excelImportResult: any = null;
   excelImportErrors: string[] = [];
   excelGeneralError = '';
+
+  showCategoryBatchModal = false;
+  batchCategories: any[] = [];
+  batchCategoryErrors: string[] = [];
+  isSavingBatchCategories = false;
 
   newProduct: any = {
     id: null,
@@ -327,26 +332,32 @@ export class Inventory implements OnInit {
 
   openModal() {
     this.showModal = true;
+    this.newCategory = { id: null, name: '', taxRate: 8, note: '' };
   }
 
   editCategory(cat: any) {
     this.isEditingCategory = true;
-    this.newCategory = { ...cat };
+    this.newCategory = { ...cat, taxRate: Math.round((cat.taxRate || 0) * 100) };
     this.showModal = true;
   }
 
   closeModal() {
     this.showModal = false;
     this.isEditingCategory = false;
-    this.newCategory = { id: null, name: '', taxRate: 0, note: '' };
+    this.newCategory = { id: null, name: '', taxRate: 8, note: '' };
   }
 
   saveCategory() {
     if (!this.newCategory.name) return;
     
+    const categoryToSave = {
+      ...this.newCategory,
+      taxRate: (this.newCategory.taxRate || 0) / 100.0
+    };
+
     const request = this.isEditingCategory
-      ? this.http.put(`${this.API_CAT_URL}/${this.newCategory.id}`, this.newCategory)
-      : this.http.post(this.API_CAT_URL, this.newCategory);
+      ? this.http.put(`${this.API_CAT_URL}/${categoryToSave.id}`, categoryToSave)
+      : this.http.post(this.API_CAT_URL, categoryToSave);
 
     request.subscribe({
       next: (res) => {
@@ -565,6 +576,80 @@ export class Inventory implements OnInit {
           errMsg = err.error.message;
         }
         this.excelGeneralError = errMsg;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  openCategoryBatchModal() {
+    this.showCategoryBatchModal = true;
+    this.batchCategoryErrors = [];
+    this.isSavingBatchCategories = false;
+    this.batchCategories = [
+      { name: '', taxRate: 8, note: '' }
+    ];
+  }
+
+  closeCategoryBatchModal() {
+    this.showCategoryBatchModal = false;
+    this.batchCategories = [];
+    this.batchCategoryErrors = [];
+  }
+
+  addBatchCategoryRow() {
+    this.batchCategories.push({ name: '', taxRate: 8, note: '' });
+  }
+
+  removeBatchCategoryRow(index: number) {
+    this.batchCategories.splice(index, 1);
+  }
+
+  saveCategoryBatch() {
+    this.batchCategoryErrors = [];
+
+    const validRows = this.batchCategories.filter(cat => cat.name && cat.name.trim() !== '');
+    if (validRows.length === 0) {
+      this.batchCategoryErrors = ['Vui lòng điền tên danh mục cho ít nhất 1 dòng.'];
+      return;
+    }
+
+    // Check frontend duplicates
+    const namesSet = new Set<string>();
+    for (let i = 0; i < validRows.length; i++) {
+      const name = validRows[i].name.trim().toLowerCase();
+      if (namesSet.has(name)) {
+        this.batchCategoryErrors = [`Tên danh mục '${validRows[i].name}' bị lặp lại trong danh sách.`];
+        return;
+      }
+      namesSet.add(name);
+    }
+
+    // Convert tax rates to decimal
+    const payload = validRows.map(cat => ({
+      name: cat.name.trim(),
+      taxRate: (cat.taxRate || 0) / 100.0,
+      note: cat.note ? cat.note.trim() : ''
+    }));
+
+    this.isSavingBatchCategories = true;
+    this.http.post<any>(`${this.API_CAT_URL}/batch`, payload).subscribe({
+      next: (res) => {
+        this.isSavingBatchCategories = false;
+        this.loadData();
+        this.closeCategoryBatchModal();
+        this.showToast('Lưu danh sách danh mục thành công!');
+      },
+      error: (err) => {
+        this.isSavingBatchCategories = false;
+        if (err.error && err.error.errors) {
+          this.batchCategoryErrors = err.error.errors;
+        } else if (err.error && typeof err.error === 'string') {
+          this.batchCategoryErrors = [err.error];
+        } else if (err.error && err.error.message) {
+          this.batchCategoryErrors = [err.error.message];
+        } else {
+          this.batchCategoryErrors = ['Đã xảy ra lỗi khi lưu danh mục.'];
+        }
         this.cdr.detectChanges();
       }
     });
