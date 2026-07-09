@@ -71,6 +71,21 @@ export class Reports implements OnInit {
   previousProfit = 0;
   Math = Math;
 
+  // Comparison growth rates (%)
+  revenueGrowth = 0;
+  cogsGrowth = 0;
+  profitGrowth = 0;
+  marginGrowth = 0;
+  ordersGrowth = 0;
+  productsSoldGrowth = 0;
+
+  calculateGrowth(current: number, previous: number): number {
+    if (!previous || previous === 0) {
+      return current > 0 ? 100 : 0;
+    }
+    return ((current - previous) / previous) * 100;
+  }
+
   // SVG Chart rendering variables
   maxVal = 1000;
   revenuePointsArray: { x: number, y: number }[] = [];
@@ -205,6 +220,16 @@ export class Reports implements OnInit {
     this.loading = true;
     const params = `?startDate=${this.startDate}&endDate=${this.endDate}`;
 
+    // Reset growth rates
+    this.revenueGrowth = 0;
+    this.cogsGrowth = 0;
+    this.profitGrowth = 0;
+    this.marginGrowth = 0;
+    this.ordersGrowth = 0;
+    this.productsSoldGrowth = 0;
+
+    const prevParams = this.getPreviousPeriodParams();
+
     // 1. Fetch Summary
     this.http.get<any>(`/api/reports/summary${params}`).subscribe({
       next: (res) => {
@@ -218,6 +243,26 @@ export class Reports implements OnInit {
         this.totalOrders = res.totalOrders || 0;
         this.aov = res.aov || 0;
         this.averageProfitPerOrder = this.totalOrders > 0 ? this.profit / this.totalOrders : 0;
+        
+        if (this.compareWithPrevious) {
+          this.http.get<any>(`/api/reports/summary${prevParams}`).subscribe({
+            next: (prevRes) => {
+              const prevGrossRevenue = prevRes.grossRevenue || 0;
+              const prevCogs = prevRes.cogs || 0;
+              const prevProfit = prevRes.profit || 0;
+              const prevMargin = prevRes.margin || 0;
+              const prevTotalOrders = prevRes.totalOrders || 0;
+
+              this.revenueGrowth = this.calculateGrowth(this.totalAmount, prevGrossRevenue);
+              this.cogsGrowth = this.calculateGrowth(this.cogs, prevCogs);
+              this.profitGrowth = this.calculateGrowth(this.profit, prevProfit);
+              this.marginGrowth = this.margin - prevMargin;
+              this.ordersGrowth = this.calculateGrowth(this.totalOrders, prevTotalOrders);
+              this.cdr.detectChanges();
+            },
+            error: (err) => console.error('Error loading previous report summary', err)
+          });
+        }
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading report summary', err)
@@ -263,6 +308,17 @@ export class Reports implements OnInit {
         const totalProductsSold = res.reduce((sum: number, item: any) => sum + (item.quantitySold || 0), 0);
         this.totalProductsSold = totalProductsSold;
         this.upt = this.totalOrders > 0 ? totalProductsSold / this.totalOrders : 0;
+        
+        if (this.compareWithPrevious) {
+          this.http.get<any[]>(`/api/reports/products${prevParams}`).subscribe({
+            next: (prevRes) => {
+              const prevTotalProductsSold = prevRes.reduce((sum: number, item: any) => sum + (item.quantitySold || 0), 0);
+              this.productsSoldGrowth = this.calculateGrowth(this.totalProductsSold, prevTotalProductsSold);
+              this.cdr.detectChanges();
+            },
+            error: (err) => console.error('Error loading previous products report', err)
+          });
+        }
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading product reports', err)

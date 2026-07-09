@@ -61,8 +61,8 @@
             Thuế: <strong style="color: #8B5CF6;">{{ tax | number:'1.0-0' }}đ</strong>
           </div>
         </div>
-        <span style="font-size: 0.72rem; color: #10B981; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
-          📈 +8.4% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
+        <span [style.color]="revenueGrowth >= 0 ? '#10B981' : '#EF4444'" style="font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
+          {{ revenueGrowth >= 0 ? '📈 +' : '📉 ' }}{{ revenueGrowth | number:'1.1-1' }}% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
         </span>
       </div>
 
@@ -75,8 +75,8 @@
         <div>
           <h3 style="margin: 0; font-size: 1.45rem; font-weight: 700; color: var(--text-main); line-height: 1.2;">{{ cogs | number:'1.0-0' }}đ</h3>
         </div>
-        <span style="font-size: 0.72rem; color: #F59E0B; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
-          📈 +5.2% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
+        <span [style.color]="cogsGrowth >= 0 ? '#F59E0B' : '#10B981'" style="font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
+          {{ cogsGrowth >= 0 ? '📈 +' : '📉 ' }}{{ cogsGrowth | number:'1.1-1' }}% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
         </span>
       </div>
 
@@ -92,8 +92,8 @@
             Lợi nhuận/Đơn: <strong style="color: var(--secondary);">{{ averageProfitPerOrder | number:'1.0-0' }}đ</strong>
           </div>
         </div>
-        <span style="font-size: 0.72rem; color: #10B981; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
-          🚀 +15.6% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
+        <span [style.color]="profitGrowth >= 0 ? '#10B981' : '#EF4444'" style="font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
+          {{ profitGrowth >= 0 ? '🚀 +' : '📉 ' }}{{ profitGrowth | number:'1.1-1' }}% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
         </span>
       </div>
 
@@ -106,8 +106,8 @@
         <div>
           <h3 style="margin: 0; font-size: 1.45rem; font-weight: 700; color: #EC4899; line-height: 1.2;">{{ margin | number:'1.1-1' }}%</h3>
         </div>
-        <span style="font-size: 0.72rem; color: #10B981; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
-          📈 +2.1% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
+        <span [style.color]="marginGrowth >= 0 ? '#10B981' : '#EF4444'" style="font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
+          {{ marginGrowth >= 0 ? '📈 +' : '📉 ' }}{{ marginGrowth | number:'1.1-1' }}% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
         </span>
       </div>
 
@@ -123,8 +123,8 @@
             AOV: <strong style="color: #8B5CF6;">{{ aov | number:'1.0-0' }}đ</strong>
           </div>
         </div>
-        <span style="font-size: 0.72rem; color: #10B981; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
-          📈 +10.2% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
+        <span [style.color]="ordersGrowth >= 0 ? '#10B981' : '#EF4444'" style="font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
+          {{ ordersGrowth >= 0 ? '📈 +' : '📉 ' }}{{ ordersGrowth | number:'1.1-1' }}% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
         </span>
       </div>
 
@@ -140,8 +140,8 @@
             UPT: <strong style="color: #F97316;">{{ upt | number:'1.1-1' }} SP/đơn</strong>
           </div>
         </div>
-        <span style="font-size: 0.72rem; color: #10B981; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
-          📈 +6.4% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
+        <span [style.color]="productsSoldGrowth >= 0 ? '#10B981' : '#EF4444'" style="font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
+          {{ productsSoldGrowth >= 0 ? '📈 +' : '📉 ' }}{{ productsSoldGrowth | number:'1.1-1' }}% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
         </span>
       </div>
     </div>
