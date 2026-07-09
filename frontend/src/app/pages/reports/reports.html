@@ -61,8 +61,12 @@
             Thuế: <strong style="color: #8B5CF6;">{{ tax | number:'1.0-0' }}đ</strong>
           </div>
         </div>
-        <span [style.color]="revenueGrowth >= 0 ? '#10B981' : '#EF4444'" style="font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
-          {{ revenueGrowth >= 0 ? '📈 +' : '📉 ' }}{{ revenueGrowth | number:'1.1-1' }}% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
+        <span style="font-size: 0.72rem; display: flex; align-items: center; gap: 0.6rem; white-space: nowrap;">
+          <span style="color: var(--text-muted); font-weight: 400;">Kỳ trước: {{ prevGrossRevenue | number:'1.0-0' }}đ</span>
+          <span [style.color]="revenueGrowth >= 0 ? '#10B981' : '#EF4444'" style="font-weight: 600; display: inline-flex; align-items: center; gap: 0.15rem;">
+            <span>{{ revenueGrowth >= 0 ? '↗' : '↘' }}</span>
+            <span>{{ Math.abs(revenueGrowth) | number:'1.1-1' }}%</span>
+          </span>
         </span>
       </div>
 
@@ -75,39 +79,51 @@
         <div>
           <h3 style="margin: 0; font-size: 1.45rem; font-weight: 700; color: var(--text-main); line-height: 1.2;">{{ cogs | number:'1.0-0' }}đ</h3>
         </div>
-        <span [style.color]="cogsGrowth >= 0 ? '#F59E0B' : '#10B981'" style="font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
-          {{ cogsGrowth >= 0 ? '📈 +' : '📉 ' }}{{ cogsGrowth | number:'1.1-1' }}% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
+        <span style="font-size: 0.72rem; display: flex; align-items: center; gap: 0.6rem; white-space: nowrap;">
+          <span style="color: var(--text-muted); font-weight: 400;">Kỳ trước: {{ prevCogs | number:'1.0-0' }}đ</span>
+          <span [style.color]="cogsGrowth >= 0 ? '#F59E0B' : '#10B981'" style="font-weight: 600; display: inline-flex; align-items: center; gap: 0.15rem;">
+            <span>{{ cogsGrowth >= 0 ? '↗' : '↘' }}</span>
+            <span>{{ Math.abs(cogsGrowth) | number:'1.1-1' }}%</span>
+          </span>
         </span>
       </div>
 
       <!-- CARD 3: PROFIT (Lợi nhuận gộp) -->
-      <div class="card stat-card" style="display: flex; flex-direction: column; border-left: 5px solid var(--secondary); margin-bottom: 0; padding: 0.85rem 1.1rem; gap: 0.5rem; min-height: 110px; justify-content: space-between;">
+      <div class="card stat-card" style="display: flex; flex-direction: column; margin-bottom: 0; padding: 0.85rem 1.1rem; gap: 0.5rem; min-height: 110px; justify-content: space-between;" [style.border-left]="profit >= 0 ? '5px solid var(--secondary)' : '5px solid #EF4444'">
         <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
           <span style="font-size: 1.1rem; line-height: 1;">📈</span>
           <span>Lợi nhuận gộp</span>
         </div>
         <div>
-          <h3 style="margin: 0; font-size: 1.45rem; font-weight: 700; color: var(--secondary); line-height: 1.2;">{{ profit | number:'1.0-0' }}đ</h3>
+          <h3 style="margin: 0; font-size: 1.45rem; font-weight: 700; line-height: 1.2;" [style.color]="profit >= 0 ? 'var(--secondary)' : '#EF4444'">{{ profit | number:'1.0-0' }}đ</h3>
           <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem;" *ngIf="totalOrders > 0">
-            Lợi nhuận/Đơn: <strong style="color: var(--secondary);">{{ averageProfitPerOrder | number:'1.0-0' }}đ</strong>
+            Lợi nhuận/Đơn: <strong [style.color]="averageProfitPerOrder >= 0 ? 'var(--secondary)' : '#EF4444'">{{ averageProfitPerOrder | number:'1.0-0' }}đ</strong>
           </div>
         </div>
-        <span [style.color]="profitGrowth >= 0 ? '#10B981' : '#EF4444'" style="font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
-          {{ profitGrowth >= 0 ? '🚀 +' : '📉 ' }}{{ profitGrowth | number:'1.1-1' }}% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
+        <span style="font-size: 0.72rem; display: flex; align-items: center; gap: 0.6rem; white-space: nowrap;">
+          <span style="color: var(--text-muted); font-weight: 400;">Kỳ trước: {{ prevProfit | number:'1.0-0' }}đ</span>
+          <span [style.color]="profitGrowth >= 0 ? '#10B981' : '#EF4444'" style="font-weight: 600; display: inline-flex; align-items: center; gap: 0.15rem;">
+            <span>{{ profitGrowth >= 0 ? '↗' : '↘' }}</span>
+            <span>{{ Math.abs(profitGrowth) | number:'1.1-1' }}%</span>
+          </span>
         </span>
       </div>
 
       <!-- CARD 4: MARGIN (Biên lợi nhuận) -->
-      <div class="card stat-card" style="display: flex; flex-direction: column; border-left: 5px solid #EC4899; margin-bottom: 0; padding: 0.85rem 1.1rem; gap: 0.5rem; min-height: 110px; justify-content: space-between;">
+      <div class="card stat-card" style="display: flex; flex-direction: column; margin-bottom: 0; padding: 0.85rem 1.1rem; gap: 0.5rem; min-height: 110px; justify-content: space-between;" [style.border-left]="margin >= 0 ? '5px solid #EC4899' : '5px solid #EF4444'">
         <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
           <span style="font-size: 1.1rem; line-height: 1;">📊</span>
           <span>Biên lợi nhuận</span>
         </div>
         <div>
-          <h3 style="margin: 0; font-size: 1.45rem; font-weight: 700; color: #EC4899; line-height: 1.2;">{{ margin | number:'1.1-1' }}%</h3>
+          <h3 style="margin: 0; font-size: 1.45rem; font-weight: 700; line-height: 1.2;" [style.color]="margin >= 0 ? '#EC4899' : '#EF4444'">{{ margin | number:'1.1-1' }}%</h3>
         </div>
-        <span [style.color]="marginGrowth >= 0 ? '#10B981' : '#EF4444'" style="font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
-          {{ marginGrowth >= 0 ? '📈 +' : '📉 ' }}{{ marginGrowth | number:'1.1-1' }}% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
+        <span style="font-size: 0.72rem; display: flex; align-items: center; gap: 0.6rem; white-space: nowrap;">
+          <span style="color: var(--text-muted); font-weight: 400;">Kỳ trước: {{ prevMargin | number:'1.1-1' }}%</span>
+          <span [style.color]="marginGrowth >= 0 ? '#10B981' : '#EF4444'" style="font-weight: 600; display: inline-flex; align-items: center; gap: 0.15rem;">
+            <span>{{ marginGrowth >= 0 ? '↗' : '↘' }}</span>
+            <span>{{ Math.abs(marginGrowth) | number:'1.1-1' }}%</span>
+          </span>
         </span>
       </div>
 
@@ -123,25 +139,33 @@
             AOV: <strong style="color: #8B5CF6;">{{ aov | number:'1.0-0' }}đ</strong>
           </div>
         </div>
-        <span [style.color]="ordersGrowth >= 0 ? '#10B981' : '#EF4444'" style="font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
-          {{ ordersGrowth >= 0 ? '📈 +' : '📉 ' }}{{ ordersGrowth | number:'1.1-1' }}% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
+        <span style="font-size: 0.72rem; display: flex; align-items: center; gap: 0.6rem; white-space: nowrap;">
+          <span style="color: var(--text-muted); font-weight: 400;">Kỳ trước: {{ prevTotalOrders | number:'1.0-0' }} đơn</span>
+          <span [style.color]="ordersGrowth >= 0 ? '#10B981' : '#EF4444'" style="font-weight: 600; display: inline-flex; align-items: center; gap: 0.15rem;">
+            <span>{{ ordersGrowth >= 0 ? '↗' : '↘' }}</span>
+            <span>{{ Math.abs(ordersGrowth) | number:'1.1-1' }}%</span>
+          </span>
         </span>
       </div>
 
-      <!-- CARD 6: PRODUCTS SOLD (Sản phẩm bán ra) -->
-      <div class="card stat-card" style="display: flex; flex-direction: column; border-left: 5px solid #F97316; margin-bottom: 0; padding: 0.85rem 1.1rem; gap: 0.5rem; min-height: 110px; justify-content: space-between;">
+      <!-- CARD 6: LOST/DISCARDED GOODS (Hàng thất thoát / hủy) -->
+      <div class="card stat-card" style="display: flex; flex-direction: column; border-left: 5px solid #EF4444; margin-bottom: 0; padding: 0.85rem 1.1rem; gap: 0.5rem; min-height: 110px; justify-content: space-between;">
         <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
-          <span style="font-size: 1.1rem; line-height: 1;">🛒</span>
-          <span>Sản phẩm bán</span>
+          <span style="font-size: 1.1rem; line-height: 1;">🗑️</span>
+          <span>Hàng thất thoát / hủy</span>
         </div>
         <div>
-          <h3 style="margin: 0; font-size: 1.45rem; font-weight: 700; color: var(--text-main); line-height: 1.2;">{{ totalProductsSold | number:'1.0-0' }} SP</h3>
+          <h3 style="margin: 0; font-size: 1.45rem; font-weight: 700; color: #EF4444; line-height: 1.2;">{{ discardedValue | number:'1.0-0' }}đ</h3>
           <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem;">
-            UPT: <strong style="color: #F97316;">{{ upt | number:'1.1-1' }} SP/đơn</strong>
+            Số lượng: <strong style="color: var(--text-main);">{{ discardedQty | number:'1.0-0' }} SP</strong>
           </div>
         </div>
-        <span [style.color]="productsSoldGrowth >= 0 ? '#10B981' : '#EF4444'" style="font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 0.15rem; white-space: nowrap;">
-          {{ productsSoldGrowth >= 0 ? '📈 +' : '📉 ' }}{{ productsSoldGrowth | number:'1.1-1' }}% <span style="color: var(--text-muted); font-weight: 400;">so với kỳ trước</span>
+        <span style="font-size: 0.72rem; display: flex; align-items: center; gap: 0.6rem; white-space: nowrap;">
+          <span style="color: var(--text-muted); font-weight: 400;">Kỳ trước: {{ prevDiscardedQty | number:'1.0-0' }} SP</span>
+          <span [style.color]="discardedQtyGrowth >= 0 ? '#EF4444' : '#10B981'" style="font-weight: 600; display: inline-flex; align-items: center; gap: 0.15rem;">
+            <span>{{ discardedQtyGrowth >= 0 ? '↗' : '↘' }}</span>
+            <span>{{ Math.abs(discardedQtyGrowth) | number:'1.1-1' }}%</span>
+          </span>
         </span>
       </div>
     </div>

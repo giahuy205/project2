@@ -71,6 +71,13 @@ export class Reports implements OnInit {
   previousProfit = 0;
   Math = Math;
 
+  prevGrossRevenue = 0;
+  prevCogs = 0;
+  prevProfit = 0;
+  prevMargin = 0;
+  prevTotalOrders = 0;
+  prevDiscardedQty = 0;
+
   // Comparison growth rates (%)
   revenueGrowth = 0;
   cogsGrowth = 0;
@@ -78,6 +85,9 @@ export class Reports implements OnInit {
   marginGrowth = 0;
   ordersGrowth = 0;
   productsSoldGrowth = 0;
+  discardedQty = 0;
+  discardedValue = 0;
+  discardedQtyGrowth = 0;
 
   calculateGrowth(current: number, previous: number): number {
     if (!previous || previous === 0) {
@@ -242,6 +252,8 @@ export class Reports implements OnInit {
         this.margin = res.margin || 0;
         this.totalOrders = res.totalOrders || 0;
         this.aov = res.aov || 0;
+        this.discardedQty = res.discardedQty || 0;
+        this.discardedValue = res.discardedValue || 0;
         this.averageProfitPerOrder = this.totalOrders > 0 ? this.profit / this.totalOrders : 0;
         
         if (this.compareWithPrevious) {
@@ -252,16 +264,38 @@ export class Reports implements OnInit {
               const prevProfit = prevRes.profit || 0;
               const prevMargin = prevRes.margin || 0;
               const prevTotalOrders = prevRes.totalOrders || 0;
+              const prevDiscardedQty = prevRes.discardedQty || 0;
+
+              this.prevGrossRevenue = prevGrossRevenue;
+              this.prevCogs = prevCogs;
+              this.prevProfit = prevProfit;
+              this.prevMargin = prevMargin;
+              this.prevTotalOrders = prevTotalOrders;
+              this.prevDiscardedQty = prevDiscardedQty;
 
               this.revenueGrowth = this.calculateGrowth(this.totalAmount, prevGrossRevenue);
               this.cogsGrowth = this.calculateGrowth(this.cogs, prevCogs);
               this.profitGrowth = this.calculateGrowth(this.profit, prevProfit);
               this.marginGrowth = this.margin - prevMargin;
               this.ordersGrowth = this.calculateGrowth(this.totalOrders, prevTotalOrders);
+              this.discardedQtyGrowth = this.calculateGrowth(this.discardedQty, prevDiscardedQty);
               this.cdr.detectChanges();
             },
             error: (err) => console.error('Error loading previous report summary', err)
           });
+        } else {
+          this.prevGrossRevenue = 0;
+          this.prevCogs = 0;
+          this.prevProfit = 0;
+          this.prevMargin = 0;
+          this.prevTotalOrders = 0;
+          this.prevDiscardedQty = 0;
+          this.revenueGrowth = 0;
+          this.cogsGrowth = 0;
+          this.profitGrowth = 0;
+          this.marginGrowth = 0;
+          this.ordersGrowth = 0;
+          this.discardedQtyGrowth = 0;
         }
         this.cdr.detectChanges();
       },

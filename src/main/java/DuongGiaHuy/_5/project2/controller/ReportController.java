@@ -41,6 +41,22 @@ public class ReportController {
 
         List<Map<String, Object>> result = jdbc.queryForList(sql, startTimestamp, endTimestamp, startTimestamp, endTimestamp);
         
+        String discardSql = "SELECT " +
+                "  COALESCE(SUM(ABS(il.change_amount)), 0) as total_discarded_qty, " +
+                "  COALESCE(SUM(ABS(il.change_amount) * COALESCE(ii.unit_price, 0)), 0) as total_discarded_value " +
+                "FROM inventory_logs il " +
+                "LEFT JOIN import_items ii ON CAST(SUBSTRING(il.note FROM 'Batch ID: ([0-9]+)') AS BIGINT) = ii.id " +
+                "WHERE il.type = 'Hủy hàng' " +
+                "  AND il.time >= CAST(? AS timestamp) AND il.time <= CAST(? AS timestamp)";
+        List<Map<String, Object>> discardResult = jdbc.queryForList(discardSql, startTimestamp, endTimestamp);
+        double discardedQty = 0.0;
+        double discardedValue = 0.0;
+        if (!discardResult.isEmpty()) {
+            Map<String, Object> discardRow = discardResult.get(0);
+            discardedQty = ((Number) (discardRow.get("total_discarded_qty") != null ? discardRow.get("total_discarded_qty") : 0.0)).doubleValue();
+            discardedValue = ((Number) (discardRow.get("total_discarded_value") != null ? discardRow.get("total_discarded_value") : 0.0)).doubleValue();
+        }
+
         Map<String, Object> summary = new HashMap<>();
         if (!result.isEmpty()) {
             Map<String, Object> row = result.get(0);
@@ -50,10 +66,10 @@ public class ReportController {
             double cogs = ((Number) (row.get("cogs") != null ? row.get("cogs") : 0.0)).doubleValue();
             long totalOrders = ((Number) (row.get("total_orders") != null ? row.get("total_orders") : 0)).longValue();
             
-            double profit = netRevenue - cogs;
+            double profit = netRevenue - cogs - discardedValue;
             double margin = netRevenue > 0 ? (profit / netRevenue * 100) : 0.0;
             double aov = totalOrders > 0 ? (grossRevenue / totalOrders) : 0.0;
-
+ 
             summary.put("netRevenue", netRevenue);
             summary.put("tax", tax);
             summary.put("grossRevenue", grossRevenue);
@@ -62,6 +78,8 @@ public class ReportController {
             summary.put("margin", margin);
             summary.put("totalOrders", totalOrders);
             summary.put("aov", aov);
+            summary.put("discardedQty", discardedQty);
+            summary.put("discardedValue", discardedValue);
         } else {
             summary.put("netRevenue", 0.0);
             summary.put("tax", 0.0);
@@ -71,6 +89,8 @@ public class ReportController {
             summary.put("margin", 0.0);
             summary.put("totalOrders", 0);
             summary.put("aov", 0.0);
+            summary.put("discardedQty", discardedQty);
+            summary.put("discardedValue", discardedValue);
         }
         return summary;
     }

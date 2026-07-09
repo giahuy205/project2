@@ -58,10 +58,11 @@
 
 input:disabled,
 select:disabled {
-  background-color: #e2e8f0;
-  color: #94a3b8;
+  background-color: #f1f5f9;
+  color: #334155;
   cursor: not-allowed;
   border-color: #cbd5e1;
+  opacity: 0.9;
 }
 
 .row-out-of-stock {
